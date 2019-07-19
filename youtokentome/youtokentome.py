@@ -61,6 +61,36 @@ class BPE:
             eos=eos,
             reverse=reverse,
         )
+    
+    def encode_as_ids(
+        self,
+        sentences: List[str],
+        bos: bool = False,
+        eos: bool = False,
+        reverse: bool = False,
+    ) -> Union[List[List[int]], List[List[str]]]:
+        return self.bpe_cython.encode(
+            sentences=sentences,
+            output_type="id",
+            bos=bos,
+            eos=eos,
+            reverse=reverse,
+        )
+    
+    def encode_as_subwords(
+        self,
+        sentences: List[str],
+        bos: bool = False,
+        eos: bool = False,
+        reverse: bool = False,
+    ) -> Union[List[List[int]], List[List[str]]]:
+        return self.bpe_cython.encode(
+            sentences=sentences,
+            output_type="subword",
+            bos=bos,
+            eos=eos,
+            reverse=reverse,
+        )
 
     def vocab_size(self) -> int:
         return self.bpe_cython.vocab_size()
