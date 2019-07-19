@@ -68,7 +68,7 @@ class BPE:
         bos: bool = False,
         eos: bool = False,
         reverse: bool = False,
-    ) -> Union[List[List[int]], List[List[str]]]:
+    ) -> List[List[int]]:
         return self.bpe_cython.encode(
             sentences=sentences,
             output_type="id",
@@ -83,7 +83,7 @@ class BPE:
         bos: bool = False,
         eos: bool = False,
         reverse: bool = False,
-    ) -> Union[List[List[int]], List[List[str]]]:
+    ) -> List[List[str]]:
         return self.bpe_cython.encode(
             sentences=sentences,
             output_type="subword",
