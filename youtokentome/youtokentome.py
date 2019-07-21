@@ -49,7 +49,6 @@ class BPE:
     ) -> Union[List[List[int]], List[List[str]]]:
         if not isinstance(output_type, OutputType):
             raise TypeError(
-                # f"parameter output_type must be youtokentome.OutputType, not {type(output_type)}"
                 "parameter output_type must be youtokentome.OutputType, not %s}" % str(type(output_type))
             )
 
