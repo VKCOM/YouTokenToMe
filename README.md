@@ -78,7 +78,8 @@ Trains BPE model and saves to file.
 * `vocab_size`: int, number of tokens in the final vocabulary
 * `coverage`: float, fraction of characters covered by the model. Must be in the range [0, 1]. A good value to use is about 0.9999.
 * `n_threads`: int, number of parallel threads used to run. If
-* equal to -1 then maximum number of threads available will be used.
+equal to -1 then minimum of the number of available threads and 8 
+will be used (see [benchmark](benchmark.md#number-of-threads)).
 * `pad_id`: int, reserved id for padding
 * `unk_id`: int, reserved id for unknown symbols
 * `bos_id`: int, reserved id for begin of sentence token
@@ -234,7 +235,8 @@ Options:
 
 Apply BPE encoding for a corpus of sentences. Use `stdin` for input and `stdout` for output.
 
-By default, encoding works in parallel using `n_threads` threads.
+By default, encoding works in parallel using `n_threads` threads. Number of threads is limited by
+8 (see [benchmark](benchmark.md#number-of-threads)).
 
 With the `--stream` option, `--n_threads` will be ignored and all sentences will be processed one by one.
  Each sentence will be tokenized and written to the `stdout` before the next sentence is read.
