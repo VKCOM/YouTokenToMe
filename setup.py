@@ -1,7 +1,13 @@
 import io
 import os
+import sys
 
 from setuptools import Extension, find_packages, setup
+
+is_64bits = sys.maxsize > 2 ** 32
+
+if not is_64bits:
+    raise SystemError("This platform does not participate in the festival")
 
 extensions = [
     Extension(
