@@ -13,7 +13,8 @@ In this benchmark, `YouTokenToMe` used 4 threads for training and tokenization. 
  doesn't support multithreading for **BPE** at all. `fastBPE` doesn't support multithreading for training. 
  For tokenization, it also used 4 threads. 
  
- The results of the experiments are below. The time is measured in seconds.
+Source code for benchmark can be found [here](tests/speed_test.py).
+The results of the experiments are below. The time is measured in seconds.
 
 
 
