@@ -6,7 +6,17 @@
  `PATH_TO_FASTBPE` in `speed_test.py`  
 * `python speed_test.py`
 
-    **Warning**: this script downloads several GB of data.
-    It use Wikipedia monolingual corpora for training and tokenization.
+    **Warning**: this script downloads several GBs of data.
+    It uses Wikipedia monolingual corpora for training and tokenization.
 [Here](https://linguatools.org/tools/corpora/wikipedia-monolingual-corpora/) 
- you can find more details about the data. 
+ you can find more details about the data.
+ 
+## Docker
+
+Alternatively benchmark can be run using docker.
+
+```
+cd tests
+sudo docker build -f Dockerfile -t yttm/speed_test .
+sudo docker run -it yttm/speed_test:latest
+```
