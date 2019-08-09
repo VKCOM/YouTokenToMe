@@ -12,7 +12,7 @@ YOU_TOKEN_TO_ME = "YouTokenToMe"
 SENTENCE_PIECE = "SentencePiece"
 FAST_BPE = "fastBPE"
 
-PATH_TO_FASTBPE = './fastBPE'
+PATH_TO_FASTBPE = "./fastBPE"
 
 
 class SentencePieceInterface:
@@ -163,7 +163,9 @@ if __name__ == "__main__":
 
     parser.add_argument("--vocab_size", type=int, default=30000)
     parser.add_argument("--n_threads", type=int, default=4)
-    parser.add_argument("--corpus_size", type=int, default=100, help="Size of testing corpus in MB")
+    parser.add_argument(
+        "--corpus_size", type=int, default=100, help="Size of testing corpus in MB"
+    )
 
     args = parser.parse_args()
 
