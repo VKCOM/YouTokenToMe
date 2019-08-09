@@ -1,0 +1,32 @@
+FROM python:3.7
+
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+	git \
+	cmake \
+	make \
+	g++ \
+	wget && \
+    pip3 install tabulate youtokentome
+
+WORKDIR /repos
+
+RUN git clone https://github.com/google/sentencepiece.git && \
+    git clone https://github.com/glample/fastBPE
+
+WORKDIR /repos/sentencepiece/build
+
+RUN cmake .. &&  make -j $(nproc) && make install && ldconfig -v
+
+WORKDIR /repos/fastBPE
+
+RUN g++ -std=c++11 -pthread -O3 fastBPE/main.cc -IfastBPE -o fast
+
+WORKDIR /test_dir
+
+COPY ./speed_test.py ./speed_test.py
+RUN cp /repos/fastBPE/fast /test_dir/fastBPE
+
+CMD ["python", "speed_test.py"]
