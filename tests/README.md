@@ -6,7 +6,7 @@
  `PATH_TO_FASTBPE` in `speed_test.py`  
 * `python speed_test.py`
 
-    **Warning!** This test requires about **80 GBs** of free space on your disk and can take **several hours** for running.
+    **Warning!** This test requires about **20 GBs** of free space on your disk and can take **about one hour** for running.
     It uses Wikipedia monolingual corpora for training and tokenization.
 [Here](https://linguatools.org/tools/corpora/wikipedia-monolingual-corpora/) 
  you can find more details about the data.
@@ -14,9 +14,11 @@
 ## Docker
 
 Alternatively benchmark can be run using Docker.
+Substitute `PATH_TO_DOWNLOADED_DATA` with absolute path to the directory where 
+wiki dumps will be downloaded.
 
 ```
 cd tests
 docker build -t yttm/speed_test .
-docker run --rm -it yttm/speed_test:latest
+docker run --rm -v PATH_TO_DOWNLOADED_DATA:/test_dir/data -it yttm/speed_test:latest
 ```
