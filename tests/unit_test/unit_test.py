@@ -67,7 +67,7 @@ def test_bos_eos_reverse():
     cmd = f"yttm encode --model={BASE_MODEL_FILE} --output_type=id --n_threads=1 --reverse --eos < {TEST_FILE} > log.txt"
     assert os.system(cmd) == 0
     file_starts_with("log.txt", "3")
-
+    os.remove('log.txt')
 
 def test_interactive_mode():
     generate_artifacts()
@@ -78,6 +78,7 @@ def test_interactive_mode():
     print("interactive helper running subword ...")
     cmd = f"python interactor.py | yttm encode --stream --model={BASE_MODEL_FILE} --output_type=subword > log.txt"
     assert os.system(cmd) == 0
+    os.remove('log.txt')
 
 
 def test_inference_speed():
@@ -97,6 +98,7 @@ def test_inference_speed():
     print("parallel inference 24 threads  ...")
     cmd = f"time yttm encode --model={BASE_MODEL_FILE} --output_type=subword --n_threads=24 < {TEST_FILE} > log.txt"
     assert os.system(cmd) == 0
+    os.remove('log.txt')
 
 
 def test_renaming():
@@ -109,6 +111,7 @@ def test_renaming():
     cmd = f"yttm encode --model={RENAME_ID_MODEL_FILE} --output_type=id --eos --reverse  --n_threads=1 < {TEST_FILE} > log.txt"
     assert os.system(cmd) == 0
     file_starts_with("log.txt", "1148")
+    os.remove('log.txt')
 
 
 def test_renaming_unknown():
@@ -121,6 +124,7 @@ def test_renaming_unknown():
 
     file_starts_with("log.txt", "2922")
     os.remove("local_test.txt")
+    os.remove('log.txt')
     return
 
 
@@ -156,6 +160,9 @@ def test_decode():
 
 def test_python_api():
     generate_artifacts()
+    os.remove(BASE_MODEL_FILE)
+    yttm.BPE.train(data=TRAIN_FILE, vocab_size=16000, model=BASE_MODEL_FILE)
+
     bpe = yttm.BPE(BASE_MODEL_FILE)
     assert bpe.vocab_size() == len(bpe.vocab())
     assert bpe.vocab_size() == len(set(bpe.vocab()))
@@ -168,9 +175,12 @@ def test_python_api():
     ids = bpe.encode(text_in, yttm.OutputType.ID)
     assert text_in == bpe.decode(ids)[0]
 
+
 def test_stress():
     build_files = ["bpe.cpp", "utils.cpp", "utf8.cpp"]
-    files = " ".join(["../../youtokentome/cpp/" + file_name for file_name in build_files])
+    files = " ".join(
+        ["../../youtokentome/cpp/" + file_name for file_name in build_files]
+    )
     files += " stress_test.cpp"
 
     print("compiling stress test ...")
@@ -178,3 +188,6 @@ def test_stress():
 
     assert os.system(cmd) == 0
     assert os.system("./test 1000") == 0
+    os.remove('test')
+    os.remove('remove_it.txt')
+
