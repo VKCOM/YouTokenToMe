@@ -167,3 +167,14 @@ def test_python_api():
     text_in = " ".join("".join([random.choice("abcd ") for _ in range(50)]).split())
     ids = bpe.encode(text_in, yttm.OutputType.ID)
     assert text_in == bpe.decode(ids)[0]
+
+def test_stress():
+    build_files = ["bpe.cpp", "utils.cpp", "utf8.cpp"]
+    files = " ".join(["../../youtokentome/cpp/" + file_name for file_name in build_files])
+    files += " stress_test.cpp"
+
+    print("compiling stress test ...")
+    cmd = f"g++ {files} -o test -std=c++14 -pthread -D_GLIBCXX_DEBUG -DDETERMINISTIC_QUEUE"
+
+    assert os.system(cmd) == 0
+    assert os.system("./test 1000") == 0
