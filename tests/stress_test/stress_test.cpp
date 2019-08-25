@@ -406,30 +406,6 @@ void stress_full(int n_iter) {
       d2_pieces.push_back(x);
     }
 
-    if (stress_all && false) { // works only with alive_tokens
-      // train_data == inference_data
-      auto train_data_1 = generate_text(test_size, true);
-      auto train_data_2 = generate_text(test_size, true);
-
-      auto full_text = train_data_1;
-      full_text.push_back('\n');
-      full_text.insert(full_text.end(), train_data_2.begin(), train_data_2.end());
-      set<uint32_t> some_set(full_text.begin(), full_text.end());
-      some_set.insert(' ');
-      int vv_size = some_set.size() + NUMBER_OF_SPECIAL_TOKENS_LOCAL + rand() % 40;
-
-      auto full_text_copy = full_text;
-      BpeConfig bpe_config = {1, n_threads, {0, 1, 2, 3}};
-      auto r3 = learn_bpe_from_string(full_text_copy, vv_size, "remove_it.txt", bpe_config);
-      BaseEncoder applyer_3(r3, 1);
-
-      auto d4 = applyer_3.encode_as_ids({train_data_1})[0];
-      auto d5 = applyer_3.encode_as_ids({train_data_2})[0];
-      set<int> s45(d4.begin(), d4.end());
-      s45.insert(d5.begin(), d5.end());
-      assert((int) s45.size() == alive_tokens);
-    }
-
     if (d1_ids != d2.ids) {
       cerr << "ids real: ";
       for (auto x: d1_ids) cerr << x << " ";
