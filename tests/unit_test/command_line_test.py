@@ -16,7 +16,7 @@ artifacts_generated = False
 def generate_artifacts():
     global artifacts_generated
     if not artifacts_generated:
-        shutil.rmtree("artifacts")
+        shutil.rmtree("artifacts", ignore_errors=True)
         Path("artifacts").mkdir()
     else:
         return
