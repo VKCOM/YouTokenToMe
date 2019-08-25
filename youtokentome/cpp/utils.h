@@ -18,7 +18,7 @@ struct BPE_Rule {
 
   BPE_Rule(uint32_t x, uint32_t y, uint32_t z);
 
-  bool operator==(const BPE_Rule& other) const;
+  bool operator==(const BPE_Rule &other) const;
 };
 
 struct SpecialTokens {
@@ -31,9 +31,9 @@ struct SpecialTokens {
 
   SpecialTokens(int pad_id, int unk_id, int bos_id, int eos_id);
 
-  void dump(std::ofstream& fout);
+  void dump(std::ofstream &fout);
 
-  void load(std::ifstream& fin);
+  void load(std::ifstream &fin);
 
   uint32_t max_id() const;
 
@@ -50,7 +50,7 @@ struct BpeConfig {
   BpeConfig() = default;
 
   BpeConfig(double character_coverage, int n_threads,
-            const SpecialTokens& special_tokens);
+            const SpecialTokens &special_tokens);
 };
 
 struct BPEState {
@@ -58,9 +58,9 @@ struct BPEState {
   std::vector<BPE_Rule> rules;
   SpecialTokens special_tokens;
 
-  void dump(const std::string& file_name);
+  void dump(const std::string &file_name);
 
-  void load(const std::string& file_name);
+  void load(const std::string &file_name);
 };
 
 struct DecodeResult {
@@ -77,12 +77,12 @@ struct EncodingConfig {
 bool is_space(uint32_t ch);
 
 std::vector<std::string> read_lines_from_stdin(size_t batch_limit,
-                                               size_t* processed);
+                                               size_t *processed);
 
-template <typename T>
-void write_to_stdout(const std::vector<std::vector<T>>& sentences, bool flush) {
-  for (const auto& sentence : sentences) {
-    for (const auto& token : sentence) {
+template<typename T>
+void write_to_stdout(const std::vector<std::vector<T>> &sentences, bool flush) {
+  for (const auto &sentence : sentences) {
+    for (const auto &token : sentence) {
       std::cout << token << " ";
     }
     std::cout << "\n";
