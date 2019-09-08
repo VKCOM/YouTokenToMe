@@ -56,7 +56,7 @@ struct VectorSegment {
 }  // namespace vkcom
 
 namespace std {
-template <>
+template<>
 struct hash<vkcom::VectorSegment> {
   size_t operator()(const vkcom::VectorSegment &x) const { return x.hash; }
 };
@@ -75,7 +75,7 @@ string fast_read_file_utf8(const string &file_name) {
   while (true) {
     size_t cur_size = res.size();
     res.resize(cur_size + buf_size);
-    int buf_len = fread((void *)(res.data() + cur_size), 1, buf_size, fin);
+    int buf_len = fread((void *) (res.data() + cur_size), 1, buf_size, fin);
     if (buf_len < buf_size) {
       res.resize(res.size() - (buf_size - buf_len));
       fclose(fin);
@@ -99,7 +99,7 @@ bool is_space(uint32_t ch) {
 }
 
 uint64_t int2comb(uint32_t a, uint32_t b) {
-  return (static_cast<uint64_t>(a) << 32u) + b;
+  return (static_cast<uint64_t >(a) << 32u) + b;
 }
 
 struct MergeCandidate {
@@ -109,8 +109,8 @@ struct MergeCandidate {
 
   MergeCandidate() = default;
 
-  MergeCandidate(size_t count, uint32_t left_token, uint32_t right_token)
-      : count(count), left_token(left_token), right_token(right_token) {}
+  MergeCandidate(size_t count, uint32_t left_token, uint32_t right_token) : count(count), left_token(left_token),
+                                                                            right_token(right_token) {}
 
   bool operator<(const MergeCandidate &other) const {
     if (count != other.count) {
@@ -138,7 +138,7 @@ struct Position {
 
   bool operator<(const Position &other) const {
     return word_id < other.word_id ||
-           (word_id == other.word_id && pos_id < other.pos_id);
+        (word_id == other.word_id && pos_id < other.pos_id);
   }
 };
 
@@ -151,12 +151,12 @@ struct PositionsCnt {
   vector<Position> positions;
   size_t cnt;
 };
-
 bool rule_intersection(BPE_Rule rule, uint32_t new_left, uint32_t new_right) {
   return rule.y == new_left || rule.x == new_right;
 }
 
 struct SmallObjectQueue {
+
   vector<vector<MergeCandidate>> queue;
   bool flag_started{false};
   size_t _size{0};
@@ -172,14 +172,29 @@ struct SmallObjectQueue {
     };
     queue[event.count].push_back(event);
     _size++;
+#ifdef DETERMINISTIC_QUEUE
+    if (queue.size() - 1 == event.count && flag_started) {
+      sort(queue.back().begin(), queue.back().end());
+    }
+#endif
   }
 
   void process_empty_slots() {
+#ifdef DETERMINISTIC_QUEUE
+    bool moved_down = !flag_started;
+#endif
     flag_started = true;
 
-    while (!queue.empty() && queue.back().empty()) {
-      queue.pop_back();
+    for (; !queue.empty() && queue.back().empty(); queue.pop_back()) {
+#ifdef DETERMINISTIC_QUEUE
+      moved_down = true;
+#endif
     }
+#ifdef DETERMINISTIC_QUEUE
+    if (moved_down && !queue.empty()) {
+      sort(queue.back().begin(), queue.back().end());
+    }
+#endif
   }
 
   bool empty() {
@@ -200,7 +215,9 @@ struct SmallObjectQueue {
     _size--;
   }
 
-  size_t size() const { return _size; }
+  size_t size() const {
+    return _size;
+  }
 };
 
 struct BigObjectQueue {
@@ -209,17 +226,19 @@ struct BigObjectQueue {
 
   BigObjectQueue(size_t big_event_bound) : big_event_bound(big_event_bound) {}
 
-  void push(const MergeCandidate &event) { big_events.push_back(event); }
+  void push(const MergeCandidate &event) {
+    big_events.push_back(event);
+  }
 
-  bool empty() const { return big_events.empty(); }
+  bool empty() const {
+    return big_events.empty();
+  }
 
-  bool top(std::function<size_t(uint64_t)> &check_cnt, MergeCandidate &ret,
-           SmallObjectQueue *small_object_queue, BPE_Rule last_rule) {
+  bool top(std::function<size_t(uint64_t)> &check_cnt, MergeCandidate &ret, SmallObjectQueue *small_object_queue,
+           BPE_Rule last_rule) {
     for (size_t i = 0; i < big_events.size();) {
-      if (!rule_intersection(last_rule, big_events[i].left_token,
-                             big_events[i].right_token)) {
-        uint64_t comb =
-            int2comb(big_events[i].left_token, big_events[i].right_token);
+      if (!rule_intersection(last_rule, big_events[i].left_token, big_events[i].right_token)) {
+        uint64_t comb = int2comb(big_events[i].left_token, big_events[i].right_token);
         assert(big_events[i].count >= check_cnt(comb));
         big_events[i].count = check_cnt(comb);
       }
@@ -232,11 +251,15 @@ struct BigObjectQueue {
         i++;
       }
     }
+#ifdef DETERMINISTIC_QUEUE
+    sort(big_events.begin(), big_events.end()); /// TODO remove unoptimal code
+#else
     for (auto &big_event : big_events) {
       if (big_event.count > big_events.back().count) {
         std::swap(big_event, big_events.back());
       }
     }
+#endif
 
     if (big_events.empty()) {
       return false;
@@ -250,7 +273,9 @@ struct BigObjectQueue {
     big_events.pop_back();
   }
 
-  size_t size() const { return big_events.size(); }
+  size_t size() const {
+    return big_events.size();
+  }
 };
 
 struct PriorityQueue {
@@ -258,9 +283,8 @@ struct PriorityQueue {
   BigObjectQueue big_queue;
   size_t big_event_bound;
 
-  explicit PriorityQueue(size_t dataset_size)
-      : big_queue(static_cast<size_t>(sqrt(dataset_size))),
-        big_event_bound(static_cast<size_t>(sqrt(dataset_size))) {}
+  explicit PriorityQueue(size_t dataset_size) : big_queue(static_cast<size_t>(sqrt(dataset_size))),
+                                                big_event_bound(static_cast<size_t>(sqrt(dataset_size))) {}
 
   void push(const MergeCandidate &event) {
     if (event.count == 0) {
@@ -277,8 +301,7 @@ struct PriorityQueue {
     return big_queue.empty() && small_queue.empty();
   }
 
-  MergeCandidate top(std::function<size_t(uint64_t)> &check_cnt,
-                     BPE_Rule last_rule) {
+  MergeCandidate top(std::function<size_t(uint64_t)> &check_cnt, BPE_Rule last_rule) {
     MergeCandidate res;
     bool has_top = big_queue.top(check_cnt, res, &small_queue, last_rule);
     if (has_top) {
@@ -295,7 +318,9 @@ struct PriorityQueue {
     }
   }
 
-  size_t size() const { return big_queue.size() + small_queue.size(); }
+  size_t size() const {
+    return big_queue.size() + small_queue.size();
+  }
 };
 
 ska::flat_hash_map<uint32_t, uint32_t> compute_alphabet_helper(
@@ -311,9 +336,9 @@ ska::flat_hash_map<uint32_t, uint32_t> compute_alphabet_helper(
   size_t cur = 0;
   size_t n_removed = 0;
   for (; cur < frequencies.size() &&
-         (data_len - n_removed - frequencies[cur].first) >
-             data_len * bpe_config.character_coverage;
-       cur++) {
+      (data_len - n_removed - frequencies[cur].first) >
+          data_len * bpe_config.character_coverage;
+         cur++) {
     n_removed += frequencies[cur].first;
   }
   std::cerr << "number of unique characters in the training data: "
@@ -461,9 +486,9 @@ void time_check(const string &message) {
   if (!message.empty()) {
     std::cerr << "## time " << message << " ... "
               << std::chrono::duration_cast<std::chrono::microseconds>(
-                     cur_moment - last_time_stamp)
-                         .count() *
-                     1.0 / 1e6
+                  cur_moment - last_time_stamp)
+                  .count() *
+                  1.0 / 1e6
               << std::endl;
   }
   last_time_stamp = cur_moment;
@@ -472,9 +497,9 @@ void time_check(const string &message) {
 double time_check_silent() {
   auto cur_moment = std::chrono::steady_clock::now();
   double ret = std::chrono::duration_cast<std::chrono::microseconds>(
-                   cur_moment - last_time_stamp)
-                   .count() *
-               1.0 / 1e6;
+      cur_moment - last_time_stamp)
+      .count() *
+      1.0 / 1e6;
   last_time_stamp = cur_moment;
   return ret;
 }
@@ -579,7 +604,7 @@ void worker_doing_merge(
   auto self_full_remove = [&](size_t word_id, size_t pos_id) {
     uint64_t comb = get_self_code(word_id, pos_id);
     uint32_t real_cnt = word_freq[word_id] *
-                        pairsInSeg(lists_of_tokens[word_id][pos_id].seg_len);
+        pairsInSeg(lists_of_tokens[word_id][pos_id].seg_len);
     pair2cnt[comb] -= real_cnt;
   };
 
@@ -608,7 +633,7 @@ void worker_doing_merge(
       std::unique_lock<std::mutex> ul(mt[thread_id]);
       cv[thread_id].wait(ul, [&] {
         return task_order[cur_token_rule % 2].z == cur_token_rule ||
-               cur_token_rule >= real_n_tokens;
+            cur_token_rule >= real_n_tokens;
       });
       assert(cur_token_rule <= real_n_tokens);
       if (cur_token_rule == real_n_tokens) {
@@ -851,7 +876,7 @@ BPEState learn_bpe_from_string(string &text_utf8, int n_tokens,
   for (size_t i = 1; i <= n_threads; i++) {
     size_t candidate = text_utf8.size() * i / n_threads;
     for (; candidate < text_utf8.size() && !is_space(text_utf8[candidate]);
-         candidate++) {
+           candidate++) {
     }
 
     split_pos.push_back(candidate);
@@ -1034,7 +1059,7 @@ BPEState learn_bpe_from_string(string &text_utf8, int n_tokens,
 
   size_t used_ids =
       char2id.size() + bpe_config.special_tokens.n_special_tokens();
-  if (used_ids > (size_t)n_tokens) {
+  if (used_ids > (size_t) n_tokens) {
     std::cerr
         << "Incorrect arguments. Vocabulary size too small. Set vocab_size>="
         << used_ids << ".  Current value for vocab_size=" << n_tokens
@@ -1100,12 +1125,12 @@ BPEState learn_bpe_from_string(string &text_utf8, int n_tokens,
   int inter_fail = 0;
   int equal_fail = 0;
   vector<std::pair<int, double>> progress_debug;
-  while (used_ids < (size_t)n_tokens) {
+  while (used_ids < (size_t) n_tokens) {
     uint32_t x, y, z;
     assert(finished_cur <= used_ids && used_ids <= finished_cur + 2);
     bool progress = false;
 
-    if (used_ids < (size_t)n_tokens && used_ids - finished_cur < 2 &&
+    if (used_ids < (size_t) n_tokens && used_ids - finished_cur < 2 &&
         last_failed_try < finished_cur) {
       progress = true;
       for (size_t i = 0; i < n_threads; i++) {
@@ -1132,18 +1157,18 @@ BPEState learn_bpe_from_string(string &text_utf8, int n_tokens,
             }
           }
           BPE_Rule last_rule = (used_ids - finished_cur == 1)
-                                   ? rules.back()
-                                   : BPE_Rule({0, 0, 0});
+                               ? rules.back()
+                               : BPE_Rule({0, 0, 0});
 
           auto merge_event = merge_order.top(check_cnt, last_rule);
           if ((used_ids - finished_cur == 1) &&
               (merge_event.left_token == rules.back().y ||
-               merge_event.right_token == rules.back().x ||
-               (!rules.empty() && rules.back().x == rules.back().y))) {
+                  merge_event.right_token == rules.back().x ||
+                  (!rules.empty() && rules.back().x == rules.back().y))) {
             inter_fail += merge_event.left_token == rules.back().y ||
-                          merge_event.right_token == rules.back().x;
+                merge_event.right_token == rules.back().x;
             equal_fail += !rules.empty() && rules.back().x == rules.back().y &&
-                          used_ids - finished_cur == 1;
+                used_ids - finished_cur == 1;
 
             last_failed_try = finished_cur;
             x = y = z = 0;
@@ -1342,7 +1367,7 @@ void check_config(BpeConfig &bpe_config, int vocab_size) {
       bpe_config.special_tokens.unk_id >= vocab_size) {
     std::cerr << "Invalid value. unk_id: must be in the range [0, vocab_size - "
                  "1]. Current value of vocab_size = " +
-                     std::to_string(vocab_size) + "."
+        std::to_string(vocab_size) + "."
               << std::endl;
     exit(EXIT_FAILURE);
   }
@@ -1351,7 +1376,7 @@ void check_config(BpeConfig &bpe_config, int vocab_size) {
       bpe_config.special_tokens.pad_id >= vocab_size) {
     std::cerr << "Invalid value. pad_id must be in the range [-1, vocab_size - "
                  "1]. Current value of vocab_size = " +
-                     std::to_string(vocab_size) + "."
+        std::to_string(vocab_size) + "."
               << std::endl;
     exit(EXIT_FAILURE);
   }
@@ -1360,7 +1385,7 @@ void check_config(BpeConfig &bpe_config, int vocab_size) {
       bpe_config.special_tokens.bos_id >= vocab_size) {
     std::cerr << "Invalid value. bos_id must be in the range [-1, vocab_size - "
                  "1]. Current value of vocab_size = " +
-                     std::to_string(vocab_size) + "."
+        std::to_string(vocab_size) + "."
               << std::endl;
     exit(EXIT_FAILURE);
   }
@@ -1369,7 +1394,7 @@ void check_config(BpeConfig &bpe_config, int vocab_size) {
       bpe_config.special_tokens.eos_id >= vocab_size) {
     std::cerr << "Invalid value. eos_id must be in the range [-1, vocab_size - "
                  "1]. Current value of vocab_size = " +
-                     std::to_string(vocab_size) + "."
+        std::to_string(vocab_size) + "."
               << std::endl;
     exit(EXIT_FAILURE);
   }
@@ -1450,7 +1475,7 @@ DecodeResult BaseEncoder::encode_sentence(const std::string &sentence_utf8,
 
     bool operator<(const MergeEvent2 &other) const {
       return priority > other.priority ||
-             (priority == other.priority && pos > other.pos);
+          (priority == other.priority && pos > other.pos);
     }
   };
 
@@ -1595,7 +1620,6 @@ DecodeResult BaseEncoder::encode_sentence(const std::string &sentence_utf8,
       std::reverse(output_pieces.begin(), output_pieces.end());
     }
   }
-
   return {output_ids, output_pieces};
 }
 
@@ -1618,7 +1642,7 @@ BaseEncoder::BaseEncoder(const string &model_path, int _n_threads)
   }
 }
 
-template <typename T>
+template<typename T>
 vector<T> concat_vectors(const vector<T> &a, const vector<T> &b) {
   vector<T> c;
   c.reserve(a.size() + b.size());
@@ -1632,7 +1656,7 @@ void BaseEncoder::fill_from_state() {
     id2char[x.second] = x.first;
   }
 
-  for (int i = 0; i < (int)bpe_state.rules.size(); i++) {
+  for (int i = 0; i < (int) bpe_state.rules.size(); i++) {
     rule2id[int2comb(bpe_state.rules[i].x, bpe_state.rules[i].y)] = i;
   }
 
@@ -1654,7 +1678,7 @@ void BaseEncoder::fill_from_state() {
 
 int BaseEncoder::vocab_size() const {
   return bpe_state.rules.size() + bpe_state.char2id.size() +
-         bpe_state.special_tokens.n_special_tokens();
+      bpe_state.special_tokens.n_special_tokens();
 }
 
 std::vector<DecodeResult> BaseEncoder::encode_parallel(
@@ -1730,8 +1754,8 @@ string BaseEncoder::id_to_subword(int id, bool replace_space) const {
   if (id < 0 || vocab_size() <= id) {
     std::cerr << "Error: Invalid value for id. id must be in the range [0, "
                  "vocab_size - 1]. Current value: vocab_size = " +
-                     std::to_string(vocab_size()) +
-                     "; id=" + std::to_string(id) + ";"
+        std::to_string(vocab_size()) +
+        "; id=" + std::to_string(id) + ";"
               << std::endl;
     exit(EXIT_FAILURE);
   }
