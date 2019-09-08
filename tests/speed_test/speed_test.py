@@ -166,15 +166,36 @@ if __name__ == "__main__":
     parser.add_argument(
         "--corpus_size", type=int, default=100, help="Size of testing corpus in MB"
     )
+    parser.add_argument(
+        "--langs",
+        type=str,
+        nargs="+",
+        help="list of languages for speed test",
+        default="ru",
+    )
 
     args = parser.parse_args()
+    langs = args.langs if isinstance(args.langs, list) else [args.langs]
 
-    links = {
+    short_to_long_names = {
+        "en": "English",
+        "ru": "Russian",
+        "ja": "Japanese",
+        "zh": "Chinese",
+    }
+
+    # For adding more languages check out this page https://linguatools.org/tools/corpora/wikipedia-monolingual-corpora/
+    all_links = {
         "English": "https://www.dropbox.com/s/cnrhd11zdtc1pic/enwiki-20181001-corpus.xml.bz2?dl=1",
         "Russian": "https://www.dropbox.com/s/lpfmyrl7nxn5ugg/ruwiki-20181001-corpus.xml.bz2?dl=1",
         "Japanese": "https://www.dropbox.com/s/wf496hlu512z9kc/jawiki-20140807-corpus.xml.bz2?dl=1",
         "Chinese": "https://www.dropbox.com/s/czhr6s5jwaljeue/zhwiki-20140804-corpus.xml.bz2?dl=1",
     }
+    links = {
+        short_to_long_names[lang]: all_links[short_to_long_names[lang]]
+        for lang in langs
+    }
+
     corpuses = {}
 
     Path("data").mkdir(exist_ok=True)
