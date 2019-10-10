@@ -865,7 +865,7 @@ void rename_tokens(ska::flat_hash_map<uint32_t, uint32_t> &char2id,
 }
 
 BPEState learn_bpe_from_string(string &text_utf8, int n_tokens,
-                               const string &output_file,
+                               StreamWriter &output,
                                BpeConfig bpe_config) {
   vector<std::thread> threads;
   assert(bpe_config.n_threads >= 1 || bpe_config.n_threads == -1);
@@ -1294,8 +1294,8 @@ BPEState learn_bpe_from_string(string &text_utf8, int n_tokens,
   rename_tokens(char2id, rules, bpe_config.special_tokens, n_tokens);
 
   BPEState bpe_state = {char2id, rules, bpe_config.special_tokens};
-  bpe_state.dump(output_file);
-  std::cerr << "model saved to: " << output_file << std::endl;
+  bpe_state.dump(output);
+  std::cerr << "model saved to: " << output.name() << std::endl;
   return bpe_state;
 }
 
@@ -1450,7 +1450,8 @@ void train_bpe(const string &input_path, const string &model_path,
   std::cerr << "reading file..." << std::endl;
   auto data = fast_read_file_utf8(input_path);
   std::cerr << "learning bpe..." << std::endl;
-  learn_bpe_from_string(data, vocab_size, model_path, bpe_config);
+  auto fout = StreamWriter.open(model_path);
+  learn_bpe_from_string(data, vocab_size, fout, bpe_config);
 }
 
 DecodeResult BaseEncoder::encode_sentence(const std::string &sentence_utf8,

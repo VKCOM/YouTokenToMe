@@ -11,6 +11,62 @@ namespace vkcom {
 using std::string;
 using std::vector;
 
+class FileWriter : public StreamWriter {
+ public:
+  FileWriter(const std::string &file_name) {
+    this->file_name = file_name;
+    this->fout = std::ofstream(file_name, std::ios::out | std::ios::binary);
+    if (fout.fail()) {
+      std::cerr << "Can't open file: " << file_name << std::endl;
+      assert(false);
+    }
+  }
+
+  virtual int write(const char *buffer, int size) override {
+    return fout.write(buffer, size);
+  }
+
+  virtual std::string name() const noexcept override {
+    return file_name;
+  }
+
+ private:
+  std::string file_name;
+  std::ofstream fout;
+};
+
+class FileReader : public StreamReader {
+ public:
+  FileReader(const std::string &file_name) {
+    this->file_name = file_name;
+    this->fin = std::ifstream(file_name, std::ios::in | std::ios::binary);
+    if (fin.fail()) {
+      std::cerr << "Can't open file: " << file_name << std::endl;
+      assert(false);
+    }
+  }
+
+  virtual int read(const char *buffer, int size) override {
+    return fin.read(buffer, size);
+  }
+
+  virtual std::string name() const noexcept override {
+    return file_name;
+  }
+
+ private:
+  std::string file_name;
+  std::ifstream fin;
+};
+
+StreamWriter StreamWriter::open(const std::string &file_name) {
+  return FileWriter(file_name);
+}
+
+StreamReader StreamReader::open(const std::string &file_name) {
+  return FileReader(file_name);
+}
+
 template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
 T bin_to_int(const char *val) {
   uint32_t ret = static_cast<unsigned char>(val[0]);
@@ -31,7 +87,7 @@ std::unique_ptr<char[]> int_to_bin(T val) {
   return std::move(ret);
 }
 
-void SpecialTokens::dump(std::ofstream &fout) {
+void SpecialTokens::dump(StreamWriter &fout) {
   std::unique_ptr<char[]> unk_id_ptr(int_to_bin(unk_id)),
                           pad_id_ptr(int_to_bin(pad_id)),
                           bos_id_ptr(int_to_bin(bos_id)),
@@ -42,7 +98,7 @@ void SpecialTokens::dump(std::ofstream &fout) {
   fout.write(eos_id_ptr.get(), 4);
 }
 
-void SpecialTokens::load(std::ifstream &fin) {
+void SpecialTokens::load(StreamReader &fin) {
   char unk_id_bs[4], pad_id_bs[4], bos_id_bs[4], eos_id_bs[4];
   fin.read(unk_id_bs, 4);
   fin.read(pad_id_bs, 4);
@@ -85,13 +141,7 @@ bool BPE_Rule::operator==(const BPE_Rule &other) const {
 
 BPE_Rule::BPE_Rule(uint32_t x, uint32_t y, uint32_t z) : x(x), y(y), z(z) {}
 
-void BPEState::dump(const string &file_name) {
-  std::ofstream fout(file_name, std::ios::out | std::ios::binary);
-  if (fout.fail()) {
-    std::cerr << "Can't open file: " << file_name << std::endl;
-    assert(false);
-  }
-
+void BPEState::dump(StreamWriter &fout) {
   std::unique_ptr<char[]> char2id_ptr(int_to_bin(char2id.size())),
                           rules_ptr(int_to_bin(rules.size()));
   fout.write(char2id_ptr.get(), 4);
@@ -115,18 +165,11 @@ void BPEState::dump(const string &file_name) {
     fout.write(rule_ptr.get(), 4);
   }
   special_tokens.dump(fout);
-  fout.close();
 }
 
-void BPEState::load(const string &file_name) {
+void BPEState::load(StreamReader &fin) {
   char2id.clear();
   rules.clear();
-  std::ifstream fin(file_name, std::ios::in | std::ios::binary);
-  if (fin.fail()) {
-    std::cerr << "Error. Can not open file with model: " << file_name
-              << std::endl;
-    exit(EXIT_FAILURE);
-  }
   char n_bs[4], m_bs[4];
   fin.read(n_bs, 4);
   fin.read(m_bs, 4);
@@ -161,7 +204,6 @@ void BPEState::load(const string &file_name) {
     rules.emplace_back(std::get<0>(rules_xyz[i]), std::get<1>(rules_xyz[i]), std::get<2>(rules_xyz[i]));
   }
   special_tokens.load(fin);
-  fin.close();
 }
 
 BpeConfig::BpeConfig(double _character_coverage, int _n_threads,

@@ -32,7 +32,7 @@ class BaseEncoder {
 
   explicit BaseEncoder(BPEState bpe_state, int _n_threads);
 
-  explicit BaseEncoder(const std::string& model_path, int n_threads);
+  explicit BaseEncoder(const StreamReader& model_path, int n_threads);
 
   void fill_from_state();
 
