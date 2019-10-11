@@ -8,6 +8,22 @@
 namespace vkcom {
 const uint32_t SPACE_TOKEN = 9601;
 
+struct StreamWriter {
+  virtual int write(const char *buffer, int size) = 0;
+  virtual std::string name() const noexcept = 0;
+  virtual ~StreamWriter() = default;
+
+  static StreamWriter open(const std::string &file_name);
+};
+
+struct StreamReader {
+  virtual int read(const char *buffer, int size) = 0;
+  virtual std::string name() const noexcept = 0;
+  virtual ~StreamReader() = default;
+
+  static StreamReader open(const std::string &file_name);
+};
+
 struct BPE_Rule {
   // x + y -> z
   uint32_t x{0};
@@ -31,9 +47,9 @@ struct SpecialTokens {
 
   SpecialTokens(int pad_id, int unk_id, int bos_id, int eos_id);
 
-  void dump(std::ofstream &fout);
+  void dump(StreamWriter &fout);
 
-  void load(std::ifstream &fin);
+  void load(StreamReader &fin);
 
   uint32_t max_id() const;
 
@@ -58,9 +74,9 @@ struct BPEState {
   std::vector<BPE_Rule> rules;
   SpecialTokens special_tokens;
 
-  void dump(const std::string &file_name);
+  void dump(StreamWriter &fout);
 
-  void load(const std::string &file_name);
+  void load(StreamReader &fin);
 };
 
 struct DecodeResult {

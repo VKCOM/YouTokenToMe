@@ -1,22 +1,32 @@
 from enum import Enum
-from typing import List, Union
+from functools import wraps
+from typing import BinaryIO, List, Optional, Union
 
 import _youtokentome_cython
+
 
 class OutputType(Enum):
     ID = 1
     SUBWORD = 2
 
+
 class BPE:
-    def __init__(self, model: str, n_threads: int = -1):
-        self.bpe_cython = _youtokentome_cython.BPE(
-            model_path=model, n_threads=n_threads
-        )
+    def __init__(self, model: Union[str, BinaryIO], n_threads: int = -1):
+        own_obj = isinstance(model, str)
+        if own_obj:
+            model = open(model, "rb")
+        try:
+            self.bpe_cython = _youtokentome_cython.BPE(
+                model_fobj=model, n_threads=n_threads
+            )
+        finally:
+            if own_obj:
+                model.close()
 
     @staticmethod
     def train(
         data: str,
-        model: str,
+        model: Optional[Union[str, BinaryIO]],
         vocab_size: int,
         coverage: float = 1.0,
         n_threads: int = -1,
@@ -25,17 +35,24 @@ class BPE:
         bos_id: int = 2,
         eos_id: int = 3,
     ) -> "BPE":
-        _youtokentome_cython.BPE.train(
-            data=data,
-            model=model,
-            vocab_size=vocab_size,
-            n_threads=n_threads,
-            coverage=coverage,
-            pad_id=pad_id,
-            unk_id=unk_id,
-            bos_id=bos_id,
-            eos_id=eos_id,
-        )
+        own_obj = isinstance(model, str)
+        if own_obj:
+            model = open(model, "wb")
+        try:
+            _youtokentome_cython.BPE.train(
+                data=data,
+                model=model,
+                vocab_size=vocab_size,
+                n_threads=n_threads,
+                coverage=coverage,
+                pad_id=pad_id,
+                unk_id=unk_id,
+                bos_id=bos_id,
+                eos_id=eos_id,
+            )
+        finally:
+            if own_obj:
+                model.close()
 
         return BPE(model=model, n_threads=n_threads)
 
@@ -60,6 +77,22 @@ class BPE:
             eos=eos,
             reverse=reverse,
         )
+
+    def save(self, where: Union[str, BinaryIO]):
+        """
+        Write the model to FS or any writeable file object.
+
+        :param where: FS path or writeable file object.
+        :return: None
+        """
+        own_obj = isinstance(where, str)
+        if own_obj:
+            where = open(where, "wb")
+        try:
+            self.bpe_cython.save(where=where)
+        finally:
+            if own_obj:
+                where.close()
 
     def vocab_size(self) -> int:
         return self.bpe_cython.vocab_size()
