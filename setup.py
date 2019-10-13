@@ -1,5 +1,6 @@
 import io
 import os
+from Cython.Build import cythonize
 
 from setuptools import Extension, find_packages, setup
 
@@ -7,7 +8,8 @@ extensions = [
     Extension(
         "_youtokentome_cython",
         [
-            "youtokentome/cpp/yttm.cpp",
+            "youtokentome/cpp/yttm.pyx",
+            # "youtokentome/cpp/yttm.cpp",
             "youtokentome/cpp/bpe.cpp",
             "youtokentome/cpp/utils.cpp",
             "youtokentome/cpp/utf8.cpp",
@@ -47,5 +49,5 @@ setup(
         "Programming Language :: Cython",
         "Programming Language :: C++",
     ],
-    ext_modules=extensions,
+    ext_modules=cythonize(extensions),
 )
