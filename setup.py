@@ -8,8 +8,7 @@ extensions = [
     Extension(
         "_youtokentome_cython",
         [
-            "youtokentome/cpp/yttm.pyx",
-            # "youtokentome/cpp/yttm.cpp",
+            "youtokentome/cpp/yttm.cpp",
             "youtokentome/cpp/bpe.cpp",
             "youtokentome/cpp/utils.cpp",
             "youtokentome/cpp/utf8.cpp",
@@ -49,5 +48,5 @@ setup(
         "Programming Language :: Cython",
         "Programming Language :: C++",
     ],
-    ext_modules=cythonize(extensions),
+    ext_modules=extensions,
 )
