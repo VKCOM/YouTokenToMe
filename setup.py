@@ -1,6 +1,5 @@
 import io
 import os
-from Cython.Build import cythonize
 
 from setuptools import Extension, find_packages, setup
 
@@ -26,7 +25,7 @@ with io.open(
 
 setup(
     name="youtokentome",
-    version="1.0.1",
+    version="1.0.2",
     packages=find_packages(),
     description="Unsupervised text tokenizer focused on computational efficiency",
     long_description=LONG_DESCRIPTION,
