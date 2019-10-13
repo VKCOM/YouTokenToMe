@@ -9,20 +9,24 @@ def compile_test():
 
     print("compiling stress test ...")
 
-    run(
-        [
-            "g++",
-            *files,
-            "-o",
-            "test",
-            "-std=c++14",
-            "-pthread",
-            "-D_GLIBCXX_DEBUG",
-            "-DDETERMINISTIC_QUEUE",
-        ],
-        check=True,
-    )
+    command = [
+                  "g++",
+                  *files,
+                  "-o",
+                  "test",
+                  "-std=c++14",
+                  "-pthread",
+                  "-D_GLIBCXX_DEBUG",
+                  "-DDETERMINISTIC_QUEUE",
+              ]
 
+    command = ' '.join(command)
+    print('command:', command)
+    run(
+        command,
+        check=True,
+        shell=True,
+    )
 
 def test_stress():
     compile_test()

@@ -53,6 +53,16 @@ struct BpeConfig {
             const SpecialTokens &special_tokens);
 };
 
+struct Status {
+  int code{0};
+  std::string message;
+  Status() = default;
+  Status(int code, std::string message);
+
+  const std::string &error_message() const;
+  bool ok() const;
+};
+
 struct BPEState {
   ska::flat_hash_map<uint32_t, uint32_t> char2id;
   std::vector<BPE_Rule> rules;
@@ -60,7 +70,7 @@ struct BPEState {
 
   void dump(const std::string &file_name);
 
-  void load(const std::string &file_name);
+  Status load(const std::string &file_name);
 };
 
 struct DecodeResult {
@@ -76,8 +86,7 @@ struct EncodingConfig {
 
 bool is_space(uint32_t ch);
 
-std::vector<std::string> read_lines_from_stdin(size_t batch_limit,
-                                               size_t *processed);
+std::vector<std::string> read_lines_from_stdin(size_t batch_limit, size_t *processed);
 
 template<typename T>
 void write_to_stdout(const std::vector<std::vector<T>> &sentences, bool flush) {
