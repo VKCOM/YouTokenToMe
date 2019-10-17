@@ -16,10 +16,10 @@ const std::string EOS_TOKEN = "<EOS>";
 
 enum OutputType { ID, SUBWORD };
 
-void train_bpe(const std::string& input_path, const std::string& model_path,
-               int vocab_size, BpeConfig config);
+Status train_bpe(const std::string &input_path, const std::string &model_path,
+                 int vocab_size, BpeConfig config);
 
-void print_vocab(const std::string& model_path, bool verbose);
+void print_vocab(const std::string &model_path, bool verbose);
 
 class BaseEncoder {
  public:
@@ -32,47 +32,51 @@ class BaseEncoder {
 
   explicit BaseEncoder(BPEState bpe_state, int _n_threads);
 
-  explicit BaseEncoder(const std::string& model_path, int n_threads);
+  explicit BaseEncoder(const std::string &model_path, int n_threads, Status *ret_status);
 
   void fill_from_state();
 
-  std::vector<std::vector<int>> encode_as_ids(
-      const std::vector<std::string>& sentences, bool bos = false,
+  Status encode_as_ids(
+      const std::vector<std::string> &sentences, std::vector<std::vector<int>> *ids, bool bos = false,
       bool eos = false, bool reverse = false) const;
 
-  std::vector<std::vector<std::string>> encode_as_subwords(
-      const std::vector<std::string>& sentences, bool bos = false,
+  Status encode_as_subwords(
+      const std::vector<std::string> &sentences,
+      std::vector<std::vector<std::string>> *subwords,
+      bool bos = false,
       bool eos = false, bool reverse = false) const;
 
-  std::string id_to_subword(int id, bool replace_space = false) const;
+  Status id_to_subword(int id, std::string *subword, bool replace_space = false) const;
 
-  int subword_to_id(const std::string& token) const;
+  int subword_to_id(const std::string &token) const;
 
-  std::vector<std::string> decode(const std::vector<std::vector<int>>& ids) const;
+  Status decode(const std::vector<std::vector<int>> &ids, std::vector<std::string> *sentences) const;
 
-  std::string decode(const std::vector<int>& ids) const;
+  Status decode(const std::vector<int> &ids, std::string *sentence) const;
 
-  std::vector<std::string> decode(const std::vector<std::string>& ids) const;
+  Status decode(const std::vector<std::string> &ids, std::vector<std::string> *sentences) const;
 
   int vocab_size() const;
 
   std::vector<std::string> vocabulary() const;
 
-  void encode_cli(const std::string& output_type, bool stream, bool bos = false,
-                  bool eos = false, bool reverse = false) const;
+  Status encode_cli(const std::string &output_type, bool stream, bool bos = false,
+                    bool eos = false, bool reverse = false) const;
 
-  void decode_cli() const;
+  Status decode_cli() const;
 
   void vocab_cli(bool verbose) const;
 
  private:
-  DecodeResult encode_sentence(const std::string& sentence_utf8,
-                               const EncodingConfig& encoding_config,
+  DecodeResult encode_sentence(const std::string &sentence_utf8,
+                               const EncodingConfig &encoding_config,
                                OutputType output_type) const;
 
-  std::vector<DecodeResult> encode_parallel(
-      const std::vector<std::string>& sentences,
-      const EncodingConfig& encoding_config, OutputType output_type) const;
+  Status encode_parallel(
+      const std::vector<std::string> &sentences,
+      const EncodingConfig &encoding_config, OutputType output_type,
+      std::vector<DecodeResult> *decoder_results
+  ) const;
 };
 
 }  // namespace vkcom

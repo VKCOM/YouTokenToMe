@@ -67,14 +67,12 @@ void BPEState::dump(const string &file_name) {
   fout.close();
 }
 
-void BPEState::load(const string &file_name) {
+Status BPEState::load(const string &file_name) {
   char2id.clear();
   rules.clear();
   std::ifstream fin(file_name, std::ios::in);
   if (fin.fail()) {
-    std::cerr << "Error. Can not open file with model: " << file_name
-              << std::endl;
-    exit(EXIT_FAILURE);
+    return Status(1, "Can not open file with model: " + file_name);
   }
   int n, m;
   fin >> n >> m;
@@ -91,6 +89,7 @@ void BPEState::load(const string &file_name) {
   }
   special_tokens.load(fin);
   fin.close();
+  return Status();
 }
 
 BpeConfig::BpeConfig(double _character_coverage, int _n_threads,
@@ -109,4 +108,12 @@ vector<string> read_lines_from_stdin(size_t batch_limit, size_t *processed) {
   return sentences;
 }
 
+Status::Status(int code, std::string message) : code(code), message(std::move(message)) {}
+
+const std::string &Status::error_message() const {
+  return message;
+}
+bool Status::ok() const {
+  return code == 0;
+}
 }  // namespace vkcom

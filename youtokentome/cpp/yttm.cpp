@@ -9,10 +9,7 @@
         "extra_compile_args": [
             "-std=c++11",
             "-pthread",
-            "-O3",
-            "-Wall",
-            "-Wextra",
-            "-Werror"
+            "-O3"
         ],
         "include_dirs": [
             "youtokentome/cpp"
@@ -860,7 +857,7 @@ static const char *__pyx_f[] = {
 /*--- Type declarations ---*/
 struct __pyx_obj_20_youtokentome_cython_BPE;
 
-/* "youtokentome/cpp/yttm.pyx":44
+/* "youtokentome/cpp/yttm.pyx":50
  * 
  * 
  * cdef class BPE:             # <<<<<<<<<<<<<<
@@ -1011,39 +1008,6 @@ static CYTHON_INLINE PyObject *__Pyx_PyCFunction_FastCall(PyObject *func, PyObje
 /* PyObjectCallOneArg.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObject *arg);
 
-/* IncludeStringH.proto */
-#include <string.h>
-
-/* BytesEquals.proto */
-static CYTHON_INLINE int __Pyx_PyBytes_Equals(PyObject* s1, PyObject* s2, int equals);
-
-/* UnicodeEquals.proto */
-static CYTHON_INLINE int __Pyx_PyUnicode_Equals(PyObject* s1, PyObject* s2, int equals);
-
-/* StrEquals.proto */
-#if PY_MAJOR_VERSION >= 3
-#define __Pyx_PyString_Equals __Pyx_PyUnicode_Equals
-#else
-#define __Pyx_PyString_Equals __Pyx_PyBytes_Equals
-#endif
-
-/* ListCompAppend.proto */
-#if CYTHON_USE_PYLIST_INTERNALS && CYTHON_ASSUME_SAFE_MACROS
-static CYTHON_INLINE int __Pyx_ListComp_Append(PyObject* list, PyObject* x) {
-    PyListObject* L = (PyListObject*) list;
-    Py_ssize_t len = Py_SIZE(list);
-    if (likely(L->allocated > len)) {
-        Py_INCREF(x);
-        PyList_SET_ITEM(list, len, x);
-        Py_SIZE(list) = len+1;
-        return 0;
-    }
-    return PyList_Append(list, x);
-}
-#else
-#define __Pyx_ListComp_Append(L,x) PyList_Append(L,x)
-#endif
-
 /* IncludeCppStringH.proto */
 #include <string>
 
@@ -1114,6 +1078,39 @@ static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject 
 
 /* RaiseException.proto */
 static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject *cause);
+
+/* IncludeStringH.proto */
+#include <string.h>
+
+/* BytesEquals.proto */
+static CYTHON_INLINE int __Pyx_PyBytes_Equals(PyObject* s1, PyObject* s2, int equals);
+
+/* UnicodeEquals.proto */
+static CYTHON_INLINE int __Pyx_PyUnicode_Equals(PyObject* s1, PyObject* s2, int equals);
+
+/* StrEquals.proto */
+#if PY_MAJOR_VERSION >= 3
+#define __Pyx_PyString_Equals __Pyx_PyUnicode_Equals
+#else
+#define __Pyx_PyString_Equals __Pyx_PyBytes_Equals
+#endif
+
+/* ListCompAppend.proto */
+#if CYTHON_USE_PYLIST_INTERNALS && CYTHON_ASSUME_SAFE_MACROS
+static CYTHON_INLINE int __Pyx_ListComp_Append(PyObject* list, PyObject* x) {
+    PyListObject* L = (PyListObject*) list;
+    Py_ssize_t len = Py_SIZE(list);
+    if (likely(L->allocated > len)) {
+        Py_INCREF(x);
+        PyList_SET_ITEM(list, len, x);
+        Py_SIZE(list) = len+1;
+        return 0;
+    }
+    return PyList_Append(list, x);
+}
+#else
+#define __Pyx_ListComp_Append(L,x) PyList_Append(L,x)
+#endif
 
 /* GetItemInt.proto */
 #define __Pyx_GetItemInt(o, i, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
@@ -1291,12 +1288,12 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 /* Module declarations from '_youtokentome_cython' */
 static PyTypeObject *__pyx_ptype_20_youtokentome_cython_BPE = 0;
 static std::string __pyx_convert_string_from_py_std__in_string(PyObject *); /*proto*/
-static std::vector<std::string>  __pyx_convert_vector_from_py_std_3a__3a_string(PyObject *); /*proto*/
 static CYTHON_INLINE PyObject *__pyx_convert_PyObject_string_to_py_std__in_string(std::string const &); /*proto*/
 static CYTHON_INLINE PyObject *__pyx_convert_PyUnicode_string_to_py_std__in_string(std::string const &); /*proto*/
 static CYTHON_INLINE PyObject *__pyx_convert_PyStr_string_to_py_std__in_string(std::string const &); /*proto*/
 static CYTHON_INLINE PyObject *__pyx_convert_PyBytes_string_to_py_std__in_string(std::string const &); /*proto*/
 static CYTHON_INLINE PyObject *__pyx_convert_PyByteArray_string_to_py_std__in_string(std::string const &); /*proto*/
+static std::vector<std::string>  __pyx_convert_vector_from_py_std_3a__3a_string(PyObject *); /*proto*/
 static PyObject *__pyx_convert_vector_to_py_std_3a__3a_string(const std::vector<std::string>  &); /*proto*/
 static PyObject *__pyx_convert_vector_to_py_int(const std::vector<int>  &); /*proto*/
 static PyObject *__pyx_convert_vector_to_py_std_3a__3a_vector_3c_int_3e___(const std::vector<std::vector<int> >  &); /*proto*/
@@ -1331,6 +1328,7 @@ static const char __pyx_k_eos_id[] = "eos_id";
 static const char __pyx_k_import[] = "__import__";
 static const char __pyx_k_pad_id[] = "pad_id";
 static const char __pyx_k_reduce[] = "__reduce__";
+static const char __pyx_k_status[] = "status";
 static const char __pyx_k_stream[] = "stream";
 static const char __pyx_k_unk_id[] = "unk_id";
 static const char __pyx_k_pathlib[] = "pathlib";
@@ -1392,6 +1390,7 @@ static PyObject *__pyx_n_s_sentences;
 static PyObject *__pyx_n_s_setstate;
 static PyObject *__pyx_n_s_setstate_cython;
 static PyObject *__pyx_n_s_staticmethod;
+static PyObject *__pyx_n_s_status;
 static PyObject *__pyx_n_s_stream;
 static PyObject *__pyx_n_s_subword;
 static PyObject *__pyx_n_s_test;
@@ -1428,7 +1427,7 @@ static PyObject *__pyx_tuple__4;
 static PyObject *__pyx_codeobj__5;
 /* Late includes */
 
-/* "youtokentome/cpp/yttm.pyx":47
+/* "youtokentome/cpp/yttm.pyx":53
  *     cdef BaseEncoder* encoder
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -1451,7 +1450,7 @@ static void __pyx_pf_20_youtokentome_cython_3BPE___dealloc__(struct __pyx_obj_20
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__dealloc__", 0);
 
-  /* "youtokentome/cpp/yttm.pyx":48
+  /* "youtokentome/cpp/yttm.pyx":54
  * 
  *     def __dealloc__(self):
  *         del self.encoder             # <<<<<<<<<<<<<<
@@ -1460,7 +1459,7 @@ static void __pyx_pf_20_youtokentome_cython_3BPE___dealloc__(struct __pyx_obj_20
  */
   delete __pyx_v_self->encoder;
 
-  /* "youtokentome/cpp/yttm.pyx":47
+  /* "youtokentome/cpp/yttm.pyx":53
  *     cdef BaseEncoder* encoder
  * 
  *     def __dealloc__(self):             # <<<<<<<<<<<<<<
@@ -1472,12 +1471,12 @@ static void __pyx_pf_20_youtokentome_cython_3BPE___dealloc__(struct __pyx_obj_20
   __Pyx_RefNannyFinishContext();
 }
 
-/* "youtokentome/cpp/yttm.pyx":50
+/* "youtokentome/cpp/yttm.pyx":56
  *         del self.encoder
  * 
  *     def __init__(self, model_path, n_threads=-1):             # <<<<<<<<<<<<<<
- *         self.encoder = new BaseEncoder(model_path.encode(), n_threads)
- * 
+ *         cdef Status status
+ *         self.encoder = new BaseEncoder(model_path.encode(), n_threads, &status)
  */
 
 /* Python wrapper */
@@ -1516,7 +1515,7 @@ static int __pyx_pw_20_youtokentome_cython_3BPE_3__init__(PyObject *__pyx_v_self
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 50, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 56, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -1532,7 +1531,7 @@ static int __pyx_pw_20_youtokentome_cython_3BPE_3__init__(PyObject *__pyx_v_self
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 50, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__init__", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 56, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("_youtokentome_cython.BPE.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -1546,6 +1545,7 @@ static int __pyx_pw_20_youtokentome_cython_3BPE_3__init__(PyObject *__pyx_v_self
 }
 
 static int __pyx_pf_20_youtokentome_cython_3BPE_2__init__(struct __pyx_obj_20_youtokentome_cython_BPE *__pyx_v_self, PyObject *__pyx_v_model_path, PyObject *__pyx_v_n_threads) {
+  vkcom::Status __pyx_v_status;
   int __pyx_r;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -1553,16 +1553,17 @@ static int __pyx_pf_20_youtokentome_cython_3BPE_2__init__(struct __pyx_obj_20_yo
   PyObject *__pyx_t_3 = NULL;
   std::string __pyx_t_4;
   int __pyx_t_5;
+  int __pyx_t_6;
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "youtokentome/cpp/yttm.pyx":51
- * 
+  /* "youtokentome/cpp/yttm.pyx":58
  *     def __init__(self, model_path, n_threads=-1):
- *         self.encoder = new BaseEncoder(model_path.encode(), n_threads)             # <<<<<<<<<<<<<<
- * 
- *     @staticmethod
+ *         cdef Status status
+ *         self.encoder = new BaseEncoder(model_path.encode(), n_threads, &status)             # <<<<<<<<<<<<<<
+ *         if status.code != 0:
+ *             raise ValueError(status.message.decode())
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_model_path, __pyx_n_s_encode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 51, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_model_path, __pyx_n_s_encode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 58, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -1576,20 +1577,55 @@ static int __pyx_pf_20_youtokentome_cython_3BPE_2__init__(struct __pyx_obj_20_yo
   }
   __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3) : __Pyx_PyObject_CallNoArg(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 51, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 58, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_4 = __pyx_convert_string_from_py_std__in_string(__pyx_t_1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 51, __pyx_L1_error)
+  __pyx_t_4 = __pyx_convert_string_from_py_std__in_string(__pyx_t_1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 58, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_v_n_threads); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 51, __pyx_L1_error)
-  __pyx_v_self->encoder = new vkcom::BaseEncoder(__pyx_t_4, __pyx_t_5);
+  __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_v_n_threads); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 58, __pyx_L1_error)
+  __pyx_v_self->encoder = new vkcom::BaseEncoder(__pyx_t_4, __pyx_t_5, (&__pyx_v_status));
 
-  /* "youtokentome/cpp/yttm.pyx":50
+  /* "youtokentome/cpp/yttm.pyx":59
+ *         cdef Status status
+ *         self.encoder = new BaseEncoder(model_path.encode(), n_threads, &status)
+ *         if status.code != 0:             # <<<<<<<<<<<<<<
+ *             raise ValueError(status.message.decode())
+ * 
+ */
+  __pyx_t_6 = ((__pyx_v_status.code != 0) != 0);
+  if (unlikely(__pyx_t_6)) {
+
+    /* "youtokentome/cpp/yttm.pyx":60
+ *         self.encoder = new BaseEncoder(model_path.encode(), n_threads, &status)
+ *         if status.code != 0:
+ *             raise ValueError(status.message.decode())             # <<<<<<<<<<<<<<
+ * 
+ *     @staticmethod
+ */
+    __pyx_t_1 = __Pyx_decode_cpp_string(__pyx_v_status.message, 0, PY_SSIZE_T_MAX, NULL, NULL, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 60, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_builtin_ValueError, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 60, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __Pyx_Raise(__pyx_t_2, 0, 0, 0);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __PYX_ERR(0, 60, __pyx_L1_error)
+
+    /* "youtokentome/cpp/yttm.pyx":59
+ *         cdef Status status
+ *         self.encoder = new BaseEncoder(model_path.encode(), n_threads, &status)
+ *         if status.code != 0:             # <<<<<<<<<<<<<<
+ *             raise ValueError(status.message.decode())
+ * 
+ */
+  }
+
+  /* "youtokentome/cpp/yttm.pyx":56
  *         del self.encoder
  * 
  *     def __init__(self, model_path, n_threads=-1):             # <<<<<<<<<<<<<<
- *         self.encoder = new BaseEncoder(model_path.encode(), n_threads)
- * 
+ *         cdef Status status
+ *         self.encoder = new BaseEncoder(model_path.encode(), n_threads, &status)
  */
 
   /* function exit code */
@@ -1606,7 +1642,7 @@ static int __pyx_pf_20_youtokentome_cython_3BPE_2__init__(struct __pyx_obj_20_yo
   return __pyx_r;
 }
 
-/* "youtokentome/cpp/yttm.pyx":54
+/* "youtokentome/cpp/yttm.pyx":63
  * 
  *     @staticmethod
  *     def train(data,             # <<<<<<<<<<<<<<
@@ -1673,13 +1709,13 @@ static PyObject *__pyx_pw_20_youtokentome_cython_3BPE_5train(CYTHON_UNUSED PyObj
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_model)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("train", 0, 3, 9, 1); __PYX_ERR(0, 54, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("train", 0, 3, 9, 1); __PYX_ERR(0, 63, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_vocab_size)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("train", 0, 3, 9, 2); __PYX_ERR(0, 54, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("train", 0, 3, 9, 2); __PYX_ERR(0, 63, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
@@ -1719,7 +1755,7 @@ static PyObject *__pyx_pw_20_youtokentome_cython_3BPE_5train(CYTHON_UNUSED PyObj
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "train") < 0)) __PYX_ERR(0, 54, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "train") < 0)) __PYX_ERR(0, 63, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -1754,7 +1790,7 @@ static PyObject *__pyx_pw_20_youtokentome_cython_3BPE_5train(CYTHON_UNUSED PyObj
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("train", 0, 3, 9, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 54, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("train", 0, 3, 9, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 63, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("_youtokentome_cython.BPE.train", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -1769,6 +1805,7 @@ static PyObject *__pyx_pw_20_youtokentome_cython_3BPE_5train(CYTHON_UNUSED PyObj
 
 static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_4train(PyObject *__pyx_v_data, PyObject *__pyx_v_model, PyObject *__pyx_v_vocab_size, PyObject *__pyx_v_coverage, PyObject *__pyx_v_n_threads, PyObject *__pyx_v_pad_id, PyObject *__pyx_v_unk_id, PyObject *__pyx_v_bos_id, PyObject *__pyx_v_eos_id) {
   vkcom::BpeConfig __pyx_v_bpe_config;
+  vkcom::Status __pyx_v_status;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
@@ -1778,117 +1815,153 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_4train(PyObject *__pyx_v_d
   PyObject *__pyx_t_5 = NULL;
   std::string __pyx_t_6;
   std::string __pyx_t_7;
+  int __pyx_t_8;
   __Pyx_RefNannySetupContext("train", 0);
 
-  /* "youtokentome/cpp/yttm.pyx":65
+  /* "youtokentome/cpp/yttm.pyx":74
  * 
  *         cdef BpeConfig bpe_config
  *         bpe_config.character_coverage = coverage             # <<<<<<<<<<<<<<
  *         bpe_config.n_threads = n_threads
  *         bpe_config.special_tokens.pad_id = pad_id
  */
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_coverage); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 65, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_coverage); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 74, __pyx_L1_error)
   __pyx_v_bpe_config.character_coverage = __pyx_t_1;
 
-  /* "youtokentome/cpp/yttm.pyx":66
+  /* "youtokentome/cpp/yttm.pyx":75
  *         cdef BpeConfig bpe_config
  *         bpe_config.character_coverage = coverage
  *         bpe_config.n_threads = n_threads             # <<<<<<<<<<<<<<
  *         bpe_config.special_tokens.pad_id = pad_id
  *         bpe_config.special_tokens.unk_id = unk_id
  */
-  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_n_threads); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_n_threads); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 75, __pyx_L1_error)
   __pyx_v_bpe_config.n_threads = __pyx_t_2;
 
-  /* "youtokentome/cpp/yttm.pyx":67
+  /* "youtokentome/cpp/yttm.pyx":76
  *         bpe_config.character_coverage = coverage
  *         bpe_config.n_threads = n_threads
  *         bpe_config.special_tokens.pad_id = pad_id             # <<<<<<<<<<<<<<
  *         bpe_config.special_tokens.unk_id = unk_id
  *         bpe_config.special_tokens.bos_id = bos_id
  */
-  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_pad_id); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 67, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_pad_id); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 76, __pyx_L1_error)
   __pyx_v_bpe_config.special_tokens.pad_id = __pyx_t_2;
 
-  /* "youtokentome/cpp/yttm.pyx":68
+  /* "youtokentome/cpp/yttm.pyx":77
  *         bpe_config.n_threads = n_threads
  *         bpe_config.special_tokens.pad_id = pad_id
  *         bpe_config.special_tokens.unk_id = unk_id             # <<<<<<<<<<<<<<
  *         bpe_config.special_tokens.bos_id = bos_id
  *         bpe_config.special_tokens.eos_id = eos_id
  */
-  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_unk_id); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 68, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_unk_id); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 77, __pyx_L1_error)
   __pyx_v_bpe_config.special_tokens.unk_id = __pyx_t_2;
 
-  /* "youtokentome/cpp/yttm.pyx":69
+  /* "youtokentome/cpp/yttm.pyx":78
  *         bpe_config.special_tokens.pad_id = pad_id
  *         bpe_config.special_tokens.unk_id = unk_id
  *         bpe_config.special_tokens.bos_id = bos_id             # <<<<<<<<<<<<<<
  *         bpe_config.special_tokens.eos_id = eos_id
  * 
  */
-  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_bos_id); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 69, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_bos_id); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 78, __pyx_L1_error)
   __pyx_v_bpe_config.special_tokens.bos_id = __pyx_t_2;
 
-  /* "youtokentome/cpp/yttm.pyx":70
+  /* "youtokentome/cpp/yttm.pyx":79
  *         bpe_config.special_tokens.unk_id = unk_id
  *         bpe_config.special_tokens.bos_id = bos_id
  *         bpe_config.special_tokens.eos_id = eos_id             # <<<<<<<<<<<<<<
  * 
- *         train_bpe(data.encode(), model.encode(), vocab_size, bpe_config)
+ *         cdef Status status = train_bpe(data.encode(), model.encode(), vocab_size, bpe_config)
  */
-  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_eos_id); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 70, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_eos_id); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 79, __pyx_L1_error)
   __pyx_v_bpe_config.special_tokens.eos_id = __pyx_t_2;
 
-  /* "youtokentome/cpp/yttm.pyx":72
+  /* "youtokentome/cpp/yttm.pyx":81
  *         bpe_config.special_tokens.eos_id = eos_id
  * 
- *         train_bpe(data.encode(), model.encode(), vocab_size, bpe_config)             # <<<<<<<<<<<<<<
+ *         cdef Status status = train_bpe(data.encode(), model.encode(), vocab_size, bpe_config)             # <<<<<<<<<<<<<<
+ *         if status.code != 0:
+ *             raise ValueError(status.message.decode())
+ */
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_data, __pyx_n_s_encode); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_5 = NULL;
+  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
+    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_4);
+    if (likely(__pyx_t_5)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
+      __Pyx_INCREF(__pyx_t_5);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_4, function);
+    }
+  }
+  __pyx_t_3 = (__pyx_t_5) ? __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5) : __Pyx_PyObject_CallNoArg(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+  if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_6 = __pyx_convert_string_from_py_std__in_string(__pyx_t_3); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 81, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_encode); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_5 = NULL;
+  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
+    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_4);
+    if (likely(__pyx_t_5)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
+      __Pyx_INCREF(__pyx_t_5);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_4, function);
+    }
+  }
+  __pyx_t_3 = (__pyx_t_5) ? __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5) : __Pyx_PyObject_CallNoArg(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+  if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_7 = __pyx_convert_string_from_py_std__in_string(__pyx_t_3); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 81, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_vocab_size); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 81, __pyx_L1_error)
+  __pyx_v_status = vkcom::train_bpe(__pyx_t_6, __pyx_t_7, __pyx_t_2, __pyx_v_bpe_config);
+
+  /* "youtokentome/cpp/yttm.pyx":82
  * 
+ *         cdef Status status = train_bpe(data.encode(), model.encode(), vocab_size, bpe_config)
+ *         if status.code != 0:             # <<<<<<<<<<<<<<
+ *             raise ValueError(status.message.decode())
  * 
  */
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_data, __pyx_n_s_encode); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 72, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = NULL;
-  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
-    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_4);
-    if (likely(__pyx_t_5)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
-      __Pyx_INCREF(__pyx_t_5);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_4, function);
-    }
-  }
-  __pyx_t_3 = (__pyx_t_5) ? __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5) : __Pyx_PyObject_CallNoArg(__pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 72, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_6 = __pyx_convert_string_from_py_std__in_string(__pyx_t_3); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 72, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_model, __pyx_n_s_encode); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 72, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = NULL;
-  if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
-    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_4);
-    if (likely(__pyx_t_5)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
-      __Pyx_INCREF(__pyx_t_5);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_4, function);
-    }
-  }
-  __pyx_t_3 = (__pyx_t_5) ? __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5) : __Pyx_PyObject_CallNoArg(__pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 72, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_7 = __pyx_convert_string_from_py_std__in_string(__pyx_t_3); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 72, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_v_vocab_size); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 72, __pyx_L1_error)
-  vkcom::train_bpe(__pyx_t_6, __pyx_t_7, __pyx_t_2, __pyx_v_bpe_config);
+  __pyx_t_8 = ((__pyx_v_status.code != 0) != 0);
+  if (unlikely(__pyx_t_8)) {
 
-  /* "youtokentome/cpp/yttm.pyx":54
+    /* "youtokentome/cpp/yttm.pyx":83
+ *         cdef Status status = train_bpe(data.encode(), model.encode(), vocab_size, bpe_config)
+ *         if status.code != 0:
+ *             raise ValueError(status.message.decode())             # <<<<<<<<<<<<<<
+ * 
+ *     def encode(self, sentences, output_type, bos, eos, reverse):
+ */
+    __pyx_t_3 = __Pyx_decode_cpp_string(__pyx_v_status.message, 0, PY_SSIZE_T_MAX, NULL, NULL, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 83, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_builtin_ValueError, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 83, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __Pyx_Raise(__pyx_t_4, 0, 0, 0);
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __PYX_ERR(0, 83, __pyx_L1_error)
+
+    /* "youtokentome/cpp/yttm.pyx":82
+ * 
+ *         cdef Status status = train_bpe(data.encode(), model.encode(), vocab_size, bpe_config)
+ *         if status.code != 0:             # <<<<<<<<<<<<<<
+ *             raise ValueError(status.message.decode())
+ * 
+ */
+  }
+
+  /* "youtokentome/cpp/yttm.pyx":63
  * 
  *     @staticmethod
  *     def train(data,             # <<<<<<<<<<<<<<
@@ -1911,12 +1984,12 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_4train(PyObject *__pyx_v_d
   return __pyx_r;
 }
 
-/* "youtokentome/cpp/yttm.pyx":75
- * 
+/* "youtokentome/cpp/yttm.pyx":85
+ *             raise ValueError(status.message.decode())
  * 
  *     def encode(self, sentences, output_type, bos, eos, reverse):             # <<<<<<<<<<<<<<
  *         cdef vector[string] s
- *         cdef vector[vector[string]] ret
+ *         cdef vector[vector[string]] ret_subwords
  */
 
 /* Python wrapper */
@@ -1959,29 +2032,29 @@ static PyObject *__pyx_pw_20_youtokentome_cython_3BPE_7encode(PyObject *__pyx_v_
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_output_type)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("encode", 1, 5, 5, 1); __PYX_ERR(0, 75, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("encode", 1, 5, 5, 1); __PYX_ERR(0, 85, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_bos)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("encode", 1, 5, 5, 2); __PYX_ERR(0, 75, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("encode", 1, 5, 5, 2); __PYX_ERR(0, 85, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_eos)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("encode", 1, 5, 5, 3); __PYX_ERR(0, 75, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("encode", 1, 5, 5, 3); __PYX_ERR(0, 85, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (likely((values[4] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_reverse)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("encode", 1, 5, 5, 4); __PYX_ERR(0, 75, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("encode", 1, 5, 5, 4); __PYX_ERR(0, 85, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "encode") < 0)) __PYX_ERR(0, 75, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "encode") < 0)) __PYX_ERR(0, 85, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 5) {
       goto __pyx_L5_argtuple_error;
@@ -2000,7 +2073,7 @@ static PyObject *__pyx_pw_20_youtokentome_cython_3BPE_7encode(PyObject *__pyx_v_
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("encode", 1, 5, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 75, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("encode", 1, 5, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 85, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("_youtokentome_cython.BPE.encode", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -2015,7 +2088,9 @@ static PyObject *__pyx_pw_20_youtokentome_cython_3BPE_7encode(PyObject *__pyx_v_
 
 static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_6encode(struct __pyx_obj_20_youtokentome_cython_BPE *__pyx_v_self, PyObject *__pyx_v_sentences, PyObject *__pyx_v_output_type, PyObject *__pyx_v_bos, PyObject *__pyx_v_eos, PyObject *__pyx_v_reverse) {
   std::vector<std::string>  __pyx_v_s;
-  std::vector<std::vector<std::string> >  __pyx_v_ret;
+  std::vector<std::vector<std::string> >  __pyx_v_ret_subwords;
+  std::vector<std::vector<int> >  __pyx_v_ret_ids;
+  vkcom::Status __pyx_v_status;
   PyObject *__pyx_v_x = NULL;
   std::string __pyx_v_piece;
   std::vector<std::string>  __pyx_v_sentence;
@@ -2041,18 +2116,18 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_6encode(struct __pyx_obj_2
   std::vector<std::vector<std::string> > ::iterator __pyx_t_18;
   __Pyx_RefNannySetupContext("encode", 0);
 
-  /* "youtokentome/cpp/yttm.pyx":78
- *         cdef vector[string] s
- *         cdef vector[vector[string]] ret
+  /* "youtokentome/cpp/yttm.pyx":90
+ *         cdef vector[vector[int]] ret_ids
+ *         cdef Status status
  *         if output_type == 'id':             # <<<<<<<<<<<<<<
  *             if isinstance(sentences, str):
  *                 s = [sentences.encode()]
  */
-  __pyx_t_1 = (__Pyx_PyString_Equals(__pyx_v_output_type, __pyx_n_s_id, Py_EQ)); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 78, __pyx_L1_error)
+  __pyx_t_1 = (__Pyx_PyString_Equals(__pyx_v_output_type, __pyx_n_s_id, Py_EQ)); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 90, __pyx_L1_error)
   if (__pyx_t_1) {
 
-    /* "youtokentome/cpp/yttm.pyx":79
- *         cdef vector[vector[string]] ret
+    /* "youtokentome/cpp/yttm.pyx":91
+ *         cdef Status status
  *         if output_type == 'id':
  *             if isinstance(sentences, str):             # <<<<<<<<<<<<<<
  *                 s = [sentences.encode()]
@@ -2062,14 +2137,14 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_6encode(struct __pyx_obj_2
     __pyx_t_2 = (__pyx_t_1 != 0);
     if (__pyx_t_2) {
 
-      /* "youtokentome/cpp/yttm.pyx":80
+      /* "youtokentome/cpp/yttm.pyx":92
  *         if output_type == 'id':
  *             if isinstance(sentences, str):
  *                 s = [sentences.encode()]             # <<<<<<<<<<<<<<
  *                 assert len(s) == 1
- *                 return self.encoder.encode_as_ids(s, bos, eos, reverse)[0]
+ *                 status = self.encoder.encode_as_ids(s, &ret_ids, bos, eos, reverse)
  */
-      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_sentences, __pyx_n_s_encode); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 80, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_sentences, __pyx_n_s_encode); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 92, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __pyx_t_5 = NULL;
       if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
@@ -2083,57 +2158,101 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_6encode(struct __pyx_obj_2
       }
       __pyx_t_3 = (__pyx_t_5) ? __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5) : __Pyx_PyObject_CallNoArg(__pyx_t_4);
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-      if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 80, __pyx_L1_error)
+      if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 92, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __pyx_t_4 = PyList_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 80, __pyx_L1_error)
+      __pyx_t_4 = PyList_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 92, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GIVEREF(__pyx_t_3);
       PyList_SET_ITEM(__pyx_t_4, 0, __pyx_t_3);
       __pyx_t_3 = 0;
-      __pyx_t_6 = __pyx_convert_vector_from_py_std_3a__3a_string(__pyx_t_4); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 80, __pyx_L1_error)
+      __pyx_t_6 = __pyx_convert_vector_from_py_std_3a__3a_string(__pyx_t_4); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 92, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __pyx_v_s = __pyx_t_6;
 
-      /* "youtokentome/cpp/yttm.pyx":81
+      /* "youtokentome/cpp/yttm.pyx":93
  *             if isinstance(sentences, str):
  *                 s = [sentences.encode()]
  *                 assert len(s) == 1             # <<<<<<<<<<<<<<
- *                 return self.encoder.encode_as_ids(s, bos, eos, reverse)[0]
- * 
+ *                 status = self.encoder.encode_as_ids(s, &ret_ids, bos, eos, reverse)
+ *                 if status.code != 0:
  */
       #ifndef CYTHON_WITHOUT_ASSERTIONS
       if (unlikely(!Py_OptimizeFlag)) {
-        __pyx_t_4 = __pyx_convert_vector_to_py_std_3a__3a_string(__pyx_v_s); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 81, __pyx_L1_error)
+        __pyx_t_4 = __pyx_convert_vector_to_py_std_3a__3a_string(__pyx_v_s); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 93, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_7 = PyObject_Length(__pyx_t_4); if (unlikely(__pyx_t_7 == ((Py_ssize_t)-1))) __PYX_ERR(0, 81, __pyx_L1_error)
+        __pyx_t_7 = PyObject_Length(__pyx_t_4); if (unlikely(__pyx_t_7 == ((Py_ssize_t)-1))) __PYX_ERR(0, 93, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
         if (unlikely(!((__pyx_t_7 == 1) != 0))) {
           PyErr_SetNone(PyExc_AssertionError);
-          __PYX_ERR(0, 81, __pyx_L1_error)
+          __PYX_ERR(0, 93, __pyx_L1_error)
         }
       }
       #endif
 
-      /* "youtokentome/cpp/yttm.pyx":82
+      /* "youtokentome/cpp/yttm.pyx":94
  *                 s = [sentences.encode()]
  *                 assert len(s) == 1
- *                 return self.encoder.encode_as_ids(s, bos, eos, reverse)[0]             # <<<<<<<<<<<<<<
+ *                 status = self.encoder.encode_as_ids(s, &ret_ids, bos, eos, reverse)             # <<<<<<<<<<<<<<
+ *                 if status.code != 0:
+ *                     raise ValueError(status.message.decode())
+ */
+      __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_v_bos); if (unlikely((__pyx_t_8 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 94, __pyx_L1_error)
+      __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_v_eos); if (unlikely((__pyx_t_9 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 94, __pyx_L1_error)
+      __pyx_t_10 = __Pyx_PyObject_IsTrue(__pyx_v_reverse); if (unlikely((__pyx_t_10 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 94, __pyx_L1_error)
+      __pyx_v_status = __pyx_v_self->encoder->encode_as_ids(__pyx_v_s, (&__pyx_v_ret_ids), __pyx_t_8, __pyx_t_9, __pyx_t_10);
+
+      /* "youtokentome/cpp/yttm.pyx":95
+ *                 assert len(s) == 1
+ *                 status = self.encoder.encode_as_ids(s, &ret_ids, bos, eos, reverse)
+ *                 if status.code != 0:             # <<<<<<<<<<<<<<
+ *                     raise ValueError(status.message.decode())
+ *                 return ret_ids[0]
+ */
+      __pyx_t_2 = ((__pyx_v_status.code != 0) != 0);
+      if (unlikely(__pyx_t_2)) {
+
+        /* "youtokentome/cpp/yttm.pyx":96
+ *                 status = self.encoder.encode_as_ids(s, &ret_ids, bos, eos, reverse)
+ *                 if status.code != 0:
+ *                     raise ValueError(status.message.decode())             # <<<<<<<<<<<<<<
+ *                 return ret_ids[0]
+ * 
+ */
+        __pyx_t_4 = __Pyx_decode_cpp_string(__pyx_v_status.message, 0, PY_SSIZE_T_MAX, NULL, NULL, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 96, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_4);
+        __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_builtin_ValueError, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 96, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_3);
+        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+        __Pyx_Raise(__pyx_t_3, 0, 0, 0);
+        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+        __PYX_ERR(0, 96, __pyx_L1_error)
+
+        /* "youtokentome/cpp/yttm.pyx":95
+ *                 assert len(s) == 1
+ *                 status = self.encoder.encode_as_ids(s, &ret_ids, bos, eos, reverse)
+ *                 if status.code != 0:             # <<<<<<<<<<<<<<
+ *                     raise ValueError(status.message.decode())
+ *                 return ret_ids[0]
+ */
+      }
+
+      /* "youtokentome/cpp/yttm.pyx":97
+ *                 if status.code != 0:
+ *                     raise ValueError(status.message.decode())
+ *                 return ret_ids[0]             # <<<<<<<<<<<<<<
  * 
  *             assert isinstance(sentences, list) or isinstance(sentences, tuple)
  */
       __Pyx_XDECREF(__pyx_r);
-      __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_v_bos); if (unlikely((__pyx_t_8 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 82, __pyx_L1_error)
-      __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_v_eos); if (unlikely((__pyx_t_9 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 82, __pyx_L1_error)
-      __pyx_t_10 = __Pyx_PyObject_IsTrue(__pyx_v_reverse); if (unlikely((__pyx_t_10 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 82, __pyx_L1_error)
-      __pyx_t_4 = __pyx_convert_vector_to_py_int((__pyx_v_self->encoder->encode_as_ids(__pyx_v_s, __pyx_t_8, __pyx_t_9, __pyx_t_10)[0])); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 82, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_4);
-      __pyx_r = __pyx_t_4;
-      __pyx_t_4 = 0;
+      __pyx_t_3 = __pyx_convert_vector_to_py_int((__pyx_v_ret_ids[0])); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 97, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_3);
+      __pyx_r = __pyx_t_3;
+      __pyx_t_3 = 0;
       goto __pyx_L0;
 
-      /* "youtokentome/cpp/yttm.pyx":79
- *         cdef vector[vector[string]] ret
+      /* "youtokentome/cpp/yttm.pyx":91
+ *         cdef Status status
  *         if output_type == 'id':
  *             if isinstance(sentences, str):             # <<<<<<<<<<<<<<
  *                 s = [sentences.encode()]
@@ -2141,12 +2260,12 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_6encode(struct __pyx_obj_2
  */
     }
 
-    /* "youtokentome/cpp/yttm.pyx":84
- *                 return self.encoder.encode_as_ids(s, bos, eos, reverse)[0]
+    /* "youtokentome/cpp/yttm.pyx":99
+ *                 return ret_ids[0]
  * 
  *             assert isinstance(sentences, list) or isinstance(sentences, tuple)             # <<<<<<<<<<<<<<
  *             s = [x.encode() for x in sentences]
- *             return self.encoder.encode_as_ids(s, bos, eos, reverse)
+ *             status = self.encoder.encode_as_ids(s, &ret_ids, bos, eos, reverse)
  */
     #ifndef CYTHON_WITHOUT_ASSERTIONS
     if (unlikely(!Py_OptimizeFlag)) {
@@ -2155,62 +2274,62 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_6encode(struct __pyx_obj_2
       if (!__pyx_t_11) {
       } else {
         __pyx_t_2 = __pyx_t_11;
-        goto __pyx_L5_bool_binop_done;
+        goto __pyx_L6_bool_binop_done;
       }
       __pyx_t_11 = PyTuple_Check(__pyx_v_sentences); 
       __pyx_t_1 = (__pyx_t_11 != 0);
       __pyx_t_2 = __pyx_t_1;
-      __pyx_L5_bool_binop_done:;
+      __pyx_L6_bool_binop_done:;
       if (unlikely(!__pyx_t_2)) {
         PyErr_SetNone(PyExc_AssertionError);
-        __PYX_ERR(0, 84, __pyx_L1_error)
+        __PYX_ERR(0, 99, __pyx_L1_error)
       }
     }
     #endif
 
-    /* "youtokentome/cpp/yttm.pyx":85
+    /* "youtokentome/cpp/yttm.pyx":100
  * 
  *             assert isinstance(sentences, list) or isinstance(sentences, tuple)
  *             s = [x.encode() for x in sentences]             # <<<<<<<<<<<<<<
- *             return self.encoder.encode_as_ids(s, bos, eos, reverse)
- *         elif output_type == 'subword':
+ *             status = self.encoder.encode_as_ids(s, &ret_ids, bos, eos, reverse)
+ *             if status.code != 0:
  */
-    __pyx_t_4 = PyList_New(0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 85, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 100, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
     if (likely(PyList_CheckExact(__pyx_v_sentences)) || PyTuple_CheckExact(__pyx_v_sentences)) {
-      __pyx_t_3 = __pyx_v_sentences; __Pyx_INCREF(__pyx_t_3); __pyx_t_7 = 0;
+      __pyx_t_4 = __pyx_v_sentences; __Pyx_INCREF(__pyx_t_4); __pyx_t_7 = 0;
       __pyx_t_12 = NULL;
     } else {
-      __pyx_t_7 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_v_sentences); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 85, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_12 = Py_TYPE(__pyx_t_3)->tp_iternext; if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 85, __pyx_L1_error)
+      __pyx_t_7 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_v_sentences); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 100, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
+      __pyx_t_12 = Py_TYPE(__pyx_t_4)->tp_iternext; if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 100, __pyx_L1_error)
     }
     for (;;) {
       if (likely(!__pyx_t_12)) {
-        if (likely(PyList_CheckExact(__pyx_t_3))) {
-          if (__pyx_t_7 >= PyList_GET_SIZE(__pyx_t_3)) break;
+        if (likely(PyList_CheckExact(__pyx_t_4))) {
+          if (__pyx_t_7 >= PyList_GET_SIZE(__pyx_t_4)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_5 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_7); __Pyx_INCREF(__pyx_t_5); __pyx_t_7++; if (unlikely(0 < 0)) __PYX_ERR(0, 85, __pyx_L1_error)
+          __pyx_t_5 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_7); __Pyx_INCREF(__pyx_t_5); __pyx_t_7++; if (unlikely(0 < 0)) __PYX_ERR(0, 100, __pyx_L1_error)
           #else
-          __pyx_t_5 = PySequence_ITEM(__pyx_t_3, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 85, __pyx_L1_error)
+          __pyx_t_5 = PySequence_ITEM(__pyx_t_4, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 100, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
           #endif
         } else {
-          if (__pyx_t_7 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
+          if (__pyx_t_7 >= PyTuple_GET_SIZE(__pyx_t_4)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_5 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_7); __Pyx_INCREF(__pyx_t_5); __pyx_t_7++; if (unlikely(0 < 0)) __PYX_ERR(0, 85, __pyx_L1_error)
+          __pyx_t_5 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_7); __Pyx_INCREF(__pyx_t_5); __pyx_t_7++; if (unlikely(0 < 0)) __PYX_ERR(0, 100, __pyx_L1_error)
           #else
-          __pyx_t_5 = PySequence_ITEM(__pyx_t_3, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 85, __pyx_L1_error)
+          __pyx_t_5 = PySequence_ITEM(__pyx_t_4, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 100, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
           #endif
         }
       } else {
-        __pyx_t_5 = __pyx_t_12(__pyx_t_3);
+        __pyx_t_5 = __pyx_t_12(__pyx_t_4);
         if (unlikely(!__pyx_t_5)) {
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 85, __pyx_L1_error)
+            else __PYX_ERR(0, 100, __pyx_L1_error)
           }
           break;
         }
@@ -2218,7 +2337,7 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_6encode(struct __pyx_obj_2
       }
       __Pyx_XDECREF_SET(__pyx_v_x, __pyx_t_5);
       __pyx_t_5 = 0;
-      __pyx_t_13 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_encode); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 85, __pyx_L1_error)
+      __pyx_t_13 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_encode); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 100, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_13);
       __pyx_t_14 = NULL;
       if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_13))) {
@@ -2232,72 +2351,116 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_6encode(struct __pyx_obj_2
       }
       __pyx_t_5 = (__pyx_t_14) ? __Pyx_PyObject_CallOneArg(__pyx_t_13, __pyx_t_14) : __Pyx_PyObject_CallNoArg(__pyx_t_13);
       __Pyx_XDECREF(__pyx_t_14); __pyx_t_14 = 0;
-      if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 85, __pyx_L1_error)
+      if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 100, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-      if (unlikely(__Pyx_ListComp_Append(__pyx_t_4, (PyObject*)__pyx_t_5))) __PYX_ERR(0, 85, __pyx_L1_error)
+      if (unlikely(__Pyx_ListComp_Append(__pyx_t_3, (PyObject*)__pyx_t_5))) __PYX_ERR(0, 100, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     }
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_6 = __pyx_convert_vector_from_py_std_3a__3a_string(__pyx_t_4); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 85, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __pyx_t_6 = __pyx_convert_vector_from_py_std_3a__3a_string(__pyx_t_3); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 100, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_v_s = __pyx_t_6;
 
-    /* "youtokentome/cpp/yttm.pyx":86
+    /* "youtokentome/cpp/yttm.pyx":101
  *             assert isinstance(sentences, list) or isinstance(sentences, tuple)
  *             s = [x.encode() for x in sentences]
- *             return self.encoder.encode_as_ids(s, bos, eos, reverse)             # <<<<<<<<<<<<<<
+ *             status = self.encoder.encode_as_ids(s, &ret_ids, bos, eos, reverse)             # <<<<<<<<<<<<<<
+ *             if status.code != 0:
+ *                 raise ValueError(status.message.decode())
+ */
+    __pyx_t_10 = __Pyx_PyObject_IsTrue(__pyx_v_bos); if (unlikely((__pyx_t_10 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 101, __pyx_L1_error)
+    __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_v_eos); if (unlikely((__pyx_t_9 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 101, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_v_reverse); if (unlikely((__pyx_t_8 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 101, __pyx_L1_error)
+    __pyx_v_status = __pyx_v_self->encoder->encode_as_ids(__pyx_v_s, (&__pyx_v_ret_ids), __pyx_t_10, __pyx_t_9, __pyx_t_8);
+
+    /* "youtokentome/cpp/yttm.pyx":102
+ *             s = [x.encode() for x in sentences]
+ *             status = self.encoder.encode_as_ids(s, &ret_ids, bos, eos, reverse)
+ *             if status.code != 0:             # <<<<<<<<<<<<<<
+ *                 raise ValueError(status.message.decode())
+ *             return ret_ids
+ */
+    __pyx_t_2 = ((__pyx_v_status.code != 0) != 0);
+    if (unlikely(__pyx_t_2)) {
+
+      /* "youtokentome/cpp/yttm.pyx":103
+ *             status = self.encoder.encode_as_ids(s, &ret_ids, bos, eos, reverse)
+ *             if status.code != 0:
+ *                 raise ValueError(status.message.decode())             # <<<<<<<<<<<<<<
+ *             return ret_ids
+ *         elif output_type == 'subword':
+ */
+      __pyx_t_3 = __Pyx_decode_cpp_string(__pyx_v_status.message, 0, PY_SSIZE_T_MAX, NULL, NULL, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 103, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_3);
+      __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_builtin_ValueError, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 103, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
+      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+      __Pyx_Raise(__pyx_t_4, 0, 0, 0);
+      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+      __PYX_ERR(0, 103, __pyx_L1_error)
+
+      /* "youtokentome/cpp/yttm.pyx":102
+ *             s = [x.encode() for x in sentences]
+ *             status = self.encoder.encode_as_ids(s, &ret_ids, bos, eos, reverse)
+ *             if status.code != 0:             # <<<<<<<<<<<<<<
+ *                 raise ValueError(status.message.decode())
+ *             return ret_ids
+ */
+    }
+
+    /* "youtokentome/cpp/yttm.pyx":104
+ *             if status.code != 0:
+ *                 raise ValueError(status.message.decode())
+ *             return ret_ids             # <<<<<<<<<<<<<<
  *         elif output_type == 'subword':
  *             if isinstance(sentences, str):
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_10 = __Pyx_PyObject_IsTrue(__pyx_v_bos); if (unlikely((__pyx_t_10 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 86, __pyx_L1_error)
-    __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_v_eos); if (unlikely((__pyx_t_9 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 86, __pyx_L1_error)
-    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_v_reverse); if (unlikely((__pyx_t_8 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 86, __pyx_L1_error)
-    __pyx_t_4 = __pyx_convert_vector_to_py_std_3a__3a_vector_3c_int_3e___(__pyx_v_self->encoder->encode_as_ids(__pyx_v_s, __pyx_t_10, __pyx_t_9, __pyx_t_8)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 86, __pyx_L1_error)
+    __pyx_t_4 = __pyx_convert_vector_to_py_std_3a__3a_vector_3c_int_3e___(__pyx_v_ret_ids); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 104, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_r = __pyx_t_4;
     __pyx_t_4 = 0;
     goto __pyx_L0;
 
-    /* "youtokentome/cpp/yttm.pyx":78
- *         cdef vector[string] s
- *         cdef vector[vector[string]] ret
+    /* "youtokentome/cpp/yttm.pyx":90
+ *         cdef vector[vector[int]] ret_ids
+ *         cdef Status status
  *         if output_type == 'id':             # <<<<<<<<<<<<<<
  *             if isinstance(sentences, str):
  *                 s = [sentences.encode()]
  */
   }
 
-  /* "youtokentome/cpp/yttm.pyx":87
- *             s = [x.encode() for x in sentences]
- *             return self.encoder.encode_as_ids(s, bos, eos, reverse)
+  /* "youtokentome/cpp/yttm.pyx":105
+ *                 raise ValueError(status.message.decode())
+ *             return ret_ids
  *         elif output_type == 'subword':             # <<<<<<<<<<<<<<
  *             if isinstance(sentences, str):
  *                 s = [sentences.encode()]
  */
-  __pyx_t_2 = (__Pyx_PyString_Equals(__pyx_v_output_type, __pyx_n_s_subword, Py_EQ)); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 87, __pyx_L1_error)
+  __pyx_t_2 = (__Pyx_PyString_Equals(__pyx_v_output_type, __pyx_n_s_subword, Py_EQ)); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 105, __pyx_L1_error)
   if (likely(__pyx_t_2)) {
 
-    /* "youtokentome/cpp/yttm.pyx":88
- *             return self.encoder.encode_as_ids(s, bos, eos, reverse)
+    /* "youtokentome/cpp/yttm.pyx":106
+ *             return ret_ids
  *         elif output_type == 'subword':
  *             if isinstance(sentences, str):             # <<<<<<<<<<<<<<
  *                 s = [sentences.encode()]
- *                 ret = self.encoder.encode_as_subwords(s, bos, eos, reverse)
+ *                 status = self.encoder.encode_as_subwords(s, &ret_subwords, bos, eos, reverse)
  */
     __pyx_t_2 = PyString_Check(__pyx_v_sentences); 
     __pyx_t_1 = (__pyx_t_2 != 0);
     if (__pyx_t_1) {
 
-      /* "youtokentome/cpp/yttm.pyx":89
+      /* "youtokentome/cpp/yttm.pyx":107
  *         elif output_type == 'subword':
  *             if isinstance(sentences, str):
  *                 s = [sentences.encode()]             # <<<<<<<<<<<<<<
- *                 ret = self.encoder.encode_as_subwords(s, bos, eos, reverse)
- *                 assert len(ret) == 1
+ *                 status = self.encoder.encode_as_subwords(s, &ret_subwords, bos, eos, reverse)
+ *                 if status.code != 0:
  */
-      __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_sentences, __pyx_n_s_encode); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 89, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_sentences, __pyx_n_s_encode); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 107, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __pyx_t_5 = NULL;
       if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
@@ -2311,91 +2474,126 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_6encode(struct __pyx_obj_2
       }
       __pyx_t_4 = (__pyx_t_5) ? __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_5) : __Pyx_PyObject_CallNoArg(__pyx_t_3);
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-      if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 89, __pyx_L1_error)
+      if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 107, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_3 = PyList_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 89, __pyx_L1_error)
+      __pyx_t_3 = PyList_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 107, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_GIVEREF(__pyx_t_4);
       PyList_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
       __pyx_t_4 = 0;
-      __pyx_t_6 = __pyx_convert_vector_from_py_std_3a__3a_string(__pyx_t_3); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 89, __pyx_L1_error)
+      __pyx_t_6 = __pyx_convert_vector_from_py_std_3a__3a_string(__pyx_t_3); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 107, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __pyx_v_s = __pyx_t_6;
 
-      /* "youtokentome/cpp/yttm.pyx":90
+      /* "youtokentome/cpp/yttm.pyx":108
  *             if isinstance(sentences, str):
  *                 s = [sentences.encode()]
- *                 ret = self.encoder.encode_as_subwords(s, bos, eos, reverse)             # <<<<<<<<<<<<<<
- *                 assert len(ret) == 1
- *                 return [piece.decode() for piece in ret[0]]
+ *                 status = self.encoder.encode_as_subwords(s, &ret_subwords, bos, eos, reverse)             # <<<<<<<<<<<<<<
+ *                 if status.code != 0:
+ *                     raise ValueError(status.message.decode())
  */
-      __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_v_bos); if (unlikely((__pyx_t_8 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 90, __pyx_L1_error)
-      __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_v_eos); if (unlikely((__pyx_t_9 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 90, __pyx_L1_error)
-      __pyx_t_10 = __Pyx_PyObject_IsTrue(__pyx_v_reverse); if (unlikely((__pyx_t_10 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 90, __pyx_L1_error)
-      __pyx_v_ret = __pyx_v_self->encoder->encode_as_subwords(__pyx_v_s, __pyx_t_8, __pyx_t_9, __pyx_t_10);
+      __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_v_bos); if (unlikely((__pyx_t_8 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 108, __pyx_L1_error)
+      __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_v_eos); if (unlikely((__pyx_t_9 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 108, __pyx_L1_error)
+      __pyx_t_10 = __Pyx_PyObject_IsTrue(__pyx_v_reverse); if (unlikely((__pyx_t_10 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 108, __pyx_L1_error)
+      __pyx_v_status = __pyx_v_self->encoder->encode_as_subwords(__pyx_v_s, (&__pyx_v_ret_subwords), __pyx_t_8, __pyx_t_9, __pyx_t_10);
 
-      /* "youtokentome/cpp/yttm.pyx":91
+      /* "youtokentome/cpp/yttm.pyx":109
  *                 s = [sentences.encode()]
- *                 ret = self.encoder.encode_as_subwords(s, bos, eos, reverse)
- *                 assert len(ret) == 1             # <<<<<<<<<<<<<<
- *                 return [piece.decode() for piece in ret[0]]
+ *                 status = self.encoder.encode_as_subwords(s, &ret_subwords, bos, eos, reverse)
+ *                 if status.code != 0:             # <<<<<<<<<<<<<<
+ *                     raise ValueError(status.message.decode())
+ *                 assert len(ret_subwords) == 1
+ */
+      __pyx_t_1 = ((__pyx_v_status.code != 0) != 0);
+      if (unlikely(__pyx_t_1)) {
+
+        /* "youtokentome/cpp/yttm.pyx":110
+ *                 status = self.encoder.encode_as_subwords(s, &ret_subwords, bos, eos, reverse)
+ *                 if status.code != 0:
+ *                     raise ValueError(status.message.decode())             # <<<<<<<<<<<<<<
+ *                 assert len(ret_subwords) == 1
+ *                 return [piece.decode() for piece in ret_subwords[0]]
+ */
+        __pyx_t_3 = __Pyx_decode_cpp_string(__pyx_v_status.message, 0, PY_SSIZE_T_MAX, NULL, NULL, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 110, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_3);
+        __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_builtin_ValueError, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 110, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_4);
+        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+        __Pyx_Raise(__pyx_t_4, 0, 0, 0);
+        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+        __PYX_ERR(0, 110, __pyx_L1_error)
+
+        /* "youtokentome/cpp/yttm.pyx":109
+ *                 s = [sentences.encode()]
+ *                 status = self.encoder.encode_as_subwords(s, &ret_subwords, bos, eos, reverse)
+ *                 if status.code != 0:             # <<<<<<<<<<<<<<
+ *                     raise ValueError(status.message.decode())
+ *                 assert len(ret_subwords) == 1
+ */
+      }
+
+      /* "youtokentome/cpp/yttm.pyx":111
+ *                 if status.code != 0:
+ *                     raise ValueError(status.message.decode())
+ *                 assert len(ret_subwords) == 1             # <<<<<<<<<<<<<<
+ *                 return [piece.decode() for piece in ret_subwords[0]]
  * 
  */
       #ifndef CYTHON_WITHOUT_ASSERTIONS
       if (unlikely(!Py_OptimizeFlag)) {
-        __pyx_t_3 = __pyx_convert_vector_to_py_std_3a__3a_vector_3c_std_3a__3a_string_3e___(__pyx_v_ret); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 91, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_3);
-        __pyx_t_7 = PyObject_Length(__pyx_t_3); if (unlikely(__pyx_t_7 == ((Py_ssize_t)-1))) __PYX_ERR(0, 91, __pyx_L1_error)
-        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+        __pyx_t_4 = __pyx_convert_vector_to_py_std_3a__3a_vector_3c_std_3a__3a_string_3e___(__pyx_v_ret_subwords); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 111, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_4);
+        __pyx_t_7 = PyObject_Length(__pyx_t_4); if (unlikely(__pyx_t_7 == ((Py_ssize_t)-1))) __PYX_ERR(0, 111, __pyx_L1_error)
+        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
         if (unlikely(!((__pyx_t_7 == 1) != 0))) {
           PyErr_SetNone(PyExc_AssertionError);
-          __PYX_ERR(0, 91, __pyx_L1_error)
+          __PYX_ERR(0, 111, __pyx_L1_error)
         }
       }
       #endif
 
-      /* "youtokentome/cpp/yttm.pyx":92
- *                 ret = self.encoder.encode_as_subwords(s, bos, eos, reverse)
- *                 assert len(ret) == 1
- *                 return [piece.decode() for piece in ret[0]]             # <<<<<<<<<<<<<<
+      /* "youtokentome/cpp/yttm.pyx":112
+ *                     raise ValueError(status.message.decode())
+ *                 assert len(ret_subwords) == 1
+ *                 return [piece.decode() for piece in ret_subwords[0]]             # <<<<<<<<<<<<<<
  * 
  *             assert isinstance(sentences, list) or isinstance(sentences, tuple)
  */
       __Pyx_XDECREF(__pyx_r);
-      __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 92, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_16 = &(__pyx_v_ret[0]);
+      __pyx_t_4 = PyList_New(0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 112, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
+      __pyx_t_16 = &(__pyx_v_ret_subwords[0]);
       __pyx_t_15 = __pyx_t_16->begin();
       for (;;) {
         if (!(__pyx_t_15 != __pyx_t_16->end())) break;
         __pyx_t_17 = *__pyx_t_15;
         ++__pyx_t_15;
         __pyx_v_piece = __pyx_t_17;
-        __pyx_t_4 = __Pyx_decode_cpp_string(__pyx_v_piece, 0, PY_SSIZE_T_MAX, NULL, NULL, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 92, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_4);
-        if (unlikely(__Pyx_ListComp_Append(__pyx_t_3, (PyObject*)__pyx_t_4))) __PYX_ERR(0, 92, __pyx_L1_error)
-        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+        __pyx_t_3 = __Pyx_decode_cpp_string(__pyx_v_piece, 0, PY_SSIZE_T_MAX, NULL, NULL, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 112, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_3);
+        if (unlikely(__Pyx_ListComp_Append(__pyx_t_4, (PyObject*)__pyx_t_3))) __PYX_ERR(0, 112, __pyx_L1_error)
+        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       }
-      __pyx_r = __pyx_t_3;
-      __pyx_t_3 = 0;
+      __pyx_r = __pyx_t_4;
+      __pyx_t_4 = 0;
       goto __pyx_L0;
 
-      /* "youtokentome/cpp/yttm.pyx":88
- *             return self.encoder.encode_as_ids(s, bos, eos, reverse)
+      /* "youtokentome/cpp/yttm.pyx":106
+ *             return ret_ids
  *         elif output_type == 'subword':
  *             if isinstance(sentences, str):             # <<<<<<<<<<<<<<
  *                 s = [sentences.encode()]
- *                 ret = self.encoder.encode_as_subwords(s, bos, eos, reverse)
+ *                 status = self.encoder.encode_as_subwords(s, &ret_subwords, bos, eos, reverse)
  */
     }
 
-    /* "youtokentome/cpp/yttm.pyx":94
- *                 return [piece.decode() for piece in ret[0]]
+    /* "youtokentome/cpp/yttm.pyx":114
+ *                 return [piece.decode() for piece in ret_subwords[0]]
  * 
  *             assert isinstance(sentences, list) or isinstance(sentences, tuple)             # <<<<<<<<<<<<<<
  *             s = [x.encode() for x in sentences]
- *             ret = self.encoder.encode_as_subwords(s, bos, eos, reverse)
+ *             status = self.encoder.encode_as_subwords(s, &ret_subwords, bos, eos, reverse)
  */
     #ifndef CYTHON_WITHOUT_ASSERTIONS
     if (unlikely(!Py_OptimizeFlag)) {
@@ -2404,62 +2602,62 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_6encode(struct __pyx_obj_2
       if (!__pyx_t_11) {
       } else {
         __pyx_t_1 = __pyx_t_11;
-        goto __pyx_L12_bool_binop_done;
+        goto __pyx_L15_bool_binop_done;
       }
       __pyx_t_11 = PyTuple_Check(__pyx_v_sentences); 
       __pyx_t_2 = (__pyx_t_11 != 0);
       __pyx_t_1 = __pyx_t_2;
-      __pyx_L12_bool_binop_done:;
+      __pyx_L15_bool_binop_done:;
       if (unlikely(!__pyx_t_1)) {
         PyErr_SetNone(PyExc_AssertionError);
-        __PYX_ERR(0, 94, __pyx_L1_error)
+        __PYX_ERR(0, 114, __pyx_L1_error)
       }
     }
     #endif
 
-    /* "youtokentome/cpp/yttm.pyx":95
+    /* "youtokentome/cpp/yttm.pyx":115
  * 
  *             assert isinstance(sentences, list) or isinstance(sentences, tuple)
  *             s = [x.encode() for x in sentences]             # <<<<<<<<<<<<<<
- *             ret = self.encoder.encode_as_subwords(s, bos, eos, reverse)
- *             return [[piece.decode() for piece in sentence] for sentence in ret]
+ *             status = self.encoder.encode_as_subwords(s, &ret_subwords, bos, eos, reverse)
+ *             if status.code != 0:
  */
-    __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 95, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
+    __pyx_t_4 = PyList_New(0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 115, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
     if (likely(PyList_CheckExact(__pyx_v_sentences)) || PyTuple_CheckExact(__pyx_v_sentences)) {
-      __pyx_t_4 = __pyx_v_sentences; __Pyx_INCREF(__pyx_t_4); __pyx_t_7 = 0;
+      __pyx_t_3 = __pyx_v_sentences; __Pyx_INCREF(__pyx_t_3); __pyx_t_7 = 0;
       __pyx_t_12 = NULL;
     } else {
-      __pyx_t_7 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_v_sentences); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 95, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_12 = Py_TYPE(__pyx_t_4)->tp_iternext; if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 95, __pyx_L1_error)
+      __pyx_t_7 = -1; __pyx_t_3 = PyObject_GetIter(__pyx_v_sentences); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 115, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_3);
+      __pyx_t_12 = Py_TYPE(__pyx_t_3)->tp_iternext; if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 115, __pyx_L1_error)
     }
     for (;;) {
       if (likely(!__pyx_t_12)) {
-        if (likely(PyList_CheckExact(__pyx_t_4))) {
-          if (__pyx_t_7 >= PyList_GET_SIZE(__pyx_t_4)) break;
+        if (likely(PyList_CheckExact(__pyx_t_3))) {
+          if (__pyx_t_7 >= PyList_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_5 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_7); __Pyx_INCREF(__pyx_t_5); __pyx_t_7++; if (unlikely(0 < 0)) __PYX_ERR(0, 95, __pyx_L1_error)
+          __pyx_t_5 = PyList_GET_ITEM(__pyx_t_3, __pyx_t_7); __Pyx_INCREF(__pyx_t_5); __pyx_t_7++; if (unlikely(0 < 0)) __PYX_ERR(0, 115, __pyx_L1_error)
           #else
-          __pyx_t_5 = PySequence_ITEM(__pyx_t_4, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 95, __pyx_L1_error)
+          __pyx_t_5 = PySequence_ITEM(__pyx_t_3, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 115, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
           #endif
         } else {
-          if (__pyx_t_7 >= PyTuple_GET_SIZE(__pyx_t_4)) break;
+          if (__pyx_t_7 >= PyTuple_GET_SIZE(__pyx_t_3)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_5 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_7); __Pyx_INCREF(__pyx_t_5); __pyx_t_7++; if (unlikely(0 < 0)) __PYX_ERR(0, 95, __pyx_L1_error)
+          __pyx_t_5 = PyTuple_GET_ITEM(__pyx_t_3, __pyx_t_7); __Pyx_INCREF(__pyx_t_5); __pyx_t_7++; if (unlikely(0 < 0)) __PYX_ERR(0, 115, __pyx_L1_error)
           #else
-          __pyx_t_5 = PySequence_ITEM(__pyx_t_4, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 95, __pyx_L1_error)
+          __pyx_t_5 = PySequence_ITEM(__pyx_t_3, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 115, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
           #endif
         }
       } else {
-        __pyx_t_5 = __pyx_t_12(__pyx_t_4);
+        __pyx_t_5 = __pyx_t_12(__pyx_t_3);
         if (unlikely(!__pyx_t_5)) {
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 95, __pyx_L1_error)
+            else __PYX_ERR(0, 115, __pyx_L1_error)
           }
           break;
         }
@@ -2467,7 +2665,7 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_6encode(struct __pyx_obj_2
       }
       __Pyx_XDECREF_SET(__pyx_v_x, __pyx_t_5);
       __pyx_t_5 = 0;
-      __pyx_t_13 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_encode); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 95, __pyx_L1_error)
+      __pyx_t_13 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_encode); if (unlikely(!__pyx_t_13)) __PYX_ERR(0, 115, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_13);
       __pyx_t_14 = NULL;
       if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_13))) {
@@ -2481,46 +2679,81 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_6encode(struct __pyx_obj_2
       }
       __pyx_t_5 = (__pyx_t_14) ? __Pyx_PyObject_CallOneArg(__pyx_t_13, __pyx_t_14) : __Pyx_PyObject_CallNoArg(__pyx_t_13);
       __Pyx_XDECREF(__pyx_t_14); __pyx_t_14 = 0;
-      if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 95, __pyx_L1_error)
+      if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 115, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_13); __pyx_t_13 = 0;
-      if (unlikely(__Pyx_ListComp_Append(__pyx_t_3, (PyObject*)__pyx_t_5))) __PYX_ERR(0, 95, __pyx_L1_error)
+      if (unlikely(__Pyx_ListComp_Append(__pyx_t_4, (PyObject*)__pyx_t_5))) __PYX_ERR(0, 115, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     }
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_6 = __pyx_convert_vector_from_py_std_3a__3a_string(__pyx_t_3); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 95, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __pyx_t_6 = __pyx_convert_vector_from_py_std_3a__3a_string(__pyx_t_4); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 115, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_v_s = __pyx_t_6;
 
-    /* "youtokentome/cpp/yttm.pyx":96
+    /* "youtokentome/cpp/yttm.pyx":116
  *             assert isinstance(sentences, list) or isinstance(sentences, tuple)
  *             s = [x.encode() for x in sentences]
- *             ret = self.encoder.encode_as_subwords(s, bos, eos, reverse)             # <<<<<<<<<<<<<<
- *             return [[piece.decode() for piece in sentence] for sentence in ret]
+ *             status = self.encoder.encode_as_subwords(s, &ret_subwords, bos, eos, reverse)             # <<<<<<<<<<<<<<
+ *             if status.code != 0:
+ *                 raise ValueError(status.message.decode())
+ */
+    __pyx_t_10 = __Pyx_PyObject_IsTrue(__pyx_v_bos); if (unlikely((__pyx_t_10 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 116, __pyx_L1_error)
+    __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_v_eos); if (unlikely((__pyx_t_9 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 116, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_v_reverse); if (unlikely((__pyx_t_8 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 116, __pyx_L1_error)
+    __pyx_v_status = __pyx_v_self->encoder->encode_as_subwords(__pyx_v_s, (&__pyx_v_ret_subwords), __pyx_t_10, __pyx_t_9, __pyx_t_8);
+
+    /* "youtokentome/cpp/yttm.pyx":117
+ *             s = [x.encode() for x in sentences]
+ *             status = self.encoder.encode_as_subwords(s, &ret_subwords, bos, eos, reverse)
+ *             if status.code != 0:             # <<<<<<<<<<<<<<
+ *                 raise ValueError(status.message.decode())
+ *             return [[piece.decode() for piece in sentence] for sentence in ret_subwords]
+ */
+    __pyx_t_1 = ((__pyx_v_status.code != 0) != 0);
+    if (unlikely(__pyx_t_1)) {
+
+      /* "youtokentome/cpp/yttm.pyx":118
+ *             status = self.encoder.encode_as_subwords(s, &ret_subwords, bos, eos, reverse)
+ *             if status.code != 0:
+ *                 raise ValueError(status.message.decode())             # <<<<<<<<<<<<<<
+ *             return [[piece.decode() for piece in sentence] for sentence in ret_subwords]
  *         else:
  */
-    __pyx_t_10 = __Pyx_PyObject_IsTrue(__pyx_v_bos); if (unlikely((__pyx_t_10 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L1_error)
-    __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_v_eos); if (unlikely((__pyx_t_9 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L1_error)
-    __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_v_reverse); if (unlikely((__pyx_t_8 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L1_error)
-    __pyx_v_ret = __pyx_v_self->encoder->encode_as_subwords(__pyx_v_s, __pyx_t_10, __pyx_t_9, __pyx_t_8);
+      __pyx_t_4 = __Pyx_decode_cpp_string(__pyx_v_status.message, 0, PY_SSIZE_T_MAX, NULL, NULL, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 118, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
+      __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_builtin_ValueError, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 118, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_3);
+      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+      __Pyx_Raise(__pyx_t_3, 0, 0, 0);
+      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+      __PYX_ERR(0, 118, __pyx_L1_error)
 
-    /* "youtokentome/cpp/yttm.pyx":97
+      /* "youtokentome/cpp/yttm.pyx":117
  *             s = [x.encode() for x in sentences]
- *             ret = self.encoder.encode_as_subwords(s, bos, eos, reverse)
- *             return [[piece.decode() for piece in sentence] for sentence in ret]             # <<<<<<<<<<<<<<
+ *             status = self.encoder.encode_as_subwords(s, &ret_subwords, bos, eos, reverse)
+ *             if status.code != 0:             # <<<<<<<<<<<<<<
+ *                 raise ValueError(status.message.decode())
+ *             return [[piece.decode() for piece in sentence] for sentence in ret_subwords]
+ */
+    }
+
+    /* "youtokentome/cpp/yttm.pyx":119
+ *             if status.code != 0:
+ *                 raise ValueError(status.message.decode())
+ *             return [[piece.decode() for piece in sentence] for sentence in ret_subwords]             # <<<<<<<<<<<<<<
  *         else:
  *             raise ValueError('output_type must be equal to "id" or "subword"')
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 97, __pyx_L1_error)
+    __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 119, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_18 = __pyx_v_ret.begin();
+    __pyx_t_18 = __pyx_v_ret_subwords.begin();
     for (;;) {
-      if (!(__pyx_t_18 != __pyx_v_ret.end())) break;
+      if (!(__pyx_t_18 != __pyx_v_ret_subwords.end())) break;
       __pyx_t_6 = *__pyx_t_18;
       ++__pyx_t_18;
       __pyx_v_sentence = __pyx_t_6;
-      __pyx_t_4 = PyList_New(0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 97, __pyx_L1_error)
+      __pyx_t_4 = PyList_New(0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 119, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __pyx_t_15 = __pyx_v_sentence.begin();
       for (;;) {
@@ -2528,48 +2761,48 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_6encode(struct __pyx_obj_2
         __pyx_t_17 = *__pyx_t_15;
         ++__pyx_t_15;
         __pyx_v_piece = __pyx_t_17;
-        __pyx_t_5 = __Pyx_decode_cpp_string(__pyx_v_piece, 0, PY_SSIZE_T_MAX, NULL, NULL, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 97, __pyx_L1_error)
+        __pyx_t_5 = __Pyx_decode_cpp_string(__pyx_v_piece, 0, PY_SSIZE_T_MAX, NULL, NULL, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 119, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_5);
-        if (unlikely(__Pyx_ListComp_Append(__pyx_t_4, (PyObject*)__pyx_t_5))) __PYX_ERR(0, 97, __pyx_L1_error)
+        if (unlikely(__Pyx_ListComp_Append(__pyx_t_4, (PyObject*)__pyx_t_5))) __PYX_ERR(0, 119, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       }
-      if (unlikely(__Pyx_ListComp_Append(__pyx_t_3, (PyObject*)__pyx_t_4))) __PYX_ERR(0, 97, __pyx_L1_error)
+      if (unlikely(__Pyx_ListComp_Append(__pyx_t_3, (PyObject*)__pyx_t_4))) __PYX_ERR(0, 119, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     }
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "youtokentome/cpp/yttm.pyx":87
- *             s = [x.encode() for x in sentences]
- *             return self.encoder.encode_as_ids(s, bos, eos, reverse)
+    /* "youtokentome/cpp/yttm.pyx":105
+ *                 raise ValueError(status.message.decode())
+ *             return ret_ids
  *         elif output_type == 'subword':             # <<<<<<<<<<<<<<
  *             if isinstance(sentences, str):
  *                 s = [sentences.encode()]
  */
   }
 
-  /* "youtokentome/cpp/yttm.pyx":99
- *             return [[piece.decode() for piece in sentence] for sentence in ret]
+  /* "youtokentome/cpp/yttm.pyx":121
+ *             return [[piece.decode() for piece in sentence] for sentence in ret_subwords]
  *         else:
  *             raise ValueError('output_type must be equal to "id" or "subword"')             # <<<<<<<<<<<<<<
  * 
  *     def subword_to_id(self, subword):
  */
   /*else*/ {
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 99, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple_, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 121, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __PYX_ERR(0, 99, __pyx_L1_error)
+    __PYX_ERR(0, 121, __pyx_L1_error)
   }
 
-  /* "youtokentome/cpp/yttm.pyx":75
- * 
+  /* "youtokentome/cpp/yttm.pyx":85
+ *             raise ValueError(status.message.decode())
  * 
  *     def encode(self, sentences, output_type, bos, eos, reverse):             # <<<<<<<<<<<<<<
  *         cdef vector[string] s
- *         cdef vector[vector[string]] ret
+ *         cdef vector[vector[string]] ret_subwords
  */
 
   /* function exit code */
@@ -2588,7 +2821,7 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_6encode(struct __pyx_obj_2
   return __pyx_r;
 }
 
-/* "youtokentome/cpp/yttm.pyx":101
+/* "youtokentome/cpp/yttm.pyx":123
  *             raise ValueError('output_type must be equal to "id" or "subword"')
  * 
  *     def subword_to_id(self, subword):             # <<<<<<<<<<<<<<
@@ -2618,7 +2851,7 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_8subword_to_id(struct __py
   std::string __pyx_t_4;
   __Pyx_RefNannySetupContext("subword_to_id", 0);
 
-  /* "youtokentome/cpp/yttm.pyx":102
+  /* "youtokentome/cpp/yttm.pyx":124
  * 
  *     def subword_to_id(self, subword):
  *         return self.encoder.subword_to_id(subword.encode())             # <<<<<<<<<<<<<<
@@ -2626,7 +2859,7 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_8subword_to_id(struct __py
  *     def id_to_subword(self, id):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_subword, __pyx_n_s_encode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_subword, __pyx_n_s_encode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 124, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -2640,18 +2873,18 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_8subword_to_id(struct __py
   }
   __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3) : __Pyx_PyObject_CallNoArg(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 102, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 124, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_4 = __pyx_convert_string_from_py_std__in_string(__pyx_t_1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 102, __pyx_L1_error)
+  __pyx_t_4 = __pyx_convert_string_from_py_std__in_string(__pyx_t_1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 124, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->encoder->subword_to_id(__pyx_t_4)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->encoder->subword_to_id(__pyx_t_4)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 124, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "youtokentome/cpp/yttm.pyx":101
+  /* "youtokentome/cpp/yttm.pyx":123
  *             raise ValueError('output_type must be equal to "id" or "subword"')
  * 
  *     def subword_to_id(self, subword):             # <<<<<<<<<<<<<<
@@ -2672,12 +2905,12 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_8subword_to_id(struct __py
   return __pyx_r;
 }
 
-/* "youtokentome/cpp/yttm.pyx":104
+/* "youtokentome/cpp/yttm.pyx":126
  *         return self.encoder.subword_to_id(subword.encode())
  * 
  *     def id_to_subword(self, id):             # <<<<<<<<<<<<<<
- *         return self.encoder.id_to_subword(id).decode()
- * 
+ *         cdef string subword
+ *         cdef Status status = self.encoder.id_to_subword(id, &subword)
  */
 
 /* Python wrapper */
@@ -2694,38 +2927,87 @@ static PyObject *__pyx_pw_20_youtokentome_cython_3BPE_11id_to_subword(PyObject *
 }
 
 static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_10id_to_subword(struct __pyx_obj_20_youtokentome_cython_BPE *__pyx_v_self, PyObject *__pyx_v_id) {
+  std::string __pyx_v_subword;
+  vkcom::Status __pyx_v_status;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
-  PyObject *__pyx_t_2 = NULL;
+  int __pyx_t_2;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
   __Pyx_RefNannySetupContext("id_to_subword", 0);
 
-  /* "youtokentome/cpp/yttm.pyx":105
- * 
+  /* "youtokentome/cpp/yttm.pyx":128
  *     def id_to_subword(self, id):
- *         return self.encoder.id_to_subword(id).decode()             # <<<<<<<<<<<<<<
+ *         cdef string subword
+ *         cdef Status status = self.encoder.id_to_subword(id, &subword)             # <<<<<<<<<<<<<<
+ *         if status.code != 0:
+ *             raise ValueError(status.message.decode())
+ */
+  __pyx_t_1 = __Pyx_PyInt_As_int(__pyx_v_id); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 128, __pyx_L1_error)
+  __pyx_v_status = __pyx_v_self->encoder->id_to_subword(__pyx_t_1, (&__pyx_v_subword));
+
+  /* "youtokentome/cpp/yttm.pyx":129
+ *         cdef string subword
+ *         cdef Status status = self.encoder.id_to_subword(id, &subword)
+ *         if status.code != 0:             # <<<<<<<<<<<<<<
+ *             raise ValueError(status.message.decode())
+ *         return subword.decode()
+ */
+  __pyx_t_2 = ((__pyx_v_status.code != 0) != 0);
+  if (unlikely(__pyx_t_2)) {
+
+    /* "youtokentome/cpp/yttm.pyx":130
+ *         cdef Status status = self.encoder.id_to_subword(id, &subword)
+ *         if status.code != 0:
+ *             raise ValueError(status.message.decode())             # <<<<<<<<<<<<<<
+ *         return subword.decode()
+ * 
+ */
+    __pyx_t_3 = __Pyx_decode_cpp_string(__pyx_v_status.message, 0, PY_SSIZE_T_MAX, NULL, NULL, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 130, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_builtin_ValueError, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 130, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __Pyx_Raise(__pyx_t_4, 0, 0, 0);
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __PYX_ERR(0, 130, __pyx_L1_error)
+
+    /* "youtokentome/cpp/yttm.pyx":129
+ *         cdef string subword
+ *         cdef Status status = self.encoder.id_to_subword(id, &subword)
+ *         if status.code != 0:             # <<<<<<<<<<<<<<
+ *             raise ValueError(status.message.decode())
+ *         return subword.decode()
+ */
+  }
+
+  /* "youtokentome/cpp/yttm.pyx":131
+ *         if status.code != 0:
+ *             raise ValueError(status.message.decode())
+ *         return subword.decode()             # <<<<<<<<<<<<<<
  * 
  *     def decode(self, ids):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_As_int(__pyx_v_id); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 105, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_decode_cpp_string(__pyx_v_self->encoder->id_to_subword(__pyx_t_1), 0, PY_SSIZE_T_MAX, NULL, NULL, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 105, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_r = __pyx_t_2;
-  __pyx_t_2 = 0;
+  __pyx_t_4 = __Pyx_decode_cpp_string(__pyx_v_subword, 0, PY_SSIZE_T_MAX, NULL, NULL, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 131, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_r = __pyx_t_4;
+  __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "youtokentome/cpp/yttm.pyx":104
+  /* "youtokentome/cpp/yttm.pyx":126
  *         return self.encoder.subword_to_id(subword.encode())
  * 
  *     def id_to_subword(self, id):             # <<<<<<<<<<<<<<
- *         return self.encoder.id_to_subword(id).decode()
- * 
+ *         cdef string subword
+ *         cdef Status status = self.encoder.id_to_subword(id, &subword)
  */
 
   /* function exit code */
   __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
   __Pyx_AddTraceback("_youtokentome_cython.BPE.id_to_subword", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -2734,8 +3016,8 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_10id_to_subword(struct __p
   return __pyx_r;
 }
 
-/* "youtokentome/cpp/yttm.pyx":107
- *         return self.encoder.id_to_subword(id).decode()
+/* "youtokentome/cpp/yttm.pyx":133
+ *         return subword.decode()
  * 
  *     def decode(self, ids):             # <<<<<<<<<<<<<<
  *         assert isinstance(ids, list)
@@ -2757,6 +3039,7 @@ static PyObject *__pyx_pw_20_youtokentome_cython_3BPE_13decode(PyObject *__pyx_v
 
 static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_12decode(struct __pyx_obj_20_youtokentome_cython_BPE *__pyx_v_self, PyObject *__pyx_v_ids) {
   std::vector<std::string>  __pyx_v_sentences;
+  vkcom::Status __pyx_v_status;
   std::string __pyx_v_sentence;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -2766,13 +3049,13 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_12decode(struct __pyx_obj_
   PyObject *__pyx_t_4 = NULL;
   int __pyx_t_5;
   std::vector<std::vector<int> >  __pyx_t_6;
-  std::vector<std::string> ::iterator __pyx_t_7;
-  std::string __pyx_t_8;
-  PyObject *__pyx_t_9 = NULL;
+  PyObject *__pyx_t_7 = NULL;
+  std::vector<std::string> ::iterator __pyx_t_8;
+  std::string __pyx_t_9;
   __Pyx_RefNannySetupContext("decode", 0);
   __Pyx_INCREF(__pyx_v_ids);
 
-  /* "youtokentome/cpp/yttm.pyx":108
+  /* "youtokentome/cpp/yttm.pyx":134
  * 
  *     def decode(self, ids):
  *         assert isinstance(ids, list)             # <<<<<<<<<<<<<<
@@ -2784,26 +3067,26 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_12decode(struct __pyx_obj_
     __pyx_t_1 = PyList_Check(__pyx_v_ids); 
     if (unlikely(!(__pyx_t_1 != 0))) {
       PyErr_SetNone(PyExc_AssertionError);
-      __PYX_ERR(0, 108, __pyx_L1_error)
+      __PYX_ERR(0, 134, __pyx_L1_error)
     }
   }
   #endif
 
-  /* "youtokentome/cpp/yttm.pyx":109
+  /* "youtokentome/cpp/yttm.pyx":135
  *     def decode(self, ids):
  *         assert isinstance(ids, list)
  *         if len(ids) > 0 and isinstance(ids[0], int):             # <<<<<<<<<<<<<<
  *             ids = [ids]
- *         cdef vector[string] sentences = self.encoder.decode(ids)
+ *         cdef vector[string] sentences
  */
-  __pyx_t_2 = PyObject_Length(__pyx_v_ids); if (unlikely(__pyx_t_2 == ((Py_ssize_t)-1))) __PYX_ERR(0, 109, __pyx_L1_error)
+  __pyx_t_2 = PyObject_Length(__pyx_v_ids); if (unlikely(__pyx_t_2 == ((Py_ssize_t)-1))) __PYX_ERR(0, 135, __pyx_L1_error)
   __pyx_t_3 = ((__pyx_t_2 > 0) != 0);
   if (__pyx_t_3) {
   } else {
     __pyx_t_1 = __pyx_t_3;
     goto __pyx_L4_bool_binop_done;
   }
-  __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_ids, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 109, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_ids, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 135, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_3 = PyInt_Check(__pyx_t_4); 
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -2812,14 +3095,14 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_12decode(struct __pyx_obj_
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "youtokentome/cpp/yttm.pyx":110
+    /* "youtokentome/cpp/yttm.pyx":136
  *         assert isinstance(ids, list)
  *         if len(ids) > 0 and isinstance(ids[0], int):
  *             ids = [ids]             # <<<<<<<<<<<<<<
- *         cdef vector[string] sentences = self.encoder.decode(ids)
- *         return [sentence.decode() for sentence in sentences]
+ *         cdef vector[string] sentences
+ *         cdef Status status = self.encoder.decode(ids, &sentences)
  */
-    __pyx_t_4 = PyList_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 110, __pyx_L1_error)
+    __pyx_t_4 = PyList_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 136, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_INCREF(__pyx_v_ids);
     __Pyx_GIVEREF(__pyx_v_ids);
@@ -2827,52 +3110,87 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_12decode(struct __pyx_obj_
     __Pyx_DECREF_SET(__pyx_v_ids, __pyx_t_4);
     __pyx_t_4 = 0;
 
-    /* "youtokentome/cpp/yttm.pyx":109
+    /* "youtokentome/cpp/yttm.pyx":135
  *     def decode(self, ids):
  *         assert isinstance(ids, list)
  *         if len(ids) > 0 and isinstance(ids[0], int):             # <<<<<<<<<<<<<<
  *             ids = [ids]
- *         cdef vector[string] sentences = self.encoder.decode(ids)
+ *         cdef vector[string] sentences
  */
   }
 
-  /* "youtokentome/cpp/yttm.pyx":111
- *         if len(ids) > 0 and isinstance(ids[0], int):
+  /* "youtokentome/cpp/yttm.pyx":138
  *             ids = [ids]
- *         cdef vector[string] sentences = self.encoder.decode(ids)             # <<<<<<<<<<<<<<
+ *         cdef vector[string] sentences
+ *         cdef Status status = self.encoder.decode(ids, &sentences)             # <<<<<<<<<<<<<<
+ *         if status.code != 0:
+ *             raise ValueError(status.message.decode())
+ */
+  __pyx_t_6 = __pyx_convert_vector_from_py_std_3a__3a_vector_3c_int_3e___(__pyx_v_ids); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 138, __pyx_L1_error)
+  __pyx_v_status = __pyx_v_self->encoder->decode(__pyx_t_6, (&__pyx_v_sentences));
+
+  /* "youtokentome/cpp/yttm.pyx":139
+ *         cdef vector[string] sentences
+ *         cdef Status status = self.encoder.decode(ids, &sentences)
+ *         if status.code != 0:             # <<<<<<<<<<<<<<
+ *             raise ValueError(status.message.decode())
+ *         return [sentence.decode() for sentence in sentences]
+ */
+  __pyx_t_1 = ((__pyx_v_status.code != 0) != 0);
+  if (unlikely(__pyx_t_1)) {
+
+    /* "youtokentome/cpp/yttm.pyx":140
+ *         cdef Status status = self.encoder.decode(ids, &sentences)
+ *         if status.code != 0:
+ *             raise ValueError(status.message.decode())             # <<<<<<<<<<<<<<
  *         return [sentence.decode() for sentence in sentences]
  * 
  */
-  __pyx_t_6 = __pyx_convert_vector_from_py_std_3a__3a_vector_3c_int_3e___(__pyx_v_ids); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 111, __pyx_L1_error)
-  __pyx_v_sentences = __pyx_v_self->encoder->decode(__pyx_t_6);
+    __pyx_t_4 = __Pyx_decode_cpp_string(__pyx_v_status.message, 0, PY_SSIZE_T_MAX, NULL, NULL, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 140, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_7 = __Pyx_PyObject_CallOneArg(__pyx_builtin_ValueError, __pyx_t_4); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 140, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_7);
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_Raise(__pyx_t_7, 0, 0, 0);
+    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+    __PYX_ERR(0, 140, __pyx_L1_error)
 
-  /* "youtokentome/cpp/yttm.pyx":112
- *             ids = [ids]
- *         cdef vector[string] sentences = self.encoder.decode(ids)
+    /* "youtokentome/cpp/yttm.pyx":139
+ *         cdef vector[string] sentences
+ *         cdef Status status = self.encoder.decode(ids, &sentences)
+ *         if status.code != 0:             # <<<<<<<<<<<<<<
+ *             raise ValueError(status.message.decode())
+ *         return [sentence.decode() for sentence in sentences]
+ */
+  }
+
+  /* "youtokentome/cpp/yttm.pyx":141
+ *         if status.code != 0:
+ *             raise ValueError(status.message.decode())
  *         return [sentence.decode() for sentence in sentences]             # <<<<<<<<<<<<<<
  * 
  *     def vocab_size(self):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_4 = PyList_New(0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 112, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_7 = __pyx_v_sentences.begin();
+  __pyx_t_7 = PyList_New(0); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 141, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_7);
+  __pyx_t_8 = __pyx_v_sentences.begin();
   for (;;) {
-    if (!(__pyx_t_7 != __pyx_v_sentences.end())) break;
-    __pyx_t_8 = *__pyx_t_7;
-    ++__pyx_t_7;
-    __pyx_v_sentence = __pyx_t_8;
-    __pyx_t_9 = __Pyx_decode_cpp_string(__pyx_v_sentence, 0, PY_SSIZE_T_MAX, NULL, NULL, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 112, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_9);
-    if (unlikely(__Pyx_ListComp_Append(__pyx_t_4, (PyObject*)__pyx_t_9))) __PYX_ERR(0, 112, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+    if (!(__pyx_t_8 != __pyx_v_sentences.end())) break;
+    __pyx_t_9 = *__pyx_t_8;
+    ++__pyx_t_8;
+    __pyx_v_sentence = __pyx_t_9;
+    __pyx_t_4 = __Pyx_decode_cpp_string(__pyx_v_sentence, 0, PY_SSIZE_T_MAX, NULL, NULL, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 141, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    if (unlikely(__Pyx_ListComp_Append(__pyx_t_7, (PyObject*)__pyx_t_4))) __PYX_ERR(0, 141, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
-  __pyx_r = __pyx_t_4;
-  __pyx_t_4 = 0;
+  __pyx_r = __pyx_t_7;
+  __pyx_t_7 = 0;
   goto __pyx_L0;
 
-  /* "youtokentome/cpp/yttm.pyx":107
- *         return self.encoder.id_to_subword(id).decode()
+  /* "youtokentome/cpp/yttm.pyx":133
+ *         return subword.decode()
  * 
  *     def decode(self, ids):             # <<<<<<<<<<<<<<
  *         assert isinstance(ids, list)
@@ -2882,7 +3200,7 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_12decode(struct __pyx_obj_
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_9);
+  __Pyx_XDECREF(__pyx_t_7);
   __Pyx_AddTraceback("_youtokentome_cython.BPE.decode", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -2892,7 +3210,7 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_12decode(struct __pyx_obj_
   return __pyx_r;
 }
 
-/* "youtokentome/cpp/yttm.pyx":114
+/* "youtokentome/cpp/yttm.pyx":143
  *         return [sentence.decode() for sentence in sentences]
  * 
  *     def vocab_size(self):             # <<<<<<<<<<<<<<
@@ -2919,7 +3237,7 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_14vocab_size(struct __pyx_
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("vocab_size", 0);
 
-  /* "youtokentome/cpp/yttm.pyx":115
+  /* "youtokentome/cpp/yttm.pyx":144
  * 
  *     def vocab_size(self):
  *         return self.encoder.vocab_size();             # <<<<<<<<<<<<<<
@@ -2927,13 +3245,13 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_14vocab_size(struct __pyx_
  *     def vocab(self):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->encoder->vocab_size()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 115, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->encoder->vocab_size()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 144, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "youtokentome/cpp/yttm.pyx":114
+  /* "youtokentome/cpp/yttm.pyx":143
  *         return [sentence.decode() for sentence in sentences]
  * 
  *     def vocab_size(self):             # <<<<<<<<<<<<<<
@@ -2952,7 +3270,7 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_14vocab_size(struct __pyx_
   return __pyx_r;
 }
 
-/* "youtokentome/cpp/yttm.pyx":117
+/* "youtokentome/cpp/yttm.pyx":146
  *         return self.encoder.vocab_size();
  * 
  *     def vocab(self):             # <<<<<<<<<<<<<<
@@ -2984,7 +3302,7 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_16vocab(struct __pyx_obj_2
   PyObject *__pyx_t_4 = NULL;
   __Pyx_RefNannySetupContext("vocab", 0);
 
-  /* "youtokentome/cpp/yttm.pyx":118
+  /* "youtokentome/cpp/yttm.pyx":147
  * 
  *     def vocab(self):
  *         cdef vector[string] vocab = self.encoder.vocabulary()             # <<<<<<<<<<<<<<
@@ -2993,7 +3311,7 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_16vocab(struct __pyx_obj_2
  */
   __pyx_v_vocab = __pyx_v_self->encoder->vocabulary();
 
-  /* "youtokentome/cpp/yttm.pyx":119
+  /* "youtokentome/cpp/yttm.pyx":148
  *     def vocab(self):
  *         cdef vector[string] vocab = self.encoder.vocabulary()
  *         return [token.decode() for token in vocab]             # <<<<<<<<<<<<<<
@@ -3001,7 +3319,7 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_16vocab(struct __pyx_obj_2
  *     def encode_cli(self, output_type, stream, bos, eos, reverse):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 119, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 148, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = __pyx_v_vocab.begin();
   for (;;) {
@@ -3009,16 +3327,16 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_16vocab(struct __pyx_obj_2
     __pyx_t_3 = *__pyx_t_2;
     ++__pyx_t_2;
     __pyx_v_token = __pyx_t_3;
-    __pyx_t_4 = __Pyx_decode_cpp_string(__pyx_v_token, 0, PY_SSIZE_T_MAX, NULL, NULL, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 119, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_decode_cpp_string(__pyx_v_token, 0, PY_SSIZE_T_MAX, NULL, NULL, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 148, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_4))) __PYX_ERR(0, 119, __pyx_L1_error)
+    if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_4))) __PYX_ERR(0, 148, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "youtokentome/cpp/yttm.pyx":117
+  /* "youtokentome/cpp/yttm.pyx":146
  *         return self.encoder.vocab_size();
  * 
  *     def vocab(self):             # <<<<<<<<<<<<<<
@@ -3038,12 +3356,12 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_16vocab(struct __pyx_obj_2
   return __pyx_r;
 }
 
-/* "youtokentome/cpp/yttm.pyx":121
+/* "youtokentome/cpp/yttm.pyx":150
  *         return [token.decode() for token in vocab]
  * 
  *     def encode_cli(self, output_type, stream, bos, eos, reverse):             # <<<<<<<<<<<<<<
- *         self.encoder.encode_cli(output_type.encode(), stream, bos, eos, reverse)
- * 
+ *         cdef Status status = self.encoder.encode_cli(output_type.encode(), stream, bos, eos, reverse)
+ *         if status.code != 0:
  */
 
 /* Python wrapper */
@@ -3086,29 +3404,29 @@ static PyObject *__pyx_pw_20_youtokentome_cython_3BPE_19encode_cli(PyObject *__p
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_stream)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("encode_cli", 1, 5, 5, 1); __PYX_ERR(0, 121, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("encode_cli", 1, 5, 5, 1); __PYX_ERR(0, 150, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_bos)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("encode_cli", 1, 5, 5, 2); __PYX_ERR(0, 121, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("encode_cli", 1, 5, 5, 2); __PYX_ERR(0, 150, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_eos)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("encode_cli", 1, 5, 5, 3); __PYX_ERR(0, 121, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("encode_cli", 1, 5, 5, 3); __PYX_ERR(0, 150, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (likely((values[4] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_reverse)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("encode_cli", 1, 5, 5, 4); __PYX_ERR(0, 121, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("encode_cli", 1, 5, 5, 4); __PYX_ERR(0, 150, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "encode_cli") < 0)) __PYX_ERR(0, 121, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "encode_cli") < 0)) __PYX_ERR(0, 150, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 5) {
       goto __pyx_L5_argtuple_error;
@@ -3127,7 +3445,7 @@ static PyObject *__pyx_pw_20_youtokentome_cython_3BPE_19encode_cli(PyObject *__p
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("encode_cli", 1, 5, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 121, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("encode_cli", 1, 5, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 150, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("_youtokentome_cython.BPE.encode_cli", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -3141,6 +3459,7 @@ static PyObject *__pyx_pw_20_youtokentome_cython_3BPE_19encode_cli(PyObject *__p
 }
 
 static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_18encode_cli(struct __pyx_obj_20_youtokentome_cython_BPE *__pyx_v_self, PyObject *__pyx_v_output_type, PyObject *__pyx_v_stream, PyObject *__pyx_v_bos, PyObject *__pyx_v_eos, PyObject *__pyx_v_reverse) {
+  vkcom::Status __pyx_v_status;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -3151,16 +3470,17 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_18encode_cli(struct __pyx_
   bool __pyx_t_6;
   bool __pyx_t_7;
   bool __pyx_t_8;
+  int __pyx_t_9;
   __Pyx_RefNannySetupContext("encode_cli", 0);
 
-  /* "youtokentome/cpp/yttm.pyx":122
+  /* "youtokentome/cpp/yttm.pyx":151
  * 
  *     def encode_cli(self, output_type, stream, bos, eos, reverse):
- *         self.encoder.encode_cli(output_type.encode(), stream, bos, eos, reverse)             # <<<<<<<<<<<<<<
- * 
- *     def decode_cli(self):
+ *         cdef Status status = self.encoder.encode_cli(output_type.encode(), stream, bos, eos, reverse)             # <<<<<<<<<<<<<<
+ *         if status.code != 0:
+ *             raise ValueError(status.message.decode())
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_output_type, __pyx_n_s_encode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 122, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_output_type, __pyx_n_s_encode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 151, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -3174,23 +3494,58 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_18encode_cli(struct __pyx_
   }
   __pyx_t_1 = (__pyx_t_3) ? __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3) : __Pyx_PyObject_CallNoArg(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 122, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 151, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_4 = __pyx_convert_string_from_py_std__in_string(__pyx_t_1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 122, __pyx_L1_error)
+  __pyx_t_4 = __pyx_convert_string_from_py_std__in_string(__pyx_t_1); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 151, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_v_stream); if (unlikely((__pyx_t_5 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 122, __pyx_L1_error)
-  __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_v_bos); if (unlikely((__pyx_t_6 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 122, __pyx_L1_error)
-  __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_v_eos); if (unlikely((__pyx_t_7 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 122, __pyx_L1_error)
-  __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_v_reverse); if (unlikely((__pyx_t_8 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 122, __pyx_L1_error)
-  __pyx_v_self->encoder->encode_cli(__pyx_t_4, __pyx_t_5, __pyx_t_6, __pyx_t_7, __pyx_t_8);
+  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_v_stream); if (unlikely((__pyx_t_5 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 151, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_v_bos); if (unlikely((__pyx_t_6 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 151, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_IsTrue(__pyx_v_eos); if (unlikely((__pyx_t_7 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 151, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_v_reverse); if (unlikely((__pyx_t_8 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 151, __pyx_L1_error)
+  __pyx_v_status = __pyx_v_self->encoder->encode_cli(__pyx_t_4, __pyx_t_5, __pyx_t_6, __pyx_t_7, __pyx_t_8);
 
-  /* "youtokentome/cpp/yttm.pyx":121
+  /* "youtokentome/cpp/yttm.pyx":152
+ *     def encode_cli(self, output_type, stream, bos, eos, reverse):
+ *         cdef Status status = self.encoder.encode_cli(output_type.encode(), stream, bos, eos, reverse)
+ *         if status.code != 0:             # <<<<<<<<<<<<<<
+ *             raise ValueError(status.message.decode())
+ * 
+ */
+  __pyx_t_9 = ((__pyx_v_status.code != 0) != 0);
+  if (unlikely(__pyx_t_9)) {
+
+    /* "youtokentome/cpp/yttm.pyx":153
+ *         cdef Status status = self.encoder.encode_cli(output_type.encode(), stream, bos, eos, reverse)
+ *         if status.code != 0:
+ *             raise ValueError(status.message.decode())             # <<<<<<<<<<<<<<
+ * 
+ *     def decode_cli(self):
+ */
+    __pyx_t_1 = __Pyx_decode_cpp_string(__pyx_v_status.message, 0, PY_SSIZE_T_MAX, NULL, NULL, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 153, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_builtin_ValueError, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 153, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __Pyx_Raise(__pyx_t_2, 0, 0, 0);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __PYX_ERR(0, 153, __pyx_L1_error)
+
+    /* "youtokentome/cpp/yttm.pyx":152
+ *     def encode_cli(self, output_type, stream, bos, eos, reverse):
+ *         cdef Status status = self.encoder.encode_cli(output_type.encode(), stream, bos, eos, reverse)
+ *         if status.code != 0:             # <<<<<<<<<<<<<<
+ *             raise ValueError(status.message.decode())
+ * 
+ */
+  }
+
+  /* "youtokentome/cpp/yttm.pyx":150
  *         return [token.decode() for token in vocab]
  * 
  *     def encode_cli(self, output_type, stream, bos, eos, reverse):             # <<<<<<<<<<<<<<
- *         self.encoder.encode_cli(output_type.encode(), stream, bos, eos, reverse)
- * 
+ *         cdef Status status = self.encoder.encode_cli(output_type.encode(), stream, bos, eos, reverse)
+ *         if status.code != 0:
  */
 
   /* function exit code */
@@ -3208,12 +3563,12 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_18encode_cli(struct __pyx_
   return __pyx_r;
 }
 
-/* "youtokentome/cpp/yttm.pyx":124
- *         self.encoder.encode_cli(output_type.encode(), stream, bos, eos, reverse)
+/* "youtokentome/cpp/yttm.pyx":155
+ *             raise ValueError(status.message.decode())
  * 
  *     def decode_cli(self):             # <<<<<<<<<<<<<<
- *         self.encoder.decode_cli()
- * 
+ *         cdef Status status = self.encoder.decode_cli()
+ *         if status.code != 0:
  */
 
 /* Python wrapper */
@@ -3230,36 +3585,82 @@ static PyObject *__pyx_pw_20_youtokentome_cython_3BPE_21decode_cli(PyObject *__p
 }
 
 static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_20decode_cli(struct __pyx_obj_20_youtokentome_cython_BPE *__pyx_v_self) {
+  vkcom::Status __pyx_v_status;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
+  int __pyx_t_1;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("decode_cli", 0);
 
-  /* "youtokentome/cpp/yttm.pyx":125
+  /* "youtokentome/cpp/yttm.pyx":156
  * 
  *     def decode_cli(self):
- *         self.encoder.decode_cli()             # <<<<<<<<<<<<<<
+ *         cdef Status status = self.encoder.decode_cli()             # <<<<<<<<<<<<<<
+ *         if status.code != 0:
+ *             raise ValueError(status.message.decode())
+ */
+  __pyx_v_status = __pyx_v_self->encoder->decode_cli();
+
+  /* "youtokentome/cpp/yttm.pyx":157
+ *     def decode_cli(self):
+ *         cdef Status status = self.encoder.decode_cli()
+ *         if status.code != 0:             # <<<<<<<<<<<<<<
+ *             raise ValueError(status.message.decode())
+ * 
+ */
+  __pyx_t_1 = ((__pyx_v_status.code != 0) != 0);
+  if (unlikely(__pyx_t_1)) {
+
+    /* "youtokentome/cpp/yttm.pyx":158
+ *         cdef Status status = self.encoder.decode_cli()
+ *         if status.code != 0:
+ *             raise ValueError(status.message.decode())             # <<<<<<<<<<<<<<
  * 
  *     def vocab_cli(self, verbose):
  */
-  __pyx_v_self->encoder->decode_cli();
+    __pyx_t_2 = __Pyx_decode_cpp_string(__pyx_v_status.message, 0, PY_SSIZE_T_MAX, NULL, NULL, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 158, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_builtin_ValueError, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 158, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __Pyx_Raise(__pyx_t_3, 0, 0, 0);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __PYX_ERR(0, 158, __pyx_L1_error)
 
-  /* "youtokentome/cpp/yttm.pyx":124
- *         self.encoder.encode_cli(output_type.encode(), stream, bos, eos, reverse)
+    /* "youtokentome/cpp/yttm.pyx":157
+ *     def decode_cli(self):
+ *         cdef Status status = self.encoder.decode_cli()
+ *         if status.code != 0:             # <<<<<<<<<<<<<<
+ *             raise ValueError(status.message.decode())
+ * 
+ */
+  }
+
+  /* "youtokentome/cpp/yttm.pyx":155
+ *             raise ValueError(status.message.decode())
  * 
  *     def decode_cli(self):             # <<<<<<<<<<<<<<
- *         self.encoder.decode_cli()
- * 
+ *         cdef Status status = self.encoder.decode_cli()
+ *         if status.code != 0:
  */
 
   /* function exit code */
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_AddTraceback("_youtokentome_cython.BPE.decode_cli", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "youtokentome/cpp/yttm.pyx":127
- *         self.encoder.decode_cli()
+/* "youtokentome/cpp/yttm.pyx":160
+ *             raise ValueError(status.message.decode())
  * 
  *     def vocab_cli(self, verbose):             # <<<<<<<<<<<<<<
  *         self.encoder.vocab_cli(verbose)
@@ -3285,17 +3686,17 @@ static PyObject *__pyx_pf_20_youtokentome_cython_3BPE_22vocab_cli(struct __pyx_o
   bool __pyx_t_1;
   __Pyx_RefNannySetupContext("vocab_cli", 0);
 
-  /* "youtokentome/cpp/yttm.pyx":128
+  /* "youtokentome/cpp/yttm.pyx":161
  * 
  *     def vocab_cli(self, verbose):
  *         self.encoder.vocab_cli(verbose)             # <<<<<<<<<<<<<<
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_v_verbose); if (unlikely((__pyx_t_1 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 128, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_v_verbose); if (unlikely((__pyx_t_1 == ((bool)-1)) && PyErr_Occurred())) __PYX_ERR(0, 161, __pyx_L1_error)
   __pyx_v_self->encoder->vocab_cli(__pyx_t_1);
 
-  /* "youtokentome/cpp/yttm.pyx":127
- *         self.encoder.decode_cli()
+  /* "youtokentome/cpp/yttm.pyx":160
+ *             raise ValueError(status.message.decode())
  * 
  *     def vocab_cli(self, verbose):             # <<<<<<<<<<<<<<
  *         self.encoder.vocab_cli(verbose)
@@ -3470,125 +3871,6 @@ static std::string __pyx_convert_string_from_py_std__in_string(PyObject *__pyx_v
   __Pyx_AddTraceback("string.from_py.__pyx_convert_string_from_py_std__in_string", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_pretend_to_initialize(&__pyx_r);
   __pyx_L0:;
-  __Pyx_RefNannyFinishContext();
-  return __pyx_r;
-}
-
-/* "vector.from_py":45
- * 
- * @cname("__pyx_convert_vector_from_py_std_3a__3a_string")
- * cdef vector[X] __pyx_convert_vector_from_py_std_3a__3a_string(object o) except *:             # <<<<<<<<<<<<<<
- *     cdef vector[X] v
- *     for item in o:
- */
-
-static std::vector<std::string>  __pyx_convert_vector_from_py_std_3a__3a_string(PyObject *__pyx_v_o) {
-  std::vector<std::string>  __pyx_v_v;
-  PyObject *__pyx_v_item = NULL;
-  std::vector<std::string>  __pyx_r;
-  __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  Py_ssize_t __pyx_t_2;
-  PyObject *(*__pyx_t_3)(PyObject *);
-  PyObject *__pyx_t_4 = NULL;
-  std::string __pyx_t_5;
-  __Pyx_RefNannySetupContext("__pyx_convert_vector_from_py_std_3a__3a_string", 0);
-
-  /* "vector.from_py":47
- * cdef vector[X] __pyx_convert_vector_from_py_std_3a__3a_string(object o) except *:
- *     cdef vector[X] v
- *     for item in o:             # <<<<<<<<<<<<<<
- *         v.push_back(<X>item)
- *     return v
- */
-  if (likely(PyList_CheckExact(__pyx_v_o)) || PyTuple_CheckExact(__pyx_v_o)) {
-    __pyx_t_1 = __pyx_v_o; __Pyx_INCREF(__pyx_t_1); __pyx_t_2 = 0;
-    __pyx_t_3 = NULL;
-  } else {
-    __pyx_t_2 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_v_o); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 47, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 47, __pyx_L1_error)
-  }
-  for (;;) {
-    if (likely(!__pyx_t_3)) {
-      if (likely(PyList_CheckExact(__pyx_t_1))) {
-        if (__pyx_t_2 >= PyList_GET_SIZE(__pyx_t_1)) break;
-        #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_4 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_4); __pyx_t_2++; if (unlikely(0 < 0)) __PYX_ERR(1, 47, __pyx_L1_error)
-        #else
-        __pyx_t_4 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 47, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_4);
-        #endif
-      } else {
-        if (__pyx_t_2 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
-        #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_4); __pyx_t_2++; if (unlikely(0 < 0)) __PYX_ERR(1, 47, __pyx_L1_error)
-        #else
-        __pyx_t_4 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 47, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_4);
-        #endif
-      }
-    } else {
-      __pyx_t_4 = __pyx_t_3(__pyx_t_1);
-      if (unlikely(!__pyx_t_4)) {
-        PyObject* exc_type = PyErr_Occurred();
-        if (exc_type) {
-          if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(1, 47, __pyx_L1_error)
-        }
-        break;
-      }
-      __Pyx_GOTREF(__pyx_t_4);
-    }
-    __Pyx_XDECREF_SET(__pyx_v_item, __pyx_t_4);
-    __pyx_t_4 = 0;
-
-    /* "vector.from_py":48
- *     cdef vector[X] v
- *     for item in o:
- *         v.push_back(<X>item)             # <<<<<<<<<<<<<<
- *     return v
- * 
- */
-    __pyx_t_5 = __pyx_convert_string_from_py_std__in_string(__pyx_v_item); if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 48, __pyx_L1_error)
-    __pyx_v_v.push_back(((std::string)__pyx_t_5));
-
-    /* "vector.from_py":47
- * cdef vector[X] __pyx_convert_vector_from_py_std_3a__3a_string(object o) except *:
- *     cdef vector[X] v
- *     for item in o:             # <<<<<<<<<<<<<<
- *         v.push_back(<X>item)
- *     return v
- */
-  }
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-
-  /* "vector.from_py":49
- *     for item in o:
- *         v.push_back(<X>item)
- *     return v             # <<<<<<<<<<<<<<
- * 
- * 
- */
-  __pyx_r = __pyx_v_v;
-  goto __pyx_L0;
-
-  /* "vector.from_py":45
- * 
- * @cname("__pyx_convert_vector_from_py_std_3a__3a_string")
- * cdef vector[X] __pyx_convert_vector_from_py_std_3a__3a_string(object o) except *:             # <<<<<<<<<<<<<<
- *     cdef vector[X] v
- *     for item in o:
- */
-
-  /* function exit code */
-  __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_AddTraceback("vector.from_py.__pyx_convert_vector_from_py_std_3a__3a_string", __pyx_clineno, __pyx_lineno, __pyx_filename);
-  __Pyx_pretend_to_initialize(&__pyx_r);
-  __pyx_L0:;
-  __Pyx_XDECREF(__pyx_v_item);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
@@ -3823,6 +4105,125 @@ static CYTHON_INLINE PyObject *__pyx_convert_PyByteArray_string_to_py_std__in_st
   __pyx_r = 0;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "vector.from_py":45
+ * 
+ * @cname("__pyx_convert_vector_from_py_std_3a__3a_string")
+ * cdef vector[X] __pyx_convert_vector_from_py_std_3a__3a_string(object o) except *:             # <<<<<<<<<<<<<<
+ *     cdef vector[X] v
+ *     for item in o:
+ */
+
+static std::vector<std::string>  __pyx_convert_vector_from_py_std_3a__3a_string(PyObject *__pyx_v_o) {
+  std::vector<std::string>  __pyx_v_v;
+  PyObject *__pyx_v_item = NULL;
+  std::vector<std::string>  __pyx_r;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  Py_ssize_t __pyx_t_2;
+  PyObject *(*__pyx_t_3)(PyObject *);
+  PyObject *__pyx_t_4 = NULL;
+  std::string __pyx_t_5;
+  __Pyx_RefNannySetupContext("__pyx_convert_vector_from_py_std_3a__3a_string", 0);
+
+  /* "vector.from_py":47
+ * cdef vector[X] __pyx_convert_vector_from_py_std_3a__3a_string(object o) except *:
+ *     cdef vector[X] v
+ *     for item in o:             # <<<<<<<<<<<<<<
+ *         v.push_back(<X>item)
+ *     return v
+ */
+  if (likely(PyList_CheckExact(__pyx_v_o)) || PyTuple_CheckExact(__pyx_v_o)) {
+    __pyx_t_1 = __pyx_v_o; __Pyx_INCREF(__pyx_t_1); __pyx_t_2 = 0;
+    __pyx_t_3 = NULL;
+  } else {
+    __pyx_t_2 = -1; __pyx_t_1 = PyObject_GetIter(__pyx_v_o); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 47, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_3 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 47, __pyx_L1_error)
+  }
+  for (;;) {
+    if (likely(!__pyx_t_3)) {
+      if (likely(PyList_CheckExact(__pyx_t_1))) {
+        if (__pyx_t_2 >= PyList_GET_SIZE(__pyx_t_1)) break;
+        #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+        __pyx_t_4 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_4); __pyx_t_2++; if (unlikely(0 < 0)) __PYX_ERR(1, 47, __pyx_L1_error)
+        #else
+        __pyx_t_4 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 47, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_4);
+        #endif
+      } else {
+        if (__pyx_t_2 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
+        #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+        __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_4); __pyx_t_2++; if (unlikely(0 < 0)) __PYX_ERR(1, 47, __pyx_L1_error)
+        #else
+        __pyx_t_4 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 47, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_4);
+        #endif
+      }
+    } else {
+      __pyx_t_4 = __pyx_t_3(__pyx_t_1);
+      if (unlikely(!__pyx_t_4)) {
+        PyObject* exc_type = PyErr_Occurred();
+        if (exc_type) {
+          if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
+          else __PYX_ERR(1, 47, __pyx_L1_error)
+        }
+        break;
+      }
+      __Pyx_GOTREF(__pyx_t_4);
+    }
+    __Pyx_XDECREF_SET(__pyx_v_item, __pyx_t_4);
+    __pyx_t_4 = 0;
+
+    /* "vector.from_py":48
+ *     cdef vector[X] v
+ *     for item in o:
+ *         v.push_back(<X>item)             # <<<<<<<<<<<<<<
+ *     return v
+ * 
+ */
+    __pyx_t_5 = __pyx_convert_string_from_py_std__in_string(__pyx_v_item); if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 48, __pyx_L1_error)
+    __pyx_v_v.push_back(((std::string)__pyx_t_5));
+
+    /* "vector.from_py":47
+ * cdef vector[X] __pyx_convert_vector_from_py_std_3a__3a_string(object o) except *:
+ *     cdef vector[X] v
+ *     for item in o:             # <<<<<<<<<<<<<<
+ *         v.push_back(<X>item)
+ *     return v
+ */
+  }
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "vector.from_py":49
+ *     for item in o:
+ *         v.push_back(<X>item)
+ *     return v             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __pyx_r = __pyx_v_v;
+  goto __pyx_L0;
+
+  /* "vector.from_py":45
+ * 
+ * @cname("__pyx_convert_vector_from_py_std_3a__3a_string")
+ * cdef vector[X] __pyx_convert_vector_from_py_std_3a__3a_string(object o) except *:             # <<<<<<<<<<<<<<
+ *     cdef vector[X] v
+ *     for item in o:
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_AddTraceback("vector.from_py.__pyx_convert_vector_from_py_std_3a__3a_string", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_pretend_to_initialize(&__pyx_r);
+  __pyx_L0:;
+  __Pyx_XDECREF(__pyx_v_item);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
@@ -4468,6 +4869,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_setstate, __pyx_k_setstate, sizeof(__pyx_k_setstate), 0, 0, 1, 1},
   {&__pyx_n_s_setstate_cython, __pyx_k_setstate_cython, sizeof(__pyx_k_setstate_cython), 0, 0, 1, 1},
   {&__pyx_n_s_staticmethod, __pyx_k_staticmethod, sizeof(__pyx_k_staticmethod), 0, 0, 1, 1},
+  {&__pyx_n_s_status, __pyx_k_status, sizeof(__pyx_k_status), 0, 0, 1, 1},
   {&__pyx_n_s_stream, __pyx_k_stream, sizeof(__pyx_k_stream), 0, 0, 1, 1},
   {&__pyx_n_s_subword, __pyx_k_subword, sizeof(__pyx_k_subword), 0, 0, 1, 1},
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
@@ -4479,8 +4881,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_staticmethod = __Pyx_GetBuiltinName(__pyx_n_s_staticmethod); if (!__pyx_builtin_staticmethod) __PYX_ERR(0, 53, __pyx_L1_error)
-  __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(0, 99, __pyx_L1_error)
+  __pyx_builtin_staticmethod = __Pyx_GetBuiltinName(__pyx_n_s_staticmethod); if (!__pyx_builtin_staticmethod) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(0, 60, __pyx_L1_error)
   __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(1, 2, __pyx_L1_error)
   __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(1, 61, __pyx_L1_error)
   return 0;
@@ -4492,14 +4894,14 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "youtokentome/cpp/yttm.pyx":99
- *             return [[piece.decode() for piece in sentence] for sentence in ret]
+  /* "youtokentome/cpp/yttm.pyx":121
+ *             return [[piece.decode() for piece in sentence] for sentence in ret_subwords]
  *         else:
  *             raise ValueError('output_type must be equal to "id" or "subword"')             # <<<<<<<<<<<<<<
  * 
  *     def subword_to_id(self, subword):
  */
-  __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_s_output_type_must_be_equal_to_id); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 99, __pyx_L1_error)
+  __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_s_output_type_must_be_equal_to_id); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 121, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
 
@@ -4522,17 +4924,17 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__3);
   __Pyx_GIVEREF(__pyx_tuple__3);
 
-  /* "youtokentome/cpp/yttm.pyx":54
+  /* "youtokentome/cpp/yttm.pyx":63
  * 
  *     @staticmethod
  *     def train(data,             # <<<<<<<<<<<<<<
  *               model,
  *               vocab_size,
  */
-  __pyx_tuple__4 = PyTuple_Pack(10, __pyx_n_s_data, __pyx_n_s_model, __pyx_n_s_vocab_size, __pyx_n_s_coverage, __pyx_n_s_n_threads, __pyx_n_s_pad_id, __pyx_n_s_unk_id, __pyx_n_s_bos_id, __pyx_n_s_eos_id, __pyx_n_s_bpe_config); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(0, 54, __pyx_L1_error)
+  __pyx_tuple__4 = PyTuple_Pack(11, __pyx_n_s_data, __pyx_n_s_model, __pyx_n_s_vocab_size, __pyx_n_s_coverage, __pyx_n_s_n_threads, __pyx_n_s_pad_id, __pyx_n_s_unk_id, __pyx_n_s_bos_id, __pyx_n_s_eos_id, __pyx_n_s_bpe_config, __pyx_n_s_status); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__4);
   __Pyx_GIVEREF(__pyx_tuple__4);
-  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(9, 0, 10, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__4, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_youtokentome_cpp_yttm_pyx, __pyx_n_s_train, 54, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(0, 54, __pyx_L1_error)
+  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(9, 0, 11, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__4, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_youtokentome_cpp_yttm_pyx, __pyx_n_s_train, 63, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -4589,15 +4991,15 @@ static int __Pyx_modinit_type_init_code(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_init_code", 0);
   /*--- Type init code ---*/
-  if (PyType_Ready(&__pyx_type_20_youtokentome_cython_BPE) < 0) __PYX_ERR(0, 44, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_20_youtokentome_cython_BPE) < 0) __PYX_ERR(0, 50, __pyx_L1_error)
   #if PY_VERSION_HEX < 0x030800B1
   __pyx_type_20_youtokentome_cython_BPE.tp_print = 0;
   #endif
   if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_20_youtokentome_cython_BPE.tp_dictoffset && __pyx_type_20_youtokentome_cython_BPE.tp_getattro == PyObject_GenericGetAttr)) {
     __pyx_type_20_youtokentome_cython_BPE.tp_getattro = __Pyx_PyObject_GenericGetAttr;
   }
-  if (PyObject_SetAttr(__pyx_m, __pyx_n_s_BPE, (PyObject *)&__pyx_type_20_youtokentome_cython_BPE) < 0) __PYX_ERR(0, 44, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_20_youtokentome_cython_BPE) < 0) __PYX_ERR(0, 44, __pyx_L1_error)
+  if (PyObject_SetAttr(__pyx_m, __pyx_n_s_BPE, (PyObject *)&__pyx_type_20_youtokentome_cython_BPE) < 0) __PYX_ERR(0, 50, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_20_youtokentome_cython_BPE) < 0) __PYX_ERR(0, 50, __pyx_L1_error)
   __pyx_ptype_20_youtokentome_cython_BPE = &__pyx_type_20_youtokentome_cython_BPE;
   __Pyx_RefNannyFinishContext();
   return 0;
@@ -4861,32 +5263,32 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "youtokentome/cpp/yttm.pyx":54
+  /* "youtokentome/cpp/yttm.pyx":63
  * 
  *     @staticmethod
  *     def train(data,             # <<<<<<<<<<<<<<
  *               model,
  *               vocab_size,
  */
-  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_20_youtokentome_cython_3BPE_5train, NULL, __pyx_n_s_youtokentome_cython); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 54, __pyx_L1_error)
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_20_youtokentome_cython_3BPE_5train, NULL, __pyx_n_s_youtokentome_cython); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem((PyObject *)__pyx_ptype_20_youtokentome_cython_BPE->tp_dict, __pyx_n_s_train, __pyx_t_2) < 0) __PYX_ERR(0, 54, __pyx_L1_error)
+  if (PyDict_SetItem((PyObject *)__pyx_ptype_20_youtokentome_cython_BPE->tp_dict, __pyx_n_s_train, __pyx_t_2) < 0) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_ptype_20_youtokentome_cython_BPE);
 
-  /* "youtokentome/cpp/yttm.pyx":53
- *         self.encoder = new BaseEncoder(model_path.encode(), n_threads)
+  /* "youtokentome/cpp/yttm.pyx":62
+ *             raise ValueError(status.message.decode())
  * 
  *     @staticmethod             # <<<<<<<<<<<<<<
  *     def train(data,
  *               model,
  */
-  __Pyx_GetNameInClass(__pyx_t_2, (PyObject *)__pyx_ptype_20_youtokentome_cython_BPE, __pyx_n_s_train); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 54, __pyx_L1_error)
+  __Pyx_GetNameInClass(__pyx_t_2, (PyObject *)__pyx_ptype_20_youtokentome_cython_BPE, __pyx_n_s_train); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_builtin_staticmethod, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 53, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_builtin_staticmethod, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 62, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (PyDict_SetItem((PyObject *)__pyx_ptype_20_youtokentome_cython_BPE->tp_dict, __pyx_n_s_train, __pyx_t_1) < 0) __PYX_ERR(0, 54, __pyx_L1_error)
+  if (PyDict_SetItem((PyObject *)__pyx_ptype_20_youtokentome_cython_BPE->tp_dict, __pyx_n_s_train, __pyx_t_1) < 0) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   PyType_Modified(__pyx_ptype_20_youtokentome_cython_BPE);
 
@@ -5365,155 +5767,6 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObjec
 }
 #endif
 
-/* BytesEquals */
-static CYTHON_INLINE int __Pyx_PyBytes_Equals(PyObject* s1, PyObject* s2, int equals) {
-#if CYTHON_COMPILING_IN_PYPY
-    return PyObject_RichCompareBool(s1, s2, equals);
-#else
-    if (s1 == s2) {
-        return (equals == Py_EQ);
-    } else if (PyBytes_CheckExact(s1) & PyBytes_CheckExact(s2)) {
-        const char *ps1, *ps2;
-        Py_ssize_t length = PyBytes_GET_SIZE(s1);
-        if (length != PyBytes_GET_SIZE(s2))
-            return (equals == Py_NE);
-        ps1 = PyBytes_AS_STRING(s1);
-        ps2 = PyBytes_AS_STRING(s2);
-        if (ps1[0] != ps2[0]) {
-            return (equals == Py_NE);
-        } else if (length == 1) {
-            return (equals == Py_EQ);
-        } else {
-            int result;
-#if CYTHON_USE_UNICODE_INTERNALS
-            Py_hash_t hash1, hash2;
-            hash1 = ((PyBytesObject*)s1)->ob_shash;
-            hash2 = ((PyBytesObject*)s2)->ob_shash;
-            if (hash1 != hash2 && hash1 != -1 && hash2 != -1) {
-                return (equals == Py_NE);
-            }
-#endif
-            result = memcmp(ps1, ps2, (size_t)length);
-            return (equals == Py_EQ) ? (result == 0) : (result != 0);
-        }
-    } else if ((s1 == Py_None) & PyBytes_CheckExact(s2)) {
-        return (equals == Py_NE);
-    } else if ((s2 == Py_None) & PyBytes_CheckExact(s1)) {
-        return (equals == Py_NE);
-    } else {
-        int result;
-        PyObject* py_result = PyObject_RichCompare(s1, s2, equals);
-        if (!py_result)
-            return -1;
-        result = __Pyx_PyObject_IsTrue(py_result);
-        Py_DECREF(py_result);
-        return result;
-    }
-#endif
-}
-
-/* UnicodeEquals */
-static CYTHON_INLINE int __Pyx_PyUnicode_Equals(PyObject* s1, PyObject* s2, int equals) {
-#if CYTHON_COMPILING_IN_PYPY
-    return PyObject_RichCompareBool(s1, s2, equals);
-#else
-#if PY_MAJOR_VERSION < 3
-    PyObject* owned_ref = NULL;
-#endif
-    int s1_is_unicode, s2_is_unicode;
-    if (s1 == s2) {
-        goto return_eq;
-    }
-    s1_is_unicode = PyUnicode_CheckExact(s1);
-    s2_is_unicode = PyUnicode_CheckExact(s2);
-#if PY_MAJOR_VERSION < 3
-    if ((s1_is_unicode & (!s2_is_unicode)) && PyString_CheckExact(s2)) {
-        owned_ref = PyUnicode_FromObject(s2);
-        if (unlikely(!owned_ref))
-            return -1;
-        s2 = owned_ref;
-        s2_is_unicode = 1;
-    } else if ((s2_is_unicode & (!s1_is_unicode)) && PyString_CheckExact(s1)) {
-        owned_ref = PyUnicode_FromObject(s1);
-        if (unlikely(!owned_ref))
-            return -1;
-        s1 = owned_ref;
-        s1_is_unicode = 1;
-    } else if (((!s2_is_unicode) & (!s1_is_unicode))) {
-        return __Pyx_PyBytes_Equals(s1, s2, equals);
-    }
-#endif
-    if (s1_is_unicode & s2_is_unicode) {
-        Py_ssize_t length;
-        int kind;
-        void *data1, *data2;
-        if (unlikely(__Pyx_PyUnicode_READY(s1) < 0) || unlikely(__Pyx_PyUnicode_READY(s2) < 0))
-            return -1;
-        length = __Pyx_PyUnicode_GET_LENGTH(s1);
-        if (length != __Pyx_PyUnicode_GET_LENGTH(s2)) {
-            goto return_ne;
-        }
-#if CYTHON_USE_UNICODE_INTERNALS
-        {
-            Py_hash_t hash1, hash2;
-        #if CYTHON_PEP393_ENABLED
-            hash1 = ((PyASCIIObject*)s1)->hash;
-            hash2 = ((PyASCIIObject*)s2)->hash;
-        #else
-            hash1 = ((PyUnicodeObject*)s1)->hash;
-            hash2 = ((PyUnicodeObject*)s2)->hash;
-        #endif
-            if (hash1 != hash2 && hash1 != -1 && hash2 != -1) {
-                goto return_ne;
-            }
-        }
-#endif
-        kind = __Pyx_PyUnicode_KIND(s1);
-        if (kind != __Pyx_PyUnicode_KIND(s2)) {
-            goto return_ne;
-        }
-        data1 = __Pyx_PyUnicode_DATA(s1);
-        data2 = __Pyx_PyUnicode_DATA(s2);
-        if (__Pyx_PyUnicode_READ(kind, data1, 0) != __Pyx_PyUnicode_READ(kind, data2, 0)) {
-            goto return_ne;
-        } else if (length == 1) {
-            goto return_eq;
-        } else {
-            int result = memcmp(data1, data2, (size_t)(length * kind));
-            #if PY_MAJOR_VERSION < 3
-            Py_XDECREF(owned_ref);
-            #endif
-            return (equals == Py_EQ) ? (result == 0) : (result != 0);
-        }
-    } else if ((s1 == Py_None) & s2_is_unicode) {
-        goto return_ne;
-    } else if ((s2 == Py_None) & s1_is_unicode) {
-        goto return_ne;
-    } else {
-        int result;
-        PyObject* py_result = PyObject_RichCompare(s1, s2, equals);
-        #if PY_MAJOR_VERSION < 3
-        Py_XDECREF(owned_ref);
-        #endif
-        if (!py_result)
-            return -1;
-        result = __Pyx_PyObject_IsTrue(py_result);
-        Py_DECREF(py_result);
-        return result;
-    }
-return_eq:
-    #if PY_MAJOR_VERSION < 3
-    Py_XDECREF(owned_ref);
-    #endif
-    return (equals == Py_EQ);
-return_ne:
-    #if PY_MAJOR_VERSION < 3
-    Py_XDECREF(owned_ref);
-    #endif
-    return (equals == Py_NE);
-#endif
-}
-
 /* decode_c_bytes */
 static CYTHON_INLINE PyObject* __Pyx_decode_c_bytes(
          const char* cstring, Py_ssize_t length, Py_ssize_t start, Py_ssize_t stop,
@@ -5723,6 +5976,155 @@ bad:
     return;
 }
 #endif
+
+/* BytesEquals */
+static CYTHON_INLINE int __Pyx_PyBytes_Equals(PyObject* s1, PyObject* s2, int equals) {
+#if CYTHON_COMPILING_IN_PYPY
+    return PyObject_RichCompareBool(s1, s2, equals);
+#else
+    if (s1 == s2) {
+        return (equals == Py_EQ);
+    } else if (PyBytes_CheckExact(s1) & PyBytes_CheckExact(s2)) {
+        const char *ps1, *ps2;
+        Py_ssize_t length = PyBytes_GET_SIZE(s1);
+        if (length != PyBytes_GET_SIZE(s2))
+            return (equals == Py_NE);
+        ps1 = PyBytes_AS_STRING(s1);
+        ps2 = PyBytes_AS_STRING(s2);
+        if (ps1[0] != ps2[0]) {
+            return (equals == Py_NE);
+        } else if (length == 1) {
+            return (equals == Py_EQ);
+        } else {
+            int result;
+#if CYTHON_USE_UNICODE_INTERNALS
+            Py_hash_t hash1, hash2;
+            hash1 = ((PyBytesObject*)s1)->ob_shash;
+            hash2 = ((PyBytesObject*)s2)->ob_shash;
+            if (hash1 != hash2 && hash1 != -1 && hash2 != -1) {
+                return (equals == Py_NE);
+            }
+#endif
+            result = memcmp(ps1, ps2, (size_t)length);
+            return (equals == Py_EQ) ? (result == 0) : (result != 0);
+        }
+    } else if ((s1 == Py_None) & PyBytes_CheckExact(s2)) {
+        return (equals == Py_NE);
+    } else if ((s2 == Py_None) & PyBytes_CheckExact(s1)) {
+        return (equals == Py_NE);
+    } else {
+        int result;
+        PyObject* py_result = PyObject_RichCompare(s1, s2, equals);
+        if (!py_result)
+            return -1;
+        result = __Pyx_PyObject_IsTrue(py_result);
+        Py_DECREF(py_result);
+        return result;
+    }
+#endif
+}
+
+/* UnicodeEquals */
+static CYTHON_INLINE int __Pyx_PyUnicode_Equals(PyObject* s1, PyObject* s2, int equals) {
+#if CYTHON_COMPILING_IN_PYPY
+    return PyObject_RichCompareBool(s1, s2, equals);
+#else
+#if PY_MAJOR_VERSION < 3
+    PyObject* owned_ref = NULL;
+#endif
+    int s1_is_unicode, s2_is_unicode;
+    if (s1 == s2) {
+        goto return_eq;
+    }
+    s1_is_unicode = PyUnicode_CheckExact(s1);
+    s2_is_unicode = PyUnicode_CheckExact(s2);
+#if PY_MAJOR_VERSION < 3
+    if ((s1_is_unicode & (!s2_is_unicode)) && PyString_CheckExact(s2)) {
+        owned_ref = PyUnicode_FromObject(s2);
+        if (unlikely(!owned_ref))
+            return -1;
+        s2 = owned_ref;
+        s2_is_unicode = 1;
+    } else if ((s2_is_unicode & (!s1_is_unicode)) && PyString_CheckExact(s1)) {
+        owned_ref = PyUnicode_FromObject(s1);
+        if (unlikely(!owned_ref))
+            return -1;
+        s1 = owned_ref;
+        s1_is_unicode = 1;
+    } else if (((!s2_is_unicode) & (!s1_is_unicode))) {
+        return __Pyx_PyBytes_Equals(s1, s2, equals);
+    }
+#endif
+    if (s1_is_unicode & s2_is_unicode) {
+        Py_ssize_t length;
+        int kind;
+        void *data1, *data2;
+        if (unlikely(__Pyx_PyUnicode_READY(s1) < 0) || unlikely(__Pyx_PyUnicode_READY(s2) < 0))
+            return -1;
+        length = __Pyx_PyUnicode_GET_LENGTH(s1);
+        if (length != __Pyx_PyUnicode_GET_LENGTH(s2)) {
+            goto return_ne;
+        }
+#if CYTHON_USE_UNICODE_INTERNALS
+        {
+            Py_hash_t hash1, hash2;
+        #if CYTHON_PEP393_ENABLED
+            hash1 = ((PyASCIIObject*)s1)->hash;
+            hash2 = ((PyASCIIObject*)s2)->hash;
+        #else
+            hash1 = ((PyUnicodeObject*)s1)->hash;
+            hash2 = ((PyUnicodeObject*)s2)->hash;
+        #endif
+            if (hash1 != hash2 && hash1 != -1 && hash2 != -1) {
+                goto return_ne;
+            }
+        }
+#endif
+        kind = __Pyx_PyUnicode_KIND(s1);
+        if (kind != __Pyx_PyUnicode_KIND(s2)) {
+            goto return_ne;
+        }
+        data1 = __Pyx_PyUnicode_DATA(s1);
+        data2 = __Pyx_PyUnicode_DATA(s2);
+        if (__Pyx_PyUnicode_READ(kind, data1, 0) != __Pyx_PyUnicode_READ(kind, data2, 0)) {
+            goto return_ne;
+        } else if (length == 1) {
+            goto return_eq;
+        } else {
+            int result = memcmp(data1, data2, (size_t)(length * kind));
+            #if PY_MAJOR_VERSION < 3
+            Py_XDECREF(owned_ref);
+            #endif
+            return (equals == Py_EQ) ? (result == 0) : (result != 0);
+        }
+    } else if ((s1 == Py_None) & s2_is_unicode) {
+        goto return_ne;
+    } else if ((s2 == Py_None) & s1_is_unicode) {
+        goto return_ne;
+    } else {
+        int result;
+        PyObject* py_result = PyObject_RichCompare(s1, s2, equals);
+        #if PY_MAJOR_VERSION < 3
+        Py_XDECREF(owned_ref);
+        #endif
+        if (!py_result)
+            return -1;
+        result = __Pyx_PyObject_IsTrue(py_result);
+        Py_DECREF(py_result);
+        return result;
+    }
+return_eq:
+    #if PY_MAJOR_VERSION < 3
+    Py_XDECREF(owned_ref);
+    #endif
+    return (equals == Py_EQ);
+return_ne:
+    #if PY_MAJOR_VERSION < 3
+    Py_XDECREF(owned_ref);
+    #endif
+    return (equals == Py_NE);
+#endif
+}
 
 /* GetItemInt */
 static PyObject *__Pyx_GetItemInt_Generic(PyObject *o, PyObject* j) {

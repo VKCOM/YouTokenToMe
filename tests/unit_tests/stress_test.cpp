@@ -267,6 +267,7 @@ string generate_text(int n_limit, bool flag_train) {
 }
 
 void manual_test() {
+  Status status;
   string trn_data = "baba baaab";
   string inf_data = "d d";
   int n_tokens = 2 + 2 + 5;
@@ -275,13 +276,18 @@ void manual_test() {
   SpecialTokens special_tokens_config = {0, 1, 2, 3};
   BpeConfig bpe_config = {1.0, 1, special_tokens_config};
 
-  auto model_fast = learn_bpe_from_string(trn_data_copy, n_tokens, "remove_it.txt", bpe_config);
+  BPEState model_fast;
+  status = learn_bpe_from_string(trn_data_copy, n_tokens, "remove_it.txt", bpe_config, &model_fast);
+  assert(status.ok());
   auto model_slow = learn_bpe_slow(trn_data, n_tokens, "remove_it.txt", bpe_config);
   assert(model_fast.rules == model_slow.rules);
   assert(model_fast.char2id == model_slow.char2id);
 
   BaseEncoder applyer(model_fast, 1);
-  auto ids = applyer.encode_as_ids({inf_data})[0];
+  vector<vector<int>> ids_tmp;
+  status  = applyer.encode_as_ids({inf_data}, &ids_tmp);
+  assert(status.ok());
+  auto ids = ids_tmp[0];
   auto result_slow = decode_slow(inf_data, applyer);
   assert(ids == result_slow.ids);
 }
@@ -299,6 +305,7 @@ vector<uint32_t> to_no_space_tokens(string raw_string) {
 }
 
 void parallel_test(int n_iter, int n_threads) {
+  Status status;
   for (int i = 0; i < n_iter; i++) {
     srand(i);
     int test_size = 1000;
@@ -317,14 +324,21 @@ void parallel_test(int n_iter, int n_threads) {
 
     auto train_data_copy = train_data;
     BpeConfig bpe_config = {character_coverage, n_threads, {0, 1, 2, 3}};
-    auto learned_model = learn_bpe_from_string(train_data_copy, vocab_size, "remove_it.txt", bpe_config);
+    BPEState learned_model;
+    status = learn_bpe_from_string(train_data_copy, vocab_size, "remove_it.txt", bpe_config, &learned_model);
+    assert(status.ok());
     BaseEncoder applyer(learned_model, 20);
 
     vector<vector<string>> result_sentence_by_sentence;
     for (auto s: inference_data) {
-      result_sentence_by_sentence.push_back(applyer.encode_as_subwords({s})[0]);
+      vector<vector<string>> encoded_subwords;
+      status = applyer.encode_as_subwords({s}, &encoded_subwords);
+      assert(status.ok());
+      result_sentence_by_sentence.push_back(encoded_subwords[0]);
     }
-    auto result_parallel = applyer.encode_as_subwords(inference_data);
+    vector<vector<string>> result_parallel;
+    status = applyer.encode_as_subwords(inference_data, &result_parallel);
+    assert(status.ok());
     assert(result_sentence_by_sentence == result_parallel);
   }
 }
@@ -332,6 +346,7 @@ void parallel_test(int n_iter, int n_threads) {
 void base_stress(int n_iter) {
   int n_threads = 8;
   const int NUMBER_OF_SPECIAL_TOKENS_LOCAL = 4;
+  Status status;
   for (int it = 0; it != n_iter; it++) {
     srand(it);
     cerr << "-------------------- new test " << it << " --------------- " << endl;
@@ -351,7 +366,9 @@ void base_stress(int n_iter) {
     }
     auto train_data_copy = train_data;
     BpeConfig bpe_config = {character_coverage, n_threads, {0, 1, 2, 3}};
-    auto fast_solution_model = learn_bpe_from_string(train_data_copy, vocab_size, "remove_it.txt", bpe_config);
+    BPEState fast_solution_model;
+    status = learn_bpe_from_string(train_data_copy, vocab_size, "remove_it.txt", bpe_config, &fast_solution_model);
+    assert(status.ok());
     auto slow_solution_model = learn_bpe_slow(train_data, vocab_size, "remove_it.txt", bpe_config);
 
     if (fast_solution_model.rules != slow_solution_model.rules
@@ -374,8 +391,14 @@ void base_stress(int n_iter) {
 
     auto inference_data = generate_text(test_size, false);
     cerr << "inference_data: " << inference_data << endl;
-    auto fast_ids = applyer.encode_as_ids({inference_data})[0];
-    auto fast_pieces = applyer.encode_as_subwords({inference_data})[0];
+    vector<vector<int>> fast_ids_tmp;
+    status = applyer.encode_as_ids({inference_data}, &fast_ids_tmp);
+    auto fast_ids = fast_ids_tmp[0];
+    assert(status.ok());
+    vector<vector<string>> fast_pieces_tmp;
+    status = applyer.encode_as_subwords({inference_data}, &fast_pieces_tmp);
+    assert(status.ok());
+    auto fast_pieces = fast_pieces_tmp[0];
     auto slow_results = decode_slow(inference_data, applyer);
     vector<string> slow_pieces;
     for (auto x: slow_results.pieces) {
