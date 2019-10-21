@@ -1,0 +1,56 @@
+env:
+  global:
+    - CIBW_SKIP="cp27-* cp33-* cp34-* *win* *i686*"
+    - CFLAGS="-static -libstdc++"
+
+notifications:
+  email: false
+
+language: python
+os: linux
+dist: xenial
+
+jobs:
+  allow_failures:
+    - name: "Black"
+
+  include:
+    - stage: test
+      name: "Black"
+      language: python
+      python: "3.7"
+      install: pip install black
+      script: black --check youtokentome
+
+    - stage: build
+      name: "Linux wheels building"
+      services:
+        - docker
+      language: python
+      python: "3.7"
+      deploy:
+        provider: pypi
+        user: "__token__"
+        password: $PYPI_TOKEN_TEST
+        server: https://test.pypi.org/legacy/
+        on:
+          tags: false
+
+    - name: "macOS wheels building"
+      os: osx
+      language: shell
+      deploy:
+        provider: pypi
+        user: "__token__"
+        password: $PYPI_TOKEN_TEST
+        server: https://test.pypi.org/legacy/
+        on:
+          tags: false
+
+install:
+  - pip install -U pip
+  - pip install cibuildwheel==0.12 twine==1.15.0
+
+script:
+  - cibuildwheel --output-dir wheelhouse
+  - ls -l wheelhouse
