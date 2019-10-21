@@ -36,14 +36,21 @@ jobs:
       python: "3.7"
       env:
         - CIBW_SKIP="cp27-* cp33-* cp34-* *win* *i686*"
-        - CFLAGS="-static -libstdc++"
+        - CFLAGS="-static"
 
     - name: "macOS wheels building"
       os: osx
+      osx_image: xcode11.2
       language: shell
+      before_install:
+        - brew update
+        - brew install gcc@8
       env:
+        - MACOSX_DEPLOYMENT_TARGET=10.14
         - CIBW_SKIP="cp27-* cp33-* cp34-* *win* *i686*"
-        - CFLAGS="-static -libstdc++"
+        - CFLAGS="-static"
+        - CXX="g++-8"
+        - CC="gcc-8"
 
 install:
   - pip install -U pip
@@ -55,5 +62,5 @@ script:
   - |
     if [[ $TRAVIS_BRANCH = "master" && $TRAVIS_TAG ]]; then
       rm -rf dist && python setup.py sdist
-      twine upload --repository-url https://test.pypi.org/legacy/ -u __token__ -p $PYPI_TOKEN_TEST --skip-existing dist/*.tar.gz wheelhouse/*.whl
+      twine upload -u __token__ -p $PYPI_TOKEN --skip-existing dist/*.tar.gz wheelhouse/*.whl
     fi
