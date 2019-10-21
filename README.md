@@ -2,6 +2,7 @@
 [![Downloads](https://pepy.tech/badge/youtokentome)](https://pepy.tech/project/youtokentome)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 ![GitHub](https://img.shields.io/github/license/vkcom/youtokentome.svg)
+[![Build Status](https://travis-ci.org/VKCOM/YouTokenToMe.svg?branch=master)](https://travis-ci.org/VKCOM/YouTokenToMe)
 
 # YouTokenToMe 
 
