@@ -3,9 +3,11 @@ from typing import List, Union
 
 import _youtokentome_cython
 
+
 class OutputType(Enum):
     ID = 1
     SUBWORD = 2
+
 
 class BPE:
     def __init__(self, model: str, n_threads: int = -1):
@@ -49,7 +51,8 @@ class BPE:
     ) -> Union[List[List[int]], List[List[str]]]:
         if not isinstance(output_type, OutputType):
             raise TypeError(
-                "parameter output_type must be youtokentome.OutputType, not %s}" % str(type(output_type))
+                "parameter output_type must be youtokentome.OutputType, not %s}"
+                % str(type(output_type))
             )
 
         output_type_str = "id" if output_type == OutputType.ID else "subword"

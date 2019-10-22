@@ -100,11 +100,13 @@ def encode(model, output_type, n_threads, bos, eos, reverse, stream):
     output_type = output_type.lower()
     if output_type != "id" and output_type != "subword":
         raise ValueError(
-            'Invalid value for "--output_type": must be equal to "id" or "subword", not "%d".' % output_type
+            'Invalid value for "--output_type": must be equal to "id" or "subword", not "%d".'
+            % output_type
         )
     if n_threads < -1 or n_threads == 0:
         raise ValueError(
-            'Invalid value for "--n_threads": must be -1 or positive integer, not "%d"' % n_threads
+            'Invalid value for "--n_threads": must be -1 or positive integer, not "%d"'
+            % n_threads
         )
 
     bpe = yttmc.BPE(model, n_threads)
