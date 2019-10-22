@@ -1,6 +1,10 @@
 notifications:
   email: false
 
+branches:
+  only:
+    - master
+
 language: python
 os: linux
 dist: xenial
