@@ -36,7 +36,6 @@ jobs:
       python: "3.7"
       env:
         - CIBW_SKIP="cp27-* cp33-* cp34-* *win* *i686*"
-        - CFLAGS="-static"
 
     - name: "macOS wheels building"
       os: osx
@@ -48,7 +47,6 @@ jobs:
       env:
         - MACOSX_DEPLOYMENT_TARGET=10.14
         - CIBW_SKIP="cp27-* cp33-* cp34-* *win* *i686*"
-        - CFLAGS="-static"
         - CXX="g++-8"
         - CC="gcc-8"
 

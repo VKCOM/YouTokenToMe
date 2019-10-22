@@ -12,7 +12,7 @@ extensions = [
             "youtokentome/cpp/utils.cpp",
             "youtokentome/cpp/utf8.cpp",
         ],
-        extra_compile_args=["-std=c++11", "-pthread", "-O3"],
+        extra_compile_args=["-std=c++11", "-pthread", "-O3", "-static"],
         language="c++",
     )
 ]
