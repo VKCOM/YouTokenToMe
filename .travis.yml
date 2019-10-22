@@ -62,7 +62,7 @@ script:
   - cibuildwheel --output-dir wheelhouse
   - ls -l wheelhouse
   - |
-    if [[ $TRAVIS_BRANCH = "master" && $TRAVIS_TAG ]]; then
+    if [[ $TRAVIS_TAG ]]; then
       rm -rf dist && python setup.py sdist
       twine upload -u __token__ -p $PYPI_TOKEN --skip-existing dist/*.tar.gz wheelhouse/*.whl
     fi
