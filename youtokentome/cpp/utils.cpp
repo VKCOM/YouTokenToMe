@@ -31,8 +31,8 @@ bool SpecialTokens::taken_id(int id) const {
   return id == unk_id || id == pad_id || id == bos_id || id == eos_id;
 }
 
-size_t SpecialTokens::n_special_tokens() const {
-  size_t cnt = 0;
+uint64_t SpecialTokens::n_special_tokens() const {
+  uint64_t cnt = 0;
   cnt += (unk_id != -1);
   cnt += (pad_id != -1);
   cnt += (bos_id != -1);
@@ -98,7 +98,7 @@ BpeConfig::BpeConfig(double _character_coverage, int _n_threads,
       n_threads(_n_threads),
       special_tokens(_special_tokens) {}
 
-vector<string> read_lines_from_stdin(size_t batch_limit, size_t *processed) {
+vector<string> read_lines_from_stdin(uint64_t batch_limit, uint64_t *processed) {
   vector<string> sentences;
   string s;
   while (*processed < batch_limit && getline(std::cin, s)) {

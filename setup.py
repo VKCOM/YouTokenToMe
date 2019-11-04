@@ -12,7 +12,7 @@ extensions = [
             "youtokentome/cpp/utils.cpp",
             "youtokentome/cpp/utf8.cpp",
         ],
-        extra_compile_args=["-std=c++11", "-pthread", "-O3", "-static"],
+        extra_compile_args=["-std=c++11", "-pthread", "-O3"],
         language="c++",
     )
 ]
@@ -25,7 +25,7 @@ with io.open(
 
 setup(
     name="youtokentome",
-    version="1.0.2",
+    version="1.0.3-rc.1",
     packages=find_packages(),
     description="Unsupervised text tokenizer focused on computational efficiency",
     long_description=LONG_DESCRIPTION,

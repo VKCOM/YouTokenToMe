@@ -18,7 +18,7 @@ bool check_codepoint(uint32_t x) {
   return (x < 0xd800) || (0xdfff < x && x < 0x110000);
 }
 
-size_t utf_length(char ch) {
+uint64_t utf_length(char ch) {
   if ((static_cast<uint8_t>(ch) & 0x80u) == 0) {
     return 1;
   }
@@ -35,8 +35,8 @@ size_t utf_length(char ch) {
   return 0;
 }
 
-uint32_t chars_to_utf8(const char* begin, size_t size, size_t* utf8_len) {
-  size_t length = utf_length(begin[0]);
+uint32_t chars_to_utf8(const char* begin, uint64_t size, uint64_t* utf8_len) {
+  uint64_t length = utf_length(begin[0]);
   if (length == 1) {
     *utf8_len = 1;
     return static_cast<uint8_t>(begin[0]);
@@ -111,7 +111,7 @@ string encode_utf8(const vector<uint32_t>& text) {
 
 vector<uint32_t> decode_utf8(const char* begin, const char* end) {
   vector<uint32_t> decoded_text;
-  size_t utf8_len = 0;
+  uint64_t utf8_len = 0;
   bool invalid_input = false;
   for (; begin < end; begin += utf8_len) {
     uint32_t code_point = chars_to_utf8(begin, end - begin, &utf8_len);

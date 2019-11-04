@@ -41,14 +41,12 @@ jobs:
       os: osx
       osx_image: xcode11.2
       language: shell
-      before_install:
-        - brew update
-        - brew install gcc@8
+      compiler: clang
       env:
         - MACOSX_DEPLOYMENT_TARGET=10.14
         - CIBW_SKIP="cp27-* cp33-* cp34-* *win* *i686*"
-        - CXX="g++-8"
-        - CC="gcc-8"
+        - CXX="g++"
+        - CC="gcc"
 
 install:
   - pip install -U pip
