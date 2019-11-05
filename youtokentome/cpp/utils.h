@@ -39,7 +39,7 @@ struct SpecialTokens {
 
   bool taken_id(int id) const;
 
-  size_t n_special_tokens() const;
+  uint64_t n_special_tokens() const;
 };
 
 struct BpeConfig {
@@ -86,7 +86,7 @@ struct EncodingConfig {
 
 bool is_space(uint32_t ch);
 
-std::vector<std::string> read_lines_from_stdin(size_t batch_limit, size_t *processed);
+std::vector<std::string> read_lines_from_stdin(uint64_t batch_limit, uint64_t *processed);
 
 template<typename T>
 void write_to_stdout(const std::vector<std::vector<T>> &sentences, bool flush) {

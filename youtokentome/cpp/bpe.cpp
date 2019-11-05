@@ -58,7 +58,7 @@ struct VectorSegment {
 namespace std {
 template<>
 struct hash<vkcom::VectorSegment> {
-  size_t operator()(const vkcom::VectorSegment &x) const { return x.hash; }
+  uint64_t operator()(const vkcom::VectorSegment &x) const { return x.hash; }
 };
 }  // namespace std
 
@@ -72,7 +72,7 @@ Status fast_read_file_utf8(const string &file_name, string *file_content) {
     return Status(1, "Failed to open file: " + file_name);
   }
   while (true) {
-    size_t cur_size = file_content->size();
+    uint64_t cur_size = file_content->size();
     file_content->resize(cur_size + buf_size);
     int buf_len = fread((void *) (file_content->data() + cur_size), 1, buf_size, fin);
     if (buf_len < buf_size) {
@@ -102,13 +102,13 @@ uint64_t int2comb(uint32_t a, uint32_t b) {
 }
 
 struct MergeCandidate {
-  size_t count{0};
+  uint64_t count{0};
   uint32_t left_token{0};
   uint32_t right_token{0};
 
   MergeCandidate() = default;
 
-  MergeCandidate(size_t count, uint32_t left_token, uint32_t right_token) : count(count), left_token(left_token),
+  MergeCandidate(uint64_t count, uint32_t left_token, uint32_t right_token) : count(count), left_token(left_token),
                                                                             right_token(right_token) {}
 
   bool operator<(const MergeCandidate &other) const {
@@ -131,9 +131,9 @@ struct MergeCandidate {
 };
 
 struct Position {
-  size_t word_id, pos_id;
+  uint64_t word_id, pos_id;
 
-  Position(size_t word_id, size_t pos_id) : word_id(word_id), pos_id(pos_id) {}
+  Position(uint64_t word_id, uint64_t pos_id) : word_id(word_id), pos_id(pos_id) {}
 
   bool operator<(const Position &other) const {
     return word_id < other.word_id ||
@@ -148,7 +148,7 @@ int pairsInSeg(int x) {
 
 struct PositionsCnt {
   vector<Position> positions;
-  size_t cnt;
+  uint64_t cnt;
 };
 bool rule_intersection(BPE_Rule rule, uint32_t new_left, uint32_t new_right) {
   return rule.y == new_left || rule.x == new_right;
@@ -158,7 +158,7 @@ struct SmallObjectQueue {
 
   vector<vector<MergeCandidate>> queue;
   bool flag_started{false};
-  size_t _size{0};
+  uint64_t _size{0};
 
   SmallObjectQueue() = default;
 
@@ -214,16 +214,16 @@ struct SmallObjectQueue {
     _size--;
   }
 
-  size_t size() const {
+  uint64_t size() const {
     return _size;
   }
 };
 
 struct BigObjectQueue {
   vector<MergeCandidate> big_events;
-  size_t big_event_bound;
+  uint64_t big_event_bound;
 
-  BigObjectQueue(size_t big_event_bound) : big_event_bound(big_event_bound) {}
+  BigObjectQueue(uint64_t big_event_bound) : big_event_bound(big_event_bound) {}
 
   void push(const MergeCandidate &event) {
     big_events.push_back(event);
@@ -233,9 +233,9 @@ struct BigObjectQueue {
     return big_events.empty();
   }
 
-  bool top(std::function<size_t(uint64_t)> &check_cnt, MergeCandidate &ret, SmallObjectQueue *small_object_queue,
+  bool top(std::function<uint64_t(uint64_t)> &check_cnt, MergeCandidate &ret, SmallObjectQueue *small_object_queue,
            BPE_Rule last_rule) {
-    for (size_t i = 0; i < big_events.size();) {
+    for (uint64_t i = 0; i < big_events.size();) {
       if (!rule_intersection(last_rule, big_events[i].left_token, big_events[i].right_token)) {
         uint64_t comb = int2comb(big_events[i].left_token, big_events[i].right_token);
         assert(big_events[i].count >= check_cnt(comb));
@@ -272,7 +272,7 @@ struct BigObjectQueue {
     big_events.pop_back();
   }
 
-  size_t size() const {
+  uint64_t size() const {
     return big_events.size();
   }
 };
@@ -280,10 +280,10 @@ struct BigObjectQueue {
 struct PriorityQueue {
   SmallObjectQueue small_queue;
   BigObjectQueue big_queue;
-  size_t big_event_bound;
+  uint64_t big_event_bound;
 
-  explicit PriorityQueue(size_t dataset_size) : big_queue(static_cast<size_t>(sqrt(dataset_size))),
-                                                big_event_bound(static_cast<size_t>(sqrt(dataset_size))) {}
+  explicit PriorityQueue(uint64_t dataset_size) : big_queue(static_cast<uint64_t>(sqrt(dataset_size))),
+                                                big_event_bound(static_cast<uint64_t>(sqrt(dataset_size))) {}
 
   void push(const MergeCandidate &event) {
     if (event.count == 0) {
@@ -300,7 +300,7 @@ struct PriorityQueue {
     return big_queue.empty() && small_queue.empty();
   }
 
-  MergeCandidate top(std::function<size_t(uint64_t)> &check_cnt, BPE_Rule last_rule) {
+  MergeCandidate top(std::function<uint64_t(uint64_t)> &check_cnt, BPE_Rule last_rule) {
     MergeCandidate res;
     bool has_top = big_queue.top(check_cnt, res, &small_queue, last_rule);
     if (has_top) {
@@ -317,23 +317,23 @@ struct PriorityQueue {
     }
   }
 
-  size_t size() const {
+  uint64_t size() const {
     return big_queue.size() + small_queue.size();
   }
 };
 
 ska::flat_hash_map<uint32_t, uint32_t> compute_alphabet_helper(
-    const ska::flat_hash_map<uint32_t, size_t> &char_cnt, size_t data_len,
+    const ska::flat_hash_map<uint32_t, uint64_t> &char_cnt, uint64_t data_len,
     ska::flat_hash_set<uint32_t> &removed_chars, const BpeConfig &bpe_config) {
-  vector<std::pair<size_t, uint32_t>> frequencies;
+  vector<std::pair<uint64_t, uint32_t>> frequencies;
 
   for (auto x : char_cnt) {
     frequencies.emplace_back(x.second, x.first);
   }
   sort(frequencies.begin(), frequencies.end());
 
-  size_t cur = 0;
-  size_t n_removed = 0;
+  uint64_t cur = 0;
+  uint64_t n_removed = 0;
   for (; cur < frequencies.size() &&
       (data_len - n_removed - frequencies[cur].first) >
           data_len * bpe_config.character_coverage;
@@ -347,10 +347,10 @@ ska::flat_hash_map<uint32_t, uint32_t> compute_alphabet_helper(
             << std::endl;
 
   ska::flat_hash_map<uint32_t, uint32_t> char2id;
-  size_t used_ids = bpe_config.special_tokens.n_special_tokens();
+  uint64_t used_ids = bpe_config.special_tokens.n_special_tokens();
   char2id[SPACE_TOKEN] = used_ids++;
 
-  for (size_t i = 0; i < cur; i++) {
+  for (uint64_t i = 0; i < cur; i++) {
     removed_chars.insert(frequencies[i].second);
   }
 
@@ -376,7 +376,7 @@ void remove_rare_chars(vector<uint32_t> &data,
 
 struct WordCount {
   vector<uint32_t> word;
-  size_t cnt;
+  uint64_t cnt;
 };
 
 ska::flat_hash_map<VectorSegment, WordCount> compute_word_count_helper(
@@ -437,9 +437,9 @@ struct NodeEncoder {
 void build_linked_list(const vector<WordCount> &word_cnt,
                        vector<vector<NodeEncoder>> &list,
                        ska::flat_hash_map<uint64_t, vector<Position>> &pair2pos,
-                       ska::flat_hash_map<uint64_t, size_t> &pair2cnt) {
+                       ska::flat_hash_map<uint64_t, uint64_t> &pair2cnt) {
   list.resize(word_cnt.size());
-  for (size_t i = 0; i < word_cnt.size(); i++) {
+  for (uint64_t i = 0; i < word_cnt.size(); i++) {
     for (uint32_t ch : word_cnt[i].word) {
       if (!list[i].empty() && list[i].back().val == ch) {
         list[i].back().seg_len++;
@@ -450,7 +450,7 @@ void build_linked_list(const vector<WordCount> &word_cnt,
     }
 
     list[i].back().next = -1;
-    for (size_t j = 0; j < list[i].size(); j++) {
+    for (uint64_t j = 0; j < list[i].size(); j++) {
       if (j + 1 < list[i].size()) {
         uint64_t comb = int2comb(list[i][j].val, list[i][j + 1].val);
         auto it = pair2pos.find(comb);
@@ -466,7 +466,7 @@ void build_linked_list(const vector<WordCount> &word_cnt,
       if (list[i][j].seg_len > 1) {
         uint64_t comb = int2comb(list[i][j].val, list[i][j].val);
         auto it = pair2pos.find(comb);
-        size_t cc = word_cnt[i].cnt * pairsInSeg(list[i][j].seg_len);
+        uint64_t cc = word_cnt[i].cnt * pairsInSeg(list[i][j].seg_len);
         if (it == pair2pos.end()) {
           pair2pos[comb] = {{i, j}};
         } else {
@@ -517,15 +517,15 @@ void init_recipe(const ska::flat_hash_map<uint32_t, uint32_t> &char2id,
 }
 
 void worker_doing_merge(
-    size_t thread_id, vector<vector<NodeEncoder>> &lists_of_tokens,
-    vector<ska::flat_hash_map<uint64_t, size_t>> &pair2cnt_g,
+    uint64_t thread_id, vector<vector<NodeEncoder>> &lists_of_tokens,
+    vector<ska::flat_hash_map<uint64_t, uint64_t>> &pair2cnt_g,
     ska::flat_hash_map<uint64_t, vector<Position>> &pair2pos,
-    vector<size_t> &word_freq, vector<std::mutex> &mt,
+    vector<uint64_t> &word_freq, vector<std::mutex> &mt,
     vector<std::condition_variable> &cv, vector<BPE_Rule> &task_order,
     vector<std::atomic_bool> &thread_use_hs,
     ska::flat_hash_map<uint32_t, uint32_t> &char2id,
-    vector<vector<ska::flat_hash_map<uint32_t, size_t>>> &left_tokens_submit,
-    vector<vector<ska::flat_hash_map<uint32_t, size_t>>> &right_tokens_submit,
+    vector<vector<ska::flat_hash_map<uint32_t, uint64_t>>> &left_tokens_submit,
+    vector<vector<ska::flat_hash_map<uint32_t, uint64_t>>> &right_tokens_submit,
     std::atomic<uint32_t> &real_n_tokens,
     vector<std::atomic<uint32_t>> &results_ready, const BpeConfig &bpe_config,
     std::mutex &main_loop_mt, std::condition_variable &main_loop_cv) {
@@ -535,13 +535,13 @@ void worker_doing_merge(
 
   uint32_t cur_token_rule =
       char2id.size() + bpe_config.special_tokens.n_special_tokens();
-  auto get_pair_code = [&](size_t word_id, size_t p1) {
+  auto get_pair_code = [&](uint64_t word_id, uint64_t p1) {
     int p2 = lists_of_tokens[word_id][p1].next;
     return int2comb(lists_of_tokens[word_id][p1].val,
                     lists_of_tokens[word_id][p2].val);
   };
 
-  auto get_self_code = [&](size_t word_id, size_t p1) {
+  auto get_self_code = [&](uint64_t word_id, uint64_t p1) {
     return int2comb(lists_of_tokens[word_id][p1].val,
                     lists_of_tokens[word_id][p1].val);
   };
@@ -550,7 +550,7 @@ void worker_doing_merge(
     pair2cnt[get_pair_code(word_id, pos_id)] -= word_freq[word_id];
   };
 
-  auto add_pair = [&](size_t word_id, size_t pos_id) {
+  auto add_pair = [&](uint64_t word_id, uint64_t pos_id) {
     uint64_t comb = get_pair_code(word_id, pos_id);
     auto it = pair2pos.find(comb);
     if (it == pair2pos.end()) {
@@ -561,18 +561,18 @@ void worker_doing_merge(
     pair2cnt[comb] += word_freq[word_id];
   };
 
-  auto add_empty_pair = [&](size_t word_id, size_t pos_id) {
+  auto add_empty_pair = [&](uint64_t word_id, uint64_t pos_id) {
     auto it = pair2pos.find(get_pair_code(word_id, pos_id));
     assert(it != pair2pos.end());
     it->second.emplace_back(word_id, pos_id);
   };
 
-  auto add_self_pair = [&](size_t word_id, size_t pos_id) {
+  auto add_self_pair = [&](uint64_t word_id, uint64_t pos_id) {
     int seg_len = lists_of_tokens[word_id][pos_id].seg_len;
     assert(seg_len >= 2);
     uint64_t comb = get_self_code(word_id, pos_id);
     auto it = pair2pos.find(comb);
-    size_t real_cnt = word_freq[word_id] * pairsInSeg(seg_len);
+    uint64_t real_cnt = word_freq[word_id] * pairsInSeg(seg_len);
     if (it == pair2pos.end()) {
       pair2pos[comb] = {{word_id, pos_id}};
       assert(pair2pos[comb].size() == 1);
@@ -582,14 +582,14 @@ void worker_doing_merge(
     pair2cnt[comb] += real_cnt;
   };
 
-  auto add_merge_compensation = [&](size_t word_id, size_t pos_id,
+  auto add_merge_compensation = [&](uint64_t word_id, uint64_t pos_id,
                                     int score_diff) {
     assert(score_diff > 0);
     uint64_t comb = get_self_code(word_id, pos_id);
     pair2cnt[comb] -= score_diff * word_freq[word_id];
   };
 
-  auto seg_len_decrement = [&](size_t word_id, size_t pos_id) {
+  auto seg_len_decrement = [&](uint64_t word_id, uint64_t pos_id) {
     int seg_len = lists_of_tokens[word_id][pos_id].seg_len;
     assert(seg_len >= 2);
     lists_of_tokens[word_id][pos_id].seg_len--;
@@ -600,14 +600,14 @@ void worker_doing_merge(
     pair2cnt[comb] -= word_freq[word_id];
   };
 
-  auto self_full_remove = [&](size_t word_id, size_t pos_id) {
+  auto self_full_remove = [&](uint64_t word_id, uint64_t pos_id) {
     uint64_t comb = get_self_code(word_id, pos_id);
     uint32_t real_cnt = word_freq[word_id] *
         pairsInSeg(lists_of_tokens[word_id][pos_id].seg_len);
     pair2cnt[comb] -= real_cnt;
   };
 
-  auto try_merge = [&](size_t word_id, size_t pos1, size_t pos2) {
+  auto try_merge = [&](uint64_t word_id, uint64_t pos1, uint64_t pos2) {
     vector<NodeEncoder> &cur_list = lists_of_tokens[word_id];
     if (cur_list[pos1].val == cur_list[pos2].val) {
       int score_before =
@@ -868,12 +868,12 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
                              BpeConfig bpe_config, BPEState *bpe_state) {
   vector<std::thread> threads;
   assert(bpe_config.n_threads >= 1 || bpe_config.n_threads == -1);
-  size_t n_threads = bpe_config.n_threads;
+  uint64_t n_threads = bpe_config.n_threads;
 
-  vector<size_t> split_pos;
+  vector<uint64_t> split_pos;
   split_pos.push_back(0);
-  for (size_t i = 1; i <= n_threads; i++) {
-    size_t candidate = text_utf8.size() * i / n_threads;
+  for (uint64_t i = 1; i <= n_threads; i++) {
+    uint64_t candidate = text_utf8.size() * i / n_threads;
     for (; candidate < text_utf8.size() && !is_space(text_utf8[candidate]);
            candidate++) {
     }
@@ -881,13 +881,13 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
     split_pos.push_back(candidate);
   }
 
-  vector<ska::flat_hash_map<uint32_t, size_t>> shared_char_cnt(n_threads);
+  vector<ska::flat_hash_map<uint32_t, uint64_t>> shared_char_cnt(n_threads);
 
   vector<std::mutex> mt(n_threads);
   vector<std::condition_variable> cv(n_threads);
   vector<char> thread_finished(n_threads, 0);
   vector<char> main_finished(n_threads, 0);
-  vector<size_t> text_len(n_threads);
+  vector<uint64_t> text_len(n_threads);
 
   ska::flat_hash_set<uint32_t> removed_chars;
   ska::flat_hash_map<uint32_t, uint32_t> char2id;
@@ -897,10 +897,10 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
 
   ska::flat_hash_map<uint32_t, vector<uint32_t>> recipe;
   ska::flat_hash_map<uint32_t, string> recipe_s;
-  vector<ska::flat_hash_map<uint64_t, size_t>> pair2cnt_g(n_threads);
+  vector<ska::flat_hash_map<uint64_t, uint64_t>> pair2cnt_g(n_threads);
   ska::flat_hash_map<uint64_t, vector<Position>> pair2pos;
   PriorityQueue merge_order(1);
-  vector<size_t> split_word_cnt;
+  vector<uint64_t> split_word_cnt;
   vector<WordCount> word_cnt_global;
 
   auto comb2int = [](uint64_t a, uint32_t &b, uint32_t &c) {
@@ -908,12 +908,12 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
     c = static_cast<uint32_t>(a & UINT32_MAX);
   };
 
-  vector<vector<ska::flat_hash_map<uint32_t, size_t>>> left_tokens_submit(
-      2, vector<ska::flat_hash_map<uint32_t, size_t>>(n_threads));
-  vector<vector<ska::flat_hash_map<uint32_t, size_t>>> right_tokens_submit(
-      2, vector<ska::flat_hash_map<uint32_t, size_t>>(n_threads));
+  vector<vector<ska::flat_hash_map<uint32_t, uint64_t>>> left_tokens_submit(
+      2, vector<ska::flat_hash_map<uint32_t, uint64_t>>(n_threads));
+  vector<vector<ska::flat_hash_map<uint32_t, uint64_t>>> right_tokens_submit(
+      2, vector<ska::flat_hash_map<uint32_t, uint64_t>>(n_threads));
   vector<std::atomic<uint32_t>> results_ready(n_threads);
-  for (size_t i = 0; i < n_threads; i++) {
+  for (uint64_t i = 0; i < n_threads; i++) {
     results_ready[i] = 0;
   }
 
@@ -927,14 +927,14 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
   std::mutex main_loop_mt;
   std::condition_variable main_loop_cv;
 
-  for (size_t i = 0; i < n_threads; i++) {
+  for (uint64_t i = 0; i < n_threads; i++) {
     threads.emplace_back(
-        [&](size_t thread_id) {
+        [&](uint64_t thread_id) {
           // threads are working 1
 
           vector<vector<NodeEncoder>> lists_of_tokens;
           ska::flat_hash_map<uint64_t, vector<Position>> pair2pos;
-          vector<size_t> word_freq;
+          vector<uint64_t> word_freq;
 
           auto thread_awake_main = [&]() {
             {
@@ -951,7 +951,7 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
           };
 
           vector<uint32_t> utf_code_points;
-          ska::flat_hash_map<uint32_t, size_t> char_cnt;
+          ska::flat_hash_map<uint32_t, uint64_t> char_cnt;
           utf_code_points =
               decode_utf8(text_utf8.data() + split_pos[thread_id],
                           text_utf8.data() + split_pos[thread_id + 1]);
@@ -1007,7 +1007,7 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
   }
 
   auto main_wait_threads = [&]() {
-    for (size_t i = 0; i < n_threads; i++) {
+    for (uint64_t i = 0; i < n_threads; i++) {
       std::unique_lock<std::mutex> lk(mt[i]);
       cv[i].wait(lk, [&] { return thread_finished[i]; });
       thread_finished[i] = 0;
@@ -1015,11 +1015,11 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
   };
 
   auto main_awake_threads = [&]() {
-    for (size_t i = 0; i < n_threads; i++) {
+    for (uint64_t i = 0; i < n_threads; i++) {
       std::lock_guard<std::mutex> lk(mt[i]);
       main_finished[i] = 1;
     }
-    for (size_t i = 0; i < n_threads; i++) {
+    for (uint64_t i = 0; i < n_threads; i++) {
       cv[i].notify_one();
     }
   };
@@ -1027,7 +1027,7 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
   main_wait_threads();
 
   // main is working  1
-  for (size_t i = 1; i < n_threads; i++) {
+  for (uint64_t i = 1; i < n_threads; i++) {
     for (auto x : shared_char_cnt[i]) {
       shared_char_cnt[0][x.first] += x.second;
     }
@@ -1043,7 +1043,7 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
   main_wait_threads();
   // main is working 2
 
-  for (size_t i = 1; i < n_threads; i++) {
+  for (uint64_t i = 1; i < n_threads; i++) {
     for (const auto &x : hash2wordcnt[i]) {
       auto it = hash2wordcnt[0].find(x.first);
       if (it == hash2wordcnt[0].end()) {
@@ -1060,9 +1060,9 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
       [](const std::pair<VectorSegment, WordCount> &x) { return x.second; });
   merge_order = PriorityQueue(text_len[0]);
 
-  size_t used_ids =
+  uint64_t used_ids =
       char2id.size() + bpe_config.special_tokens.n_special_tokens();
-  if (used_ids > (size_t) n_tokens) {
+  if (used_ids > (uint64_t) n_tokens) {
     string error_message = "Incorrect arguments. Vocabulary size too small. Set vocab_size>=";
     error_message += std::to_string(used_ids) + ".  Current value for vocab_size=" + std::to_string(n_tokens);
     error_flag = 1;
@@ -1076,7 +1076,7 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
   init_recipe(char2id, recipe, recipe_s);
 
   split_word_cnt.push_back(0);
-  for (size_t i = 1; i <= n_threads; i++) {
+  for (uint64_t i = 1; i <= n_threads; i++) {
     split_word_cnt.push_back(word_cnt_global.size() * i / n_threads);
   }
 
@@ -1088,7 +1088,7 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
 
   ska::flat_hash_map<uint64_t, uint64_t> real_pair_cnt;
 
-  for (size_t i = 0; i < n_threads; i++) {
+  for (uint64_t i = 0; i < n_threads; i++) {
     for (const auto &x : pair2cnt_g[i]) {
       real_pair_cnt[x.first] += x.second;
     }
@@ -1109,9 +1109,9 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
     return new_recipe;
   };
 
-  std::function<size_t(uint64_t)> check_cnt = [&](uint64_t mask) {
-    size_t ret = 0;
-    for (size_t i = 0; i < n_threads; i++) {
+  std::function<uint64_t(uint64_t)> check_cnt = [&](uint64_t mask) {
+    uint64_t ret = 0;
+    for (uint64_t i = 0; i < n_threads; i++) {
       auto it = pair2cnt_g[i].find(mask);
       if (it != pair2cnt_g[i].end()) {
         ret += it->second;
@@ -1120,32 +1120,32 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
     return ret;
   };
 
-  size_t finished_cur = used_ids;
-  size_t last_failed_try = 0;
+  uint64_t finished_cur = used_ids;
+  uint64_t last_failed_try = 0;
 
-  ska::flat_hash_map<uint32_t, size_t> all_res;
+  ska::flat_hash_map<uint32_t, uint64_t> all_res;
   vector<char> local_check_list(n_threads);
-  ska::flat_hash_map<uint32_t, size_t> global_ht_update_left;
-  ska::flat_hash_map<uint32_t, size_t> global_ht_update_right;
+  ska::flat_hash_map<uint32_t, uint64_t> global_ht_update_left;
+  ska::flat_hash_map<uint32_t, uint64_t> global_ht_update_right;
 
   int inter_fail = 0;
   int equal_fail = 0;
   vector<std::pair<int, double>> progress_debug;
-  while (used_ids < (size_t) n_tokens) {
+  while (used_ids < (uint64_t) n_tokens) {
     uint32_t x, y, z;
     assert(finished_cur <= used_ids && used_ids <= finished_cur + 2);
     bool progress = false;
 
-    if (used_ids < (size_t) n_tokens && used_ids - finished_cur < 2 &&
+    if (used_ids < (uint64_t) n_tokens && used_ids - finished_cur < 2 &&
         last_failed_try < finished_cur) {
       progress = true;
-      for (size_t i = 0; i < n_threads; i++) {
+      for (uint64_t i = 0; i < n_threads; i++) {
         thread_use_hs[i] = false;
       }
       {
         vector<std::lock_guard<std::mutex>> lg(mt.begin(), mt.end());
 
-        size_t real_cnt = 0;
+        uint64_t real_cnt = 0;
         while (true) {
           if (merge_order.empty()) {
             if (finished_cur == used_ids) {
@@ -1234,7 +1234,7 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
           rules.emplace_back(x, y, z);
         }
 
-        for (size_t i = 0; i < n_threads; i++) {
+        for (uint64_t i = 0; i < n_threads; i++) {
           thread_use_hs[i] = true;
         }
       }
@@ -1249,7 +1249,7 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
     // collect results
 
     bool full_epoch = true;
-    for (size_t i = 0; i < n_threads; i++) {
+    for (uint64_t i = 0; i < n_threads; i++) {
       if (!local_check_list[i]) {
         if (results_ready[i] >= finished_cur) {
           progress = true;
@@ -1285,7 +1285,7 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
     if (!progress) {
       std::unique_lock<std::mutex> ul(main_loop_mt);
       main_loop_cv.wait(ul, [&] {
-        for (size_t i = 0; i < n_threads; i++) {
+        for (uint64_t i = 0; i < n_threads; i++) {
           if (!local_check_list[i] && results_ready[i] >= finished_cur)
             return true;
         }
@@ -1309,7 +1309,7 @@ void build_linked_list(
     const vector<WordCount> &word_cnt, vector<vector<NodeEncoder>> &list,
     ska::flat_hash_map<uint64_t, PositionsCnt> &pair2poscnt) {
   list.resize(word_cnt.size());
-  for (size_t i = 0; i < word_cnt.size(); i++) {
+  for (uint64_t i = 0; i < word_cnt.size(); i++) {
     for (uint32_t ch : word_cnt[i].word) {
       if (!list[i].empty() && list[i].back().val == ch) {
         list[i].back().seg_len++;
@@ -1320,7 +1320,7 @@ void build_linked_list(
     }
 
     list[i].back().next = -1;
-    for (size_t j = 0; j < list[i].size(); j++) {
+    for (uint64_t j = 0; j < list[i].size(); j++) {
       if (j + 1 < list[i].size()) {
         uint64_t comb = int2comb(list[i][j].val, list[i][j + 1].val);
         auto it = pair2poscnt.find(comb);
@@ -1336,7 +1336,7 @@ void build_linked_list(
       if (list[i][j].seg_len > 1) {
         uint64_t comb = int2comb(list[i][j].val, list[i][j].val);
         auto it = pair2poscnt.find(comb);
-        size_t cc = word_cnt[i].cnt * pairsInSeg(list[i][j].seg_len);
+        uint64_t cc = word_cnt[i].cnt * pairsInSeg(list[i][j].seg_len);
         if (it == pair2poscnt.end()) {
           pair2poscnt[comb] = {{{i, j}}, cc};
         } else {
@@ -1351,7 +1351,7 @@ void build_linked_list(
 ska::flat_hash_map<uint32_t, uint32_t> compute_alphabet(
     const vector<uint32_t> &data, ska::flat_hash_set<uint32_t> &removed_chars,
     const BpeConfig &bpe_config) {
-  ska::flat_hash_map<uint32_t, size_t> char_cnt;
+  ska::flat_hash_map<uint32_t, uint64_t> char_cnt;
   for (auto ch : data) {
     if (!is_space(ch)) {
       char_cnt[ch]++;
@@ -1393,7 +1393,7 @@ Status check_config(BpeConfig &bpe_config, int vocab_size) {
   }
 
   ska::flat_hash_set<int> ids;
-  size_t cnt_add = 0;
+  uint64_t cnt_add = 0;
   if (bpe_config.special_tokens.pad_id != -1) {
     ids.insert(bpe_config.special_tokens.pad_id);
     cnt_add++;
@@ -1464,7 +1464,7 @@ DecodeResult BaseEncoder::encode_sentence(const std::string &sentence_utf8,
     uint32_t token_id;
     int prev, next;
 
-    NodeDecoder(uint32_t _val, size_t cur_pos)
+    NodeDecoder(uint32_t _val, uint64_t cur_pos)
         : token_id(_val),
           prev(static_cast<int>(cur_pos) - 1),
           next(static_cast<int>(cur_pos) + 1) {}
@@ -1539,19 +1539,19 @@ DecodeResult BaseEncoder::encode_sentence(const std::string &sentence_utf8,
 
     std::priority_queue<MergeEvent2> queue;
 
-    auto pair_code = [&](size_t first_pos) {
+    auto pair_code = [&](uint64_t first_pos) {
       auto second_pos = list[first_pos].next;
       return int2comb(list[first_pos].token_id, list[second_pos].token_id);
     };
 
-    auto push_in_queue_if_rule_exist = [&](size_t pos) {
+    auto push_in_queue_if_rule_exist = [&](uint64_t pos) {
       auto it = rule2id.find(pair_code(pos));
       if (it != rule2id.end()) {
         queue.push({it->second, static_cast<int>(pos)});
       }
     };
 
-    for (size_t j = 0; j + 1 < list.size(); j++) {
+    for (uint64_t j = 0; j + 1 < list.size(); j++) {
       push_in_queue_if_rule_exist(j);
     }
 
@@ -1703,10 +1703,10 @@ Status BaseEncoder::encode_parallel(
   }
 
   decoder_results->assign(sentences.size(), DecodeResult());
-  if (sentences.size() <= static_cast<size_t>(n_threads) * 3 ||
+  if (sentences.size() <= static_cast<uint64_t>(n_threads) * 3 ||
       n_threads == 1) {  // Not too many sentences. It's better to solve it
     // without threads.
-    for (size_t i = 0; i < sentences.size(); i++) {
+    for (uint64_t i = 0; i < sentences.size(); i++) {
       decoder_results->at(i) = encode_sentence(sentences[i], encoding_config, output_type);
     }
     return Status();
@@ -1714,13 +1714,13 @@ Status BaseEncoder::encode_parallel(
   vector<std::thread> threads;
   for (int i = 0; i < n_threads; i++) {
     threads.emplace_back(
-        [&](size_t this_thread) {
-          size_t tasks_for_thread =
+        [&](uint64_t this_thread) {
+          uint64_t tasks_for_thread =
               (sentences.size() + n_threads - 1) / n_threads;
-          size_t first_task = tasks_for_thread * this_thread;
-          size_t last_task =
-              std::min(tasks_for_thread * (this_thread + 1), sentences.size());
-          for (size_t j = first_task; j < last_task; j++) {
+          uint64_t first_task = tasks_for_thread * this_thread;
+          uint64_t last_task =
+              std::min(tasks_for_thread * (this_thread + 1), static_cast<uint64_t>(sentences.size()));
+          for (uint64_t j = first_task; j < last_task; j++) {
             decoder_results->at(j) =
                 encode_sentence(sentences[j], encoding_config, output_type);
           }
@@ -1744,7 +1744,7 @@ Status BaseEncoder::encode_as_ids(const vector<string> &sentences, vector<vector
     return status;
   }
   ids->assign(decode_results.size(), vector<int>());
-  for (size_t i = 0; i < decode_results.size(); i++) {
+  for (uint64_t i = 0; i < decode_results.size(); i++) {
     ids->at(i) = move(decode_results[i].ids);
   }
   return Status();
@@ -1762,7 +1762,7 @@ Status BaseEncoder::encode_as_subwords(
     return status;
   }
   subwords->assign(decode_results.size(), vector<string>());
-  for (size_t i = 0; i < decode_results.size(); i++) {
+  for (uint64_t i = 0; i < decode_results.size(); i++) {
     subwords->at(i) = move(decode_results[i].pieces);
   }
   return Status();
@@ -1898,7 +1898,7 @@ void BaseEncoder::vocab_cli(bool verbose) const {
     }
   }
 
-  for (size_t i = 0; i < n_tokens; i++) {
+  for (uint64_t i = 0; i < n_tokens; i++) {
     string token_z;
     Status status = id_to_subword(i, &token_z);
     assert(status.ok());
@@ -1964,9 +1964,9 @@ Status BaseEncoder::encode_cli(const string &output_type_str, bool stream,
     }
   } else {
     time_check("");
-    const size_t batch_limit = 10 * 1024 * 1024;
-    size_t total_progress = 0;
-    size_t processed;
+    const uint64_t batch_limit = 10 * 1024 * 1024;
+    uint64_t total_progress = 0;
+    uint64_t processed;
     std::cerr << "n_threads: " << n_threads << std::endl;
     int chars_remove = 0;
     do {
