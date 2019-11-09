@@ -48,6 +48,7 @@ class BPE:
         bos: bool = False,
         eos: bool = False,
         reverse: bool = False,
+        dropout_prob: float = 0,
     ) -> Union[List[List[int]], List[List[str]]]:
         if not isinstance(output_type, OutputType):
             raise TypeError(
@@ -62,6 +63,7 @@ class BPE:
             bos=bos,
             eos=eos,
             reverse=reverse,
+            dropout_prob=dropout_prob,
         )
 
     def vocab_size(self) -> int:

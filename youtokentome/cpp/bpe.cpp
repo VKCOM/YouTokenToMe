@@ -1610,12 +1610,11 @@ DecodeResult BaseEncoder::encode_sentence(const std::string &sentence_utf8,
     };
 
     std::unique_ptr<BasePriorityQueue<MergeEvent2>> queue(nullptr);
-    double skip_prob = 0;
-    if (skip_prob == 0) {
+    if (encoding_config.dropout_prob == 0) {
       queue = std::make_unique<STLQueue<MergeEvent2>>();
     }
     else {
-      queue = std::make_unique<DropoutQueue<MergeEvent2>>(skip_prob);
+      queue = std::make_unique<DropoutQueue<MergeEvent2>>(encoding_config.dropout_prob);
     }
 
     auto push_in_queue_if_rule_exist = [&](uint64_t pos) {
@@ -1811,8 +1810,8 @@ Status BaseEncoder::encode_parallel(
 
 Status BaseEncoder::encode_as_ids(const vector<string> &sentences, vector<vector<int>> *ids,
                                   bool bos, bool eos,
-                                  bool reverse) const {
-  EncodingConfig encoding_config = {bos, eos, reverse};
+                                  bool reverse, double dropout_prob) const {
+  EncodingConfig encoding_config = {bos, eos, reverse, dropout_prob};
 
   std::vector<DecodeResult> decode_results;
   Status status = encode_parallel(sentences, encoding_config, ID, &decode_results);
@@ -1829,9 +1828,9 @@ Status BaseEncoder::encode_as_ids(const vector<string> &sentences, vector<vector
 Status BaseEncoder::encode_as_subwords(
     const vector<string> &sentences,
     vector<vector<string>> *subwords,
-    bool bos, bool eos, bool reverse) const {
+    bool bos, bool eos, bool reverse, double dropout_prob) const {
   time_check("");
-  EncodingConfig encoding_config = {bos, eos, reverse};
+  EncodingConfig encoding_config = {bos, eos, reverse, dropout_prob};
   std::vector<DecodeResult> decode_results;
   Status status = encode_parallel(sentences, encoding_config, SUBWORD, &decode_results);
   if (!status.ok()) {
@@ -2006,7 +2005,7 @@ void BaseEncoder::vocab_cli(bool verbose) const {
 }
 
 Status BaseEncoder::encode_cli(const string &output_type_str, bool stream,
-                               bool bos, bool eos, bool reverse) const {
+                               bool bos, bool eos, bool reverse, double dropout_prob) const {
   std::ios_base::sync_with_stdio(false);
   OutputType output_type;
   if (output_type_str == "id") {
@@ -2020,7 +2019,7 @@ Status BaseEncoder::encode_cli(const string &output_type_str, bool stream,
       string sentence;
       while (getline(std::cin, sentence)) {
         vector<vector<string>> subwords;
-        Status status = encode_as_subwords({sentence}, &subwords, bos, eos, reverse);
+        Status status = encode_as_subwords({sentence}, &subwords, bos, eos, reverse, dropout_prob);
         if (!status.ok()) {
           return status;
         }
@@ -2031,7 +2030,7 @@ Status BaseEncoder::encode_cli(const string &output_type_str, bool stream,
       string sentence;
       while (getline(std::cin, sentence)) {
         vector<vector<int>> ids;
-        Status status = encode_as_ids({sentence}, &ids, bos, eos, reverse);
+        Status status = encode_as_ids({sentence}, &ids, bos, eos, reverse, dropout_prob);
         if (!status.ok()) {
           return status;
         }
@@ -2050,7 +2049,7 @@ Status BaseEncoder::encode_cli(const string &output_type_str, bool stream,
       auto sentences = read_lines_from_stdin(batch_limit, &processed);
       if (output_type == SUBWORD) {
         vector<vector<string>> subwords;
-        Status status = encode_as_subwords(sentences, &subwords, bos, eos, reverse);
+        Status status = encode_as_subwords(sentences, &subwords, bos, eos, reverse, dropout_prob);
         if (!status.ok()) {
           return status;
         }
@@ -2058,7 +2057,7 @@ Status BaseEncoder::encode_cli(const string &output_type_str, bool stream,
       } else {
         assert(output_type == ID);
         vector<vector<int>> ids;
-        Status status = encode_as_ids(sentences, &ids, bos, eos, reverse);
+        Status status = encode_as_ids(sentences, &ids, bos, eos, reverse, dropout_prob);
         if (!status.ok()) {
           return status;
         }

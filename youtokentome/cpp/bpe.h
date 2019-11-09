@@ -38,13 +38,13 @@ class BaseEncoder {
 
   Status encode_as_ids(
       const std::vector<std::string> &sentences, std::vector<std::vector<int>> *ids, bool bos = false,
-      bool eos = false, bool reverse = false) const;
+      bool eos = false, bool reverse = false, double dropout_prob=0) const;
 
   Status encode_as_subwords(
       const std::vector<std::string> &sentences,
       std::vector<std::vector<std::string>> *subwords,
       bool bos = false,
-      bool eos = false, bool reverse = false) const;
+      bool eos = false, bool reverse = false, double dropout_prob=0) const;
 
   Status id_to_subword(int id, std::string *subword, bool replace_space = false) const;
 
@@ -61,7 +61,7 @@ class BaseEncoder {
   std::vector<std::string> vocabulary() const;
 
   Status encode_cli(const std::string &output_type, bool stream, bool bos = false,
-                    bool eos = false, bool reverse = false) const;
+                    bool eos = false, bool reverse = false, double dropout_prob = 0) const;
 
   Status decode_cli() const;
 

@@ -2,17 +2,19 @@ import io
 import os
 
 from setuptools import Extension, find_packages, setup
+from Cython.Build import cythonize
 
 extensions = [
     Extension(
         "_youtokentome_cython",
         [
-            "youtokentome/cpp/yttm.cpp",
+            # "youtokentome/cpp/yttm.cpp",
+            "youtokentome/cpp/yttm.pyx",
             "youtokentome/cpp/bpe.cpp",
             "youtokentome/cpp/utils.cpp",
             "youtokentome/cpp/utf8.cpp",
         ],
-        extra_compile_args=["-std=c++11", "-pthread", "-O3"],
+        extra_compile_args=["-std=c++14", "-pthread", "-O3"],
         language="c++",
     )
 ]
@@ -47,5 +49,5 @@ setup(
         "Programming Language :: Cython",
         "Programming Language :: C++",
     ],
-    ext_modules=extensions,
+    ext_modules=cythonize(extensions),
 )

@@ -96,9 +96,9 @@ def bpe(data, model, vocab_size, coverage, n_threads, pad_id, unk_id, bos_id, eo
     "--stream", is_flag=True, help="Process each line before reading the next one."
 )
 @click.option(
-    "--dropout_prob", type=click.FLOAT, help="Process each line before reading the next one."
+    "--dropout_prob", type=click.FLOAT, default=0, show_default=True, help="Process each line before reading the next one."
 )
-def encode(model, output_type, n_threads, bos, eos, reverse, stream):
+def encode(model, output_type, n_threads, bos, eos, reverse, stream, dropout_prob):
     """Encode text to ids or subwords."""
     output_type = output_type.lower()
     if output_type != "id" and output_type != "subword":
@@ -113,7 +113,7 @@ def encode(model, output_type, n_threads, bos, eos, reverse, stream):
         )
 
     bpe = yttmc.BPE(model, n_threads)
-    bpe.encode_cli(output_type, stream, bos, eos, reverse)
+    bpe.encode_cli(output_type, stream, bos, eos, reverse, dropout_prob)
 
 
 @click.command()
