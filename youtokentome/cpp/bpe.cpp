@@ -15,6 +15,7 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <random>
 
 #include "third_party/flat_hash_map.h"
 #include "utf8.h"
@@ -1457,6 +1458,71 @@ Status train_bpe(const string &input_path, const string &model_path,
   return Status();
 }
 
+
+template<typename T>
+class BasePriorityQueue {
+ public:
+  virtual void push(T x) = 0;
+  virtual bool pop(T& x) = 0;
+  virtual ~BasePriorityQueue() {}
+};
+
+template<typename T>
+class STLQueue : public BasePriorityQueue<T> {
+  std::priority_queue<T> q;
+  void push(T x) override {
+    q.push(x);
+  }
+  bool pop(T& x) override {
+    if (q.empty()) {
+      return false;
+    }
+    x = q.top();
+    q.pop();
+    return true;
+  }
+};
+
+std::mt19937 rnd;
+
+template<typename T>
+class DropoutQueue : public BasePriorityQueue<T> {
+  double skip_prob;
+  std::uniform_real_distribution<> dist;
+  std::priority_queue<T> q;
+  vector<T> skipped_elements;
+ public:
+  explicit DropoutQueue(double _skip_prob):skip_prob(_skip_prob), dist(std::uniform_real_distribution<>(0, 1))  {}
+  void push(T x) override {
+    q.push(x);
+  }
+  bool pop(T& x) override {
+    assert(skipped_elements.empty());
+    while (true) {
+      if (q.empty()) {
+        for (auto y: skipped_elements)  {
+          q.push(y);
+        }
+        skipped_elements.clear();
+        return false;
+      }
+      T temp = q.top();
+      q.pop();
+      if (dist(rnd) < skip_prob) {
+        skipped_elements.push_back(temp);
+      }
+      else {
+        for (auto y: skipped_elements)  {
+          q.push(y);
+        }
+        skipped_elements.clear();
+        x = temp;
+        return true;
+      }
+    }
+  }
+};
+
 DecodeResult BaseEncoder::encode_sentence(const std::string &sentence_utf8,
                                           const EncodingConfig &encoding_config,
                                           OutputType output_type) const {
@@ -1537,17 +1603,25 @@ DecodeResult BaseEncoder::encode_sentence(const std::string &sentence_utf8,
     }
     list.back().next = -1;
 
-    std::priority_queue<MergeEvent2> queue;
 
     auto pair_code = [&](uint64_t first_pos) {
       auto second_pos = list[first_pos].next;
       return int2comb(list[first_pos].token_id, list[second_pos].token_id);
     };
 
+    std::unique_ptr<BasePriorityQueue<MergeEvent2>> queue(nullptr);
+    double skip_prob = 0;
+    if (skip_prob == 0) {
+      queue = std::make_unique<STLQueue<MergeEvent2>>();
+    }
+    else {
+      queue = std::make_unique<DropoutQueue<MergeEvent2>>(skip_prob);
+    }
+
     auto push_in_queue_if_rule_exist = [&](uint64_t pos) {
       auto it = rule2id.find(pair_code(pos));
       if (it != rule2id.end()) {
-        queue.push({it->second, static_cast<int>(pos)});
+        queue->push({it->second, static_cast<int>(pos)});
       }
     };
 
@@ -1555,9 +1629,11 @@ DecodeResult BaseEncoder::encode_sentence(const std::string &sentence_utf8,
       push_in_queue_if_rule_exist(j);
     }
 
-    while (!queue.empty()) {
-      MergeEvent2 event = queue.top();
-      queue.pop();
+    while (true) {
+      MergeEvent2 event;
+      if (!queue->pop(event)) {
+        break;
+      }
       int rule_id = event.priority;
       int pos_1 = event.pos;
       int pos_2 = list[pos_1].next;
