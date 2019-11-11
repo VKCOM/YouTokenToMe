@@ -78,9 +78,7 @@ Trains BPE model and saves to file.
 * `model`: string, path to where the trained model will be saved
 * `vocab_size`: int, number of tokens in the final vocabulary
 * `coverage`: float, fraction of characters covered by the model. Must be in the range [0, 1]. A good value to use is about 0.9999.
-* `n_threads`: int, number of parallel threads used to run. If
-equal to -1 then minimum of the number of available threads and 8 
-will be used (see [benchmark](benchmark.md#number-of-threads)).
+* `n_threads`: int, number of parallel threads used to run. If this parameter is equal to -1, then the number of threads is going to be evaluated as min(number_of_avaible_threads, 8) (see [benchmark](benchmark.md#number-of-threads)).
 * `pad_id`: int, reserved id for padding
 * `unk_id`: int, reserved id for unknown symbols
 * `bos_id`: int, reserved id for begin of sentence token
