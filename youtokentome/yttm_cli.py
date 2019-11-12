@@ -80,7 +80,10 @@ def bpe(data, model, vocab_size, coverage, n_threads, pad_id, unk_id, bos_id, eo
     help="Path to file with learned model.",
 )
 @click.option(
-    "--output_type", type=click.STRING, required=True, help="'id' or 'subword'."
+    "--output_type",
+    type=click.Choice(["id", "subword"]),
+    required=True,
+    help="'id' or 'subword'.",
 )
 @click.option(
     "--n_threads",
@@ -97,12 +100,6 @@ def bpe(data, model, vocab_size, coverage, n_threads, pad_id, unk_id, bos_id, eo
 )
 def encode(model, output_type, n_threads, bos, eos, reverse, stream):
     """Encode text to ids or subwords."""
-    output_type = output_type.lower()
-    if output_type != "id" and output_type != "subword":
-        raise ValueError(
-            'Invalid value for "--output_type": must be equal to "id" or "subword", not "%d".'
-            % output_type
-        )
     if n_threads < -1 or n_threads == 0:
         raise ValueError(
             'Invalid value for "--n_threads": must be -1 or positive integer, not "%d"'
