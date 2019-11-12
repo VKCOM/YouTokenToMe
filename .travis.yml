@@ -6,9 +6,6 @@ os: linux
 dist: xenial
 
 jobs:
-  allow_failures:
-    - stage: lint
-
   include:
     - stage: lint
       name: "Black"
