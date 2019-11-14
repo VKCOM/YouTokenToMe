@@ -33,6 +33,7 @@ jobs:
       python: "3.7"
       env:
         - CIBW_SKIP="cp27-* cp33-* cp34-* *win* *i686*"
+        - CIBW_BEFORE_BUILD="pip install Cython==0.29.14"
 
     - name: "macOS wheels building"
       os: osx
@@ -42,6 +43,7 @@ jobs:
       env:
         - MACOSX_DEPLOYMENT_TARGET=10.14
         - CIBW_SKIP="cp27-* cp33-* cp34-* *win* *i686*"
+        - CIBW_BEFORE_BUILD="pip install Cython==0.29.14"
         - CXX="g++"
         - CC="gcc"
 
