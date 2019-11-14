@@ -1825,7 +1825,7 @@ int BaseEncoder::subword_to_id(const string &token) const {
   return bpe_state.special_tokens.unk_id;
 }
 
-Status BaseEncoder::decode(const vector<vector<int>> &ids, vector<string> *sentences, unordered_set<int> *ignore_ids) const {
+Status BaseEncoder::decode(const vector<vector<int>> &ids, vector<string> *sentences, const unordered_set<int> *ignore_ids) const {
   vector<string> ret;
   for (const auto &sentence : ids) {
     string decode_output;
@@ -1838,7 +1838,7 @@ Status BaseEncoder::decode(const vector<vector<int>> &ids, vector<string> *sente
   return Status();
 }
 
-Status BaseEncoder::decode(const vector<int> &ids, string *sentence, unordered_set<int> *ignore_ids) const {
+Status BaseEncoder::decode(const vector<int> &ids, string *sentence, const unordered_set<int> *ignore_ids) const {
   bool first_iter = true;
   for (auto id : ids) {
     string subword;
