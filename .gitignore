@@ -13,25 +13,13 @@ develop-eggs/
 dist/
 downloads/
 eggs/
-.idea/
-experimentation.py
 *.pt
 *.png
 lib/
 lib64/
 parts/
-sample/
-checkpoint/
 sdist/
 var/
-data/
-celeba/
-ffhq/
-ffhqa-all/
-ffhq-female/
-ffhq-male/
-labels/
-05:29PM_August_17/
 wheels/
 *.egg-info/
 .installed.cfg
@@ -43,6 +31,7 @@ cmake-build-debug/
 youtokentome.egg-info/
 *darwin.so
 yttm.cpp
+.idea/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -66,6 +55,8 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 *.txt
+*.yttm
+artifacts/
 
 # Translations
 *.mo
