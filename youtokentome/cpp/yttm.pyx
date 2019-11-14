@@ -44,7 +44,7 @@ cdef extern from "bpe.h" namespace "vkcom":
         Status id_to_subword(int id, string* subword) const
 
         int subword_to_id(const string &subword) const
-        Status decode(const vector[vector[int]]& ids, vector[string]* output, unordered_set[int]* ignore_ids) const
+        Status decode(const vector[vector[int]]& ids, vector[string]* output, const unordered_set[int]* ignore_ids) const
         int vocab_size() const
         vector[string] vocabulary() const
 
