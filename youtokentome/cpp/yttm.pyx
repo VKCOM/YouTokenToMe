@@ -132,16 +132,23 @@ cdef class BPE:
         return subword.decode()
 
     def decode(self, ids, ignore_ids):
-        assert isinstance(
-            ids, list
-        ), "ids have to be a list instance but {} found".format(type(list))
-        assert (
+
+        if not isinstance(ids, list):
+            raise TypeError(
+                "ids have to be a list instance but {} found".format(type(list))
+            )
+
+        if not (
             isinstance(ignore_ids, set)
             or isinstance(ignore_ids, list)
             or ignore_ids is None
-        ), "ids have to be a list instance or set instance, but {} found".format(
-            type(ignore_ids)
-        )
+        ):
+            raise TypeError(
+                "ids have to be a list or set instance, but {} found".format(
+                    type(ignore_ids)
+                )
+            )
+
         if len(ids) > 0 and isinstance(ids[0], int):
             ids = [ids]
         if ignore_ids is None:
