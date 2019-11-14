@@ -1843,7 +1843,7 @@ Status BaseEncoder::decode(const vector<int> &ids, string *sentence, unordered_s
   for (auto id : ids) {
     string subword;
 
-    if (!ignore_ids || ignore_ids -> count(id) == 0) {
+    if (!ignore_ids || ignore_ids->count(id) == 0) {
         Status status = id_to_subword(id, &subword, true);
         if (!status.ok()) {
             return status;
