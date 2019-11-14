@@ -8,7 +8,6 @@ extensions = [
     Extension(
         "_youtokentome_cython",
         [
-            # "youtokentome/cpp/yttm.cpp",
             "youtokentome/cpp/yttm.pyx",
             "youtokentome/cpp/bpe.cpp",
             "youtokentome/cpp/utils.cpp",
