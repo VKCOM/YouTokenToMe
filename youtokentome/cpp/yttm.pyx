@@ -44,7 +44,7 @@ cdef extern from "bpe.h" namespace "vkcom":
         Status id_to_subword(int id, string* subword) const
 
         int subword_to_id(const string &subword) const
-        Status decode(const vector[vector[int]]& ids, vector[string]* output, unordered_set[int]& ignore_ids) const
+        Status decode(const vector[vector[int]]& ids, vector[string]* output, unordered_set[int]* ignore_ids) const
         int vocab_size() const
         vector[string] vocabulary() const
 
@@ -136,26 +136,22 @@ cdef class BPE:
 
         if not isinstance(ids, list):
             raise TypeError(
-                "ids have to be a list instance but {} found".format(type(list))
+                "{} is not a list instance".format(type(ids))
             )
 
-        if not (
-            isinstance(ignore_ids, Collection) or ignore_ids is None
-        ):
+        if not isinstance(ignore_ids, Collection) and ignore_ids is not None:
             raise TypeError(
-                "ids have to be a Collection instance, but {} found".format(
-                    type(ignore_ids)
-                )
+                "{} is not a Collection instance".format(type(ignore_ids))
             )
 
         if len(ids) > 0 and isinstance(ids[0], int):
             ids = [ids]
         if ignore_ids is None:
-            ignore_ids = set([])
-        elif not isinstance(ignore_ids, set):
-            ignore_ids = set(ignore_ids)
+            ignore_ids = set()
+
         cdef vector[string] sentences
-        cdef Status status = self.encoder.decode(ids, &sentences, ignore_ids)
+        cdef unordered_set[int] c_ignore_ids = unordered_set[int](ignore_ids)
+        cdef Status status = self.encoder.decode(ids, &sentences, &c_ignore_ids)
         if status.code != 0:
             raise ValueError(status.message.decode())
         return [sentence.decode() for sentence in sentences]
