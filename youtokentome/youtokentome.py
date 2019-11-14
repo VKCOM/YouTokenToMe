@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Union, Optional, Set
+from typing import List, Union, Optional, Collection
 
 import _youtokentome_cython
 
@@ -77,6 +77,6 @@ class BPE:
         return self.bpe_cython.id_to_subword(id)
 
     def decode(
-        self, ids: List[int], ignore_ids: Optional[Union[Set[int], List[int]]] = None
+        self, ids: List[int], ignore_ids: Optional[Collection[int]] = None
     ) -> str:
         return self.bpe_cython.decode(ids, ignore_ids)

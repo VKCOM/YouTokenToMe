@@ -177,7 +177,7 @@ Convert each id to subword and concatenate with space symbol.
 **Args:**
 
   * `ids`: list of lists of integers. All integers must be in the range [0, vocab_size-1]
-  * `ignore_ids`: list or set of integers. These indices would be ignored during the decoding. All integers must be in the range [0, vocab_size-1] [default: None]
+  * `ignore_ids`: collection of integers. These indices would be ignored during the decoding. All integers must be in the range [0, vocab_size-1] [default: None]
 
   
 **Returns:** List of strings.  

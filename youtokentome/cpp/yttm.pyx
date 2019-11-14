@@ -4,6 +4,7 @@ from libcpp.string cimport string
 from libcpp cimport bool
 import os
 from pathlib import Path
+from typing import Collection
 
 
 cdef extern from "bpe.h" namespace "vkcom":
@@ -139,12 +140,10 @@ cdef class BPE:
             )
 
         if not (
-            isinstance(ignore_ids, set)
-            or isinstance(ignore_ids, list)
-            or ignore_ids is None
+            isinstance(ignore_ids, Collection) or ignore_ids is None
         ):
             raise TypeError(
-                "ids have to be a list or set instance, but {} found".format(
+                "ids have to be a Collection instance, but {} found".format(
                     type(ignore_ids)
                 )
             )
@@ -153,7 +152,7 @@ cdef class BPE:
             ids = [ids]
         if ignore_ids is None:
             ignore_ids = set([])
-        elif isinstance(ignore_ids, list):
+        elif not isinstance(ignore_ids, set):
             ignore_ids = set(ignore_ids)
         cdef vector[string] sentences
         cdef Status status = self.encoder.decode(ids, &sentences, ignore_ids)
