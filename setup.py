@@ -2,12 +2,13 @@ import io
 import os
 
 from setuptools import Extension, find_packages, setup
+from Cython.Build import cythonize
 
 extensions = [
     Extension(
         "_youtokentome_cython",
         [
-            "youtokentome/cpp/yttm.cpp",
+            "youtokentome/cpp/yttm.pyx",
             "youtokentome/cpp/bpe.cpp",
             "youtokentome/cpp/utils.cpp",
             "youtokentome/cpp/utf8.cpp",
@@ -18,8 +19,8 @@ extensions = [
 ]
 
 with io.open(
-    os.path.join(os.path.abspath(os.path.dirname(__file__)), "README.md"),
-    encoding="utf-8",
+        os.path.join(os.path.abspath(os.path.dirname(__file__)), "README.md"),
+        encoding="utf-8",
 ) as f:
     LONG_DESCRIPTION = "\n" + f.read()
 
@@ -47,5 +48,5 @@ setup(
         "Programming Language :: Cython",
         "Programming Language :: C++",
     ],
-    ext_modules=extensions,
+    ext_modules=cythonize(extensions),
 )

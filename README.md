@@ -170,13 +170,15 @@ id_to_subword(self, id)
 &nbsp;
 #### decode 
 ```python
-decode(self, ids)
+decode(self, ids, ignore_ids=None)
 ```  
 Convert each id to subword and concatenate with space symbol.
 
 **Args:**
 
   * `ids`: list of lists of integers. All integers must be in the range [0, vocab_size-1]
+  * `ignore_ids`: collection of integers. These indices would be ignored during the decoding. All integers must be in the range [0, vocab_size-1] [default: None]
+
   
 **Returns:** List of strings.  
  
@@ -285,6 +287,7 @@ Usage: yttm decode [OPTIONS]
 
 Options:
   --model PATH  Path to file with learned model.  [required]
+  --ignore_ids  List of indices to ignore for decoding. Example: --ignore_ids=1,2,3
   --help        Show this message and exit.
 ```
 

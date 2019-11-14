@@ -110,6 +110,18 @@ def encode(model, output_type, n_threads, bos, eos, reverse, stream):
     bpe.encode_cli(output_type, stream, bos, eos, reverse)
 
 
+def validate_ignore_ids(ctx, param, value):
+    try:
+        if value is not None:
+            return [int(idx) for idx in value.split(",")]
+        else:
+            return None
+    except ValueError:
+        raise click.BadParameter(
+            "Bad format: expected list of comma-separated integers, but got {}"
+        )
+
+
 @click.command()
 @click.option(
     "--model",
@@ -117,10 +129,17 @@ def encode(model, output_type, n_threads, bos, eos, reverse, stream):
     required=True,
     help="Path to file with learned model.",
 )
-def decode(model):
+@click.option(
+    "--ignore_ids",
+    type=click.STRING,
+    callback=validate_ignore_ids,
+    required=False,
+    help="List of indices to ignore for decoding. Example: --ignore_ids=1,2,3",
+)
+def decode(model, ignore_ids):
     """Decode ids to text."""
     bpe = yttmc.BPE(model)
-    bpe.decode_cli()
+    bpe.decode_cli(ignore_ids)
 
 
 @click.command()
