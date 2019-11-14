@@ -21,6 +21,9 @@ def test_encode_decode():
     text_in = [" ".join("".join([random.choice("abcd ") for _ in range(50)]).split())]
     ids = bpe.encode(text_in, yttm.OutputType.ID)
     assert text_in == bpe.decode(ids)
+    ids_bos_eos = bpe.encode(text_in, yttm.OutputType.ID, bos=True, eos=True)
+    assert text_in == bpe.decode(ids_bos_eos, ignore_ids=[2, 3])
+    assert bpe.decode(ids, ignore_ids=[]) == bpe.decode(ids_bos_eos, ignore_ids=[2, 3])
 
 
 def test_vocabulary_consistency():

@@ -1822,11 +1822,11 @@ int BaseEncoder::subword_to_id(const string &token) const {
   return bpe_state.special_tokens.unk_id;
 }
 
-Status BaseEncoder::decode(const vector<vector<int>> &ids, vector<string> *sentences) const {
+Status BaseEncoder::decode(const vector<vector<int>> &ids, vector<string> *sentences, vector<int> &ignore_ids) const {
   vector<string> ret;
   for (const auto &sentence : ids) {
     string decode_output;
-    Status status = decode(sentence, &decode_output);
+    Status status = decode(sentence, &decode_output, ignore_ids);
     if (!status.ok()) {
       return status;
     }
@@ -1835,19 +1835,22 @@ Status BaseEncoder::decode(const vector<vector<int>> &ids, vector<string> *sente
   return Status();
 }
 
-Status BaseEncoder::decode(const vector<int> &ids, string *sentence) const {
+Status BaseEncoder::decode(const vector<int> &ids, string *sentence, vector<int> &ignore_ids) const {
   bool first_iter = true;
   for (auto id : ids) {
     string subword;
-    Status status = id_to_subword(id, &subword, true);
-    if (!status.ok()) {
-      return status;
+    auto it = find(ignore_ids.begin(), ignore_ids.end(), id);
+    if (it == ignore_ids.end()) {
+        Status status = id_to_subword(id, &subword, true);
+        if (!status.ok()) {
+            return status;
+        }
+        *sentence += subword;
+        if (first_iter && sentence->at(0) == ' ') {
+            *sentence = sentence->substr(1);
+        }
+        first_iter = false;
     }
-    *sentence += subword;
-    if (first_iter && sentence->at(0) == ' ') {
-      *sentence = sentence->substr(1);
-    }
-    first_iter = false;
   }
   return Status();
 }
@@ -1862,7 +1865,8 @@ Status BaseEncoder::decode(const vector<string> &data, vector<string> *sentences
       ids.push_back(x);
     }
     string sentence;
-    Status status = decode(ids, &sentence);
+    vector<int> empty_ignore;
+    Status status = decode(ids, &sentence, empty_ignore);
     if (!status.ok()) {
       return status;
     }
