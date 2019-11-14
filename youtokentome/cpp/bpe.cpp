@@ -15,6 +15,8 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <unordered_set>
+
 
 #include "third_party/flat_hash_map.h"
 #include "utf8.h"
@@ -23,6 +25,7 @@
 namespace vkcom {
 using std::string;
 using std::vector;
+using std::unordered_set;
 
 struct VectorSegment {
   constexpr static uint64_t MOD = 2032191299;
@@ -1822,7 +1825,7 @@ int BaseEncoder::subword_to_id(const string &token) const {
   return bpe_state.special_tokens.unk_id;
 }
 
-Status BaseEncoder::decode(const vector<vector<int>> &ids, vector<string> *sentences, vector<int> &ignore_ids) const {
+Status BaseEncoder::decode(const vector<vector<int>> &ids, vector<string> *sentences, unordered_set<int> &ignore_ids) const {
   vector<string> ret;
   for (const auto &sentence : ids) {
     string decode_output;
@@ -1835,12 +1838,13 @@ Status BaseEncoder::decode(const vector<vector<int>> &ids, vector<string> *sente
   return Status();
 }
 
-Status BaseEncoder::decode(const vector<int> &ids, string *sentence, vector<int> &ignore_ids) const {
+Status BaseEncoder::decode(const vector<int> &ids, string *sentence, unordered_set<int> &ignore_ids) const {
   bool first_iter = true;
   for (auto id : ids) {
     string subword;
-    auto it = find(ignore_ids.begin(), ignore_ids.end(), id);
-    if (it == ignore_ids.end()) {
+
+    auto got = ignore_ids.find(id);
+    if (got == ignore_ids.end()) {
         Status status = id_to_subword(id, &subword, true);
         if (!status.ok()) {
             return status;
@@ -1865,7 +1869,7 @@ Status BaseEncoder::decode(const vector<string> &data, vector<string> *sentences
       ids.push_back(x);
     }
     string sentence;
-    vector<int> empty_ignore;
+    unordered_set<int> empty_ignore;
     Status status = decode(ids, &sentence, empty_ignore);
     if (!status.ok()) {
       return status;

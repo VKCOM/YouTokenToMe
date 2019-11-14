@@ -1,4 +1,5 @@
 from libcpp.vector cimport vector
+from libcpp.unordered_set cimport unordered_set
 from libcpp.string cimport string
 from libcpp cimport bool
 import os
@@ -42,7 +43,7 @@ cdef extern from "bpe.h" namespace "vkcom":
         Status id_to_subword(int id, string* subword) const
 
         int subword_to_id(const string &subword) const
-        Status decode(const vector[vector[int]]& ids, vector[string]* output, vector[int]& ignore_ids) const
+        Status decode(const vector[vector[int]]& ids, vector[string]* output, unordered_set[int]& ignore_ids) const
         int vocab_size() const
         vector[string] vocabulary() const
 
@@ -131,12 +132,22 @@ cdef class BPE:
         return subword.decode()
 
     def decode(self, ids, ignore_ids):
-        assert isinstance(ids, list)
-        assert isinstance(ignore_ids, list) or ignore_ids is None
+        assert isinstance(
+            ids, list
+        ), "ids have to be a list instance but {} found".format(type(list))
+        assert (
+            isinstance(ignore_ids, set)
+            or isinstance(ignore_ids, list)
+            or ignore_ids is None
+        ), "ids have to be a list instance or set instance, but {} found".format(
+            type(ignore_ids)
+        )
         if len(ids) > 0 and isinstance(ids[0], int):
             ids = [ids]
         if ignore_ids is None:
-            ignore_ids = []
+            ignore_ids = set([])
+        elif isinstance(ignore_ids, list):
+            ignore_ids = set(ignore_ids)
         cdef vector[string] sentences
         cdef Status status = self.encoder.decode(ids, &sentences, ignore_ids)
         if status.code != 0:

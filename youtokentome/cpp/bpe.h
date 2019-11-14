@@ -2,7 +2,7 @@
 
 #include <map>
 #include <string>
-#include <unordered_map>
+#include <unordered_set>
 #include "third_party/flat_hash_map.h"
 
 #include "utils.h"
@@ -50,9 +50,9 @@ class BaseEncoder {
 
   int subword_to_id(const std::string &token) const;
 
-  Status decode(const std::vector<std::vector<int>> &ids, std::vector<std::string> *sentences, std::vector<int> &ignore_ids) const;
+  Status decode(const std::vector<std::vector<int>> &ids, std::vector<std::string> *sentences, std::unordered_set<int> &ignore_ids) const;
 
-  Status decode(const std::vector<int> &ids, std::string *sentence, std::vector<int> &ignore_ids) const;
+  Status decode(const std::vector<int> &ids, std::string *sentence, std::unordered_set<int> &ignore_ids) const;
 
   Status decode(const std::vector<std::string> &ids, std::vector<std::string> *sentences) const;
 
