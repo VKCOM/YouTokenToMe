@@ -287,7 +287,7 @@ Usage: yttm decode [OPTIONS]
 
 Options:
   --model PATH  Path to file with learned model.  [required]
-  --ignore_ids  List of indices that would be ignored during the decoding, for example [2, 3]
+  --ignore_ids  List of indices that would be ignored during the decoding.
   --help        Show this message and exit.
 ```
 

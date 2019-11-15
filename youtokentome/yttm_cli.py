@@ -110,27 +110,14 @@ def encode(model, output_type, n_threads, bos, eos, reverse, stream):
     bpe.encode_cli(output_type, stream, bos, eos, reverse)
 
 
-class IndicesList(click.ParamType):
-    name = "indices_list"
-
-    def convert(self, value, param, ctx):
-        try:
-            if value is None:
-                return []
-
-            if value[0] != "[" or value[-1] != "]":
-                raise ValueError
-
-            return [
-                int(idx) for idx in value[1:-1].replace(" ", "").split(",") if idx != ""
-            ]
-        except:
-            self.fail(
-                "Wrong format: expected array of integers, but found {}".format(value),
-                param,
-                ctx,
-            )
-
+def validate_ignore_ids(ctx, param, value):
+    try:
+        if value is not None:
+            return [int(idx) for idx in value.split(",")]
+        else:
+            return None
+    except ValueError:
+        raise click.BadParameter("Wrong format: expected array of integers, but found {}".format(value))
 
 @click.command()
 @click.option(
@@ -141,9 +128,10 @@ class IndicesList(click.ParamType):
 )
 @click.option(
     "--ignore_ids",
-    type=IndicesList(),
+    type=click.STRING,
+    callback=validate_ignore_ids,
     required=False,
-    help="Array of indices to ingore during the decoding.",
+    help="Array of indices to ignore during the decoding.",
 )
 def decode(model, ignore_ids):
     """Decode ids to text."""

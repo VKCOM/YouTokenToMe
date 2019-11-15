@@ -193,7 +193,7 @@ def test_decode():
         "yttm",
         "decode",
         f"--model={BASE_MODEL_FILE}",
-        f"--ignore_ids=[{BOS_ID}, {EOS_ID}]",
+        f"--ignore_ids={BOS_ID},{EOS_ID}",
     ]
     run(
         cmd_args,
