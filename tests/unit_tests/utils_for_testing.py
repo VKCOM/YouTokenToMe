@@ -42,7 +42,8 @@ def generate_artifacts():
         f"--model={BASE_MODEL_FILE}",
         "--vocab_size=16000",
         "--coverage=0.999",
-        f"--bos_id={BOS_ID}" f"--eos_id={EOS_ID}",
+        f"--bos_id={BOS_ID}",
+        f"--eos_id={EOS_ID}",
     ]
 
     run(cmd_args, check=True)
