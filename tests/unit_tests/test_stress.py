@@ -14,7 +14,7 @@ def compile_test():
         *files,
         "-o",
         "test",
-        "-std=c++14",
+        "-std=c++11",
         "-pthread",
         "-D_GLIBCXX_DEBUG",
         "-DDETERMINISTIC_QUEUE",
