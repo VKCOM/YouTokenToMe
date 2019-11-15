@@ -7,6 +7,8 @@ from utils_for_testing import (
     RENAME_ID_MODEL_FILE,
     TEST_FILE,
     TRAIN_FILE,
+    BOS_ID,
+    EOS_ID,
     file_starts_with,
     generate_artifacts,
 )
@@ -170,8 +172,41 @@ def test_decode():
     with open("decode_text_out.txt", "r") as fin:
         text_out = fin.readline()
 
+    assert text_in == text_out[:-1]
+
+    cmd_args = [
+        "yttm",
+        "encode",
+        f"--model={BASE_MODEL_FILE}",
+        "--output_type=id",
+        "--bos",
+        "--eos",
+    ]
+    run(
+        cmd_args,
+        stdin=open("decode_text_in.txt", "r"),
+        stdout=open("decode_id.txt", "w"),
+        check=True,
+    )
+
+    cmd_args = [
+        "yttm",
+        "decode",
+        f"--model={BASE_MODEL_FILE}",
+        f"--ignore_ids=[{BOS_ID}, {EOS_ID}]",
+    ]
+    run(
+        cmd_args,
+        stdin=open("decode_id.txt", "r"),
+        stdout=open("decode_text_out.txt", "w"),
+        check=True,
+    )
+
+    with open("decode_text_out.txt", "r") as fin:
+        text_out = fin.readline()
+
+    assert text_in == text_out[:-1]
+
     os.remove("decode_text_in.txt")
     os.remove("decode_text_out.txt")
     os.remove("decode_id.txt")
-
-    assert text_in == text_out[:-1]

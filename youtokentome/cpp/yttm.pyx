@@ -37,7 +37,7 @@ cdef extern from "bpe.h" namespace "vkcom":
 
         Status encode_cli(string output_type, bool stream, bool bos, bool eos, bool reverse) const
 
-        Status decode_cli() const
+        Status decode_cli(const unordered_set[int]* ignore_ids) const
 
         void vocab_cli(bool verbose) const
 
@@ -168,8 +168,11 @@ cdef class BPE:
         if status.code != 0:
             raise ValueError(status.message.decode())
 
-    def decode_cli(self):
-        cdef Status status = self.encoder.decode_cli()
+    def decode_cli(self, ignore_ids):
+        if ignore_ids is None:
+            ignore_ids = set()
+        cdef unordered_set[int] c_ignore_ids = unordered_set[int](ignore_ids)
+        cdef Status status = self.encoder.decode_cli(&c_ignore_ids)
         if status.code != 0:
             raise ValueError(status.message.decode())
 

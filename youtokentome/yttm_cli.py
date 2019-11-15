@@ -110,6 +110,28 @@ def encode(model, output_type, n_threads, bos, eos, reverse, stream):
     bpe.encode_cli(output_type, stream, bos, eos, reverse)
 
 
+class IndicesList(click.ParamType):
+    name = "indices_list"
+
+    def convert(self, value, param, ctx):
+        try:
+            if value is None:
+                return []
+
+            if value[0] != "[" or value[-1] != "]":
+                raise ValueError
+
+            return [
+                int(idx) for idx in value[1:-1].replace(" ", "").split(",") if idx != ""
+            ]
+        except:
+            self.fail(
+                "Wrong format: expected array of integers, but found {}".format(value),
+                param,
+                ctx,
+            )
+
+
 @click.command()
 @click.option(
     "--model",
@@ -117,10 +139,16 @@ def encode(model, output_type, n_threads, bos, eos, reverse, stream):
     required=True,
     help="Path to file with learned model.",
 )
-def decode(model):
+@click.option(
+    "--ignore_ids",
+    type=IndicesList(),
+    required=False,
+    help="Array of indices to ingore during the decoding.",
+)
+def decode(model, ignore_ids):
     """Decode ids to text."""
     bpe = yttmc.BPE(model)
-    bpe.decode_cli()
+    bpe.decode_cli(ignore_ids)
 
 
 @click.command()

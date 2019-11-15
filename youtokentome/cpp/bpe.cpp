@@ -17,7 +17,6 @@
 #include <vector>
 #include <unordered_set>
 
-
 #include "third_party/flat_hash_map.h"
 #include "utf8.h"
 #include "utils.h"
@@ -112,7 +111,7 @@ struct MergeCandidate {
   MergeCandidate() = default;
 
   MergeCandidate(uint64_t count, uint32_t left_token, uint32_t right_token) : count(count), left_token(left_token),
-                                                                            right_token(right_token) {}
+                                                                              right_token(right_token) {}
 
   bool operator<(const MergeCandidate &other) const {
     if (count != other.count) {
@@ -286,7 +285,7 @@ struct PriorityQueue {
   uint64_t big_event_bound;
 
   explicit PriorityQueue(uint64_t dataset_size) : big_queue(static_cast<uint64_t>(sqrt(dataset_size))),
-                                                big_event_bound(static_cast<uint64_t>(sqrt(dataset_size))) {}
+                                                  big_event_bound(static_cast<uint64_t>(sqrt(dataset_size))) {}
 
   void push(const MergeCandidate &event) {
     if (event.count == 0) {
@@ -1825,7 +1824,9 @@ int BaseEncoder::subword_to_id(const string &token) const {
   return bpe_state.special_tokens.unk_id;
 }
 
-Status BaseEncoder::decode(const vector<vector<int>> &ids, vector<string> *sentences, const unordered_set<int> *ignore_ids) const {
+Status BaseEncoder::decode(const vector<vector<int>> &ids,
+                           vector<string> *sentences,
+                           const unordered_set<int> *ignore_ids) const {
   vector<string> ret;
   for (const auto &sentence : ids) {
     string decode_output;
@@ -1844,21 +1845,23 @@ Status BaseEncoder::decode(const vector<int> &ids, string *sentence, const unord
     string subword;
 
     if (!ignore_ids || ignore_ids->count(id) == 0) {
-        Status status = id_to_subword(id, &subword, true);
-        if (!status.ok()) {
-            return status;
-        }
-        *sentence += subword;
-        if (first_iter && sentence->at(0) == ' ') {
-            *sentence = sentence->substr(1);
-        }
-        first_iter = false;
+      Status status = id_to_subword(id, &subword, true);
+      if (!status.ok()) {
+        return status;
+      }
+      *sentence += subword;
+      if (first_iter && sentence->at(0) == ' ') {
+        *sentence = sentence->substr(1);
+      }
+      first_iter = false;
     }
   }
   return Status();
 }
 
-Status BaseEncoder::decode(const vector<string> &data, vector<string> *sentences) const {
+Status BaseEncoder::decode(const vector<string> &data,
+                           vector<string> *sentences,
+                           const std::unordered_set<int> *ignore_ids) const {
   for (const auto &s : data) {
     std::stringstream stream;
     stream << s;
@@ -1868,7 +1871,7 @@ Status BaseEncoder::decode(const vector<string> &data, vector<string> *sentences
       ids.push_back(x);
     }
     string sentence;
-    Status status = decode(ids, &sentence, nullptr);
+    Status status = decode(ids, &sentence, ignore_ids);
     if (!status.ok()) {
       return status;
     }
@@ -2010,12 +2013,12 @@ Status BaseEncoder::encode_cli(const string &output_type_str, bool stream,
   return Status();
 }
 
-Status BaseEncoder::decode_cli() const {
+Status BaseEncoder::decode_cli(const std::unordered_set<int> *ignore_ids) const {
   std::ios_base::sync_with_stdio(false);
   string sentence;
   while (getline(std::cin, sentence)) {
     vector<string> output;
-    Status status = decode({sentence}, &output);
+    Status status = decode({sentence}, &output, ignore_ids);
     if (!status.ok()) {
       return status;
     }

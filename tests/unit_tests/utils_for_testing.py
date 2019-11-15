@@ -7,6 +7,8 @@ BASE_MODEL_FILE = "artifacts/base_model.yttm"
 RENAME_ID_MODEL_FILE = "artifacts/rename_model.yttm"
 TRAIN_FILE = "artifacts/random_train_text.txt"
 TEST_FILE = "artifacts/random_test_text.txt"
+BOS_ID = 2
+EOS_ID = 3
 
 artifacts_generated = False
 
@@ -40,6 +42,7 @@ def generate_artifacts():
         f"--model={BASE_MODEL_FILE}",
         "--vocab_size=16000",
         "--coverage=0.999",
+        f"--bos_id={BOS_ID}" f"--eos_id={EOS_ID}",
     ]
 
     run(cmd_args, check=True)
