@@ -134,7 +134,7 @@ def validate_ignore_ids(ctx, param, value):
     type=click.STRING,
     callback=validate_ignore_ids,
     required=False,
-    help="Array of indices to ignore during the decoding.",
+    help="List of indices to ignore for decoding. Example: --ignore_ids=1,2,3",
 )
 def decode(model, ignore_ids):
     """Decode ids to text."""
