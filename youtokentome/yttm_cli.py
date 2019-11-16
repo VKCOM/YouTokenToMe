@@ -118,7 +118,7 @@ def validate_ignore_ids(ctx, param, value):
             return None
     except ValueError:
         raise click.BadParameter(
-            "Wrong format: expected array of integers, but found {}".format(value)
+            "Bad format: expected list of comma-separated integers, but got {}"
         )
 
 
