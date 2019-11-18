@@ -1613,10 +1613,10 @@ DecodeResult BaseEncoder::encode_sentence(const std::string &sentence_utf8,
 
     std::unique_ptr<BasePriorityQueue<MergeEvent2>> queue(nullptr);
     if (encoding_config.dropout_prob == 0) {
-      queue = std::make_unique<STLQueue<MergeEvent2>>();
+      queue.reset(new STLQueue<MergeEvent2>());
     }
     else {
-      queue = std::make_unique<DropoutQueue<MergeEvent2>>(encoding_config.dropout_prob);
+      queue.reset(new DropoutQueue<MergeEvent2>(encoding_config.dropout_prob));
     }
 
     auto push_in_queue_if_rule_exist = [&](uint64_t pos) {
