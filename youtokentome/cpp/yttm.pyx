@@ -94,7 +94,6 @@ cdef class BPE:
         if output_type == 'id':
             if isinstance(sentences, str):
                 s = [sentences.encode()]
-                assert len(s) == 1
                 status = self.encoder.encode_as_ids(s, &ret_ids, bos, eos, reverse, dropout_prob)
                 if status.code != 0:
                     raise ValueError(status.message.decode())
