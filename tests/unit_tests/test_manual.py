@@ -51,6 +51,7 @@ def test_english():
     print(tokenized_text)
     os.remove(TRAIN_DATA_PATH)
 
+
 def test_japanese():
     train_text = """
         むかし、 むかし、 ある ところ に

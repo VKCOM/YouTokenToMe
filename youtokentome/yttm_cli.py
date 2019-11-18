@@ -80,7 +80,10 @@ def bpe(data, model, vocab_size, coverage, n_threads, pad_id, unk_id, bos_id, eo
     help="Path to file with learned model.",
 )
 @click.option(
-    "--output_type", type=click.STRING, required=True, help="'id' or 'subword'."
+    "--output_type",
+    type=click.Choice(["id", "subword"]),
+    required=True,
+    help="'id' or 'subword'.",
 )
 @click.option(
     "--n_threads",
@@ -100,12 +103,6 @@ def bpe(data, model, vocab_size, coverage, n_threads, pad_id, unk_id, bos_id, eo
 )
 def encode(model, output_type, n_threads, bos, eos, reverse, stream, dropout_prob):
     """Encode text to ids or subwords."""
-    output_type = output_type.lower()
-    if output_type != "id" and output_type != "subword":
-        raise ValueError(
-            'Invalid value for "--output_type": must be equal to "id" or "subword", not "%d".'
-            % output_type
-        )
     if n_threads < -1 or n_threads == 0:
         raise ValueError(
             'Invalid value for "--n_threads": must be -1 or positive integer, not "%d"'
@@ -116,6 +113,18 @@ def encode(model, output_type, n_threads, bos, eos, reverse, stream, dropout_pro
     bpe.encode_cli(output_type, stream, bos, eos, reverse, dropout_prob)
 
 
+def validate_ignore_ids(ctx, param, value):
+    try:
+        if value is not None:
+            return [int(idx) for idx in value.split(",")]
+        else:
+            return None
+    except ValueError:
+        raise click.BadParameter(
+            "Bad format: expected list of comma-separated integers, but got {}"
+        )
+
+
 @click.command()
 @click.option(
     "--model",
@@ -123,10 +132,17 @@ def encode(model, output_type, n_threads, bos, eos, reverse, stream, dropout_pro
     required=True,
     help="Path to file with learned model.",
 )
-def decode(model):
+@click.option(
+    "--ignore_ids",
+    type=click.STRING,
+    callback=validate_ignore_ids,
+    required=False,
+    help="List of indices to ignore for decoding. Example: --ignore_ids=1,2,3",
+)
+def decode(model, ignore_ids):
     """Decode ids to text."""
     bpe = yttmc.BPE(model)
-    bpe.decode_cli()
+    bpe.decode_cli(ignore_ids)
 
 
 @click.command()

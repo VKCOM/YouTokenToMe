@@ -2,7 +2,7 @@
 
 #include <map>
 #include <string>
-#include <unordered_map>
+#include <unordered_set>
 #include "third_party/flat_hash_map.h"
 
 #include "utils.h"
@@ -50,11 +50,15 @@ class BaseEncoder {
 
   int subword_to_id(const std::string &token) const;
 
-  Status decode(const std::vector<std::vector<int>> &ids, std::vector<std::string> *sentences) const;
+  Status decode(const std::vector<std::vector<int>> &ids,
+                std::vector<std::string> *sentences,
+                const std::unordered_set<int> *ignore_ids) const;
 
-  Status decode(const std::vector<int> &ids, std::string *sentence) const;
+  Status decode(const std::vector<int> &ids, std::string *sentence, const std::unordered_set<int> *ignore_ids) const;
 
-  Status decode(const std::vector<std::string> &ids, std::vector<std::string> *sentences) const;
+  Status decode(const std::vector<std::string> &ids,
+                std::vector<std::string> *sentences,
+                const std::unordered_set<int> *ignore_ids) const;
 
   int vocab_size() const;
 
@@ -63,7 +67,7 @@ class BaseEncoder {
   Status encode_cli(const std::string &output_type, bool stream, bool bos = false,
                     bool eos = false, bool reverse = false, double dropout_prob = 0) const;
 
-  Status decode_cli() const;
+  Status decode_cli(const std::unordered_set<int> *ignore_ids) const;
 
   void vocab_cli(bool verbose) const;
 

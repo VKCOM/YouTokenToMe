@@ -1,8 +1,10 @@
 from libcpp.vector cimport vector
+from libcpp.unordered_set cimport unordered_set
 from libcpp.string cimport string
 from libcpp cimport bool
 import os
 from pathlib import Path
+from typing import Collection
 
 
 cdef extern from "bpe.h" namespace "vkcom":
@@ -35,14 +37,14 @@ cdef extern from "bpe.h" namespace "vkcom":
 
         Status encode_cli(string output_type, bool stream, bool bos, bool eos, bool reverse, double dropout_prob) const
 
-        Status decode_cli() const
+        Status decode_cli(const unordered_set[int]* ignore_ids) const
 
         void vocab_cli(bool verbose) const
 
         Status id_to_subword(int id, string* subword) const
 
         int subword_to_id(const string &subword) const
-        Status decode(const vector[vector[int]]& ids, vector[string]* output) const
+        Status decode(const vector[vector[int]]& ids, vector[string]* output, const unordered_set[int]* ignore_ids) const
         int vocab_size() const
         vector[string] vocabulary() const
 
@@ -132,12 +134,26 @@ cdef class BPE:
             raise ValueError(status.message.decode())
         return subword.decode()
 
-    def decode(self, ids):
-        assert isinstance(ids, list)
+    def decode(self, ids, ignore_ids):
+
+        if not isinstance(ids, list):
+            raise TypeError(
+                "{} is not a list instance".format(type(ids))
+            )
+
+        if not isinstance(ignore_ids, Collection) and ignore_ids is not None:
+            raise TypeError(
+                "{} is not a Collection instance".format(type(ignore_ids))
+            )
+
         if len(ids) > 0 and isinstance(ids[0], int):
             ids = [ids]
+        if ignore_ids is None:
+            ignore_ids = set()
+
         cdef vector[string] sentences
-        cdef Status status = self.encoder.decode(ids, &sentences)
+        cdef unordered_set[int] c_ignore_ids = unordered_set[int](ignore_ids)
+        cdef Status status = self.encoder.decode(ids, &sentences, &c_ignore_ids)
         if status.code != 0:
             raise ValueError(status.message.decode())
         return [sentence.decode() for sentence in sentences]
@@ -154,8 +170,11 @@ cdef class BPE:
         if status.code != 0:
             raise ValueError(status.message.decode())
 
-    def decode_cli(self):
-        cdef Status status = self.encoder.decode_cli()
+    def decode_cli(self, ignore_ids):
+        if ignore_ids is None:
+            ignore_ids = set()
+        cdef unordered_set[int] c_ignore_ids = unordered_set[int](ignore_ids)
+        cdef Status status = self.encoder.decode_cli(&c_ignore_ids)
         if status.code != 0:
             raise ValueError(status.message.decode())
 
