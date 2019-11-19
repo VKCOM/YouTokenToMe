@@ -99,7 +99,11 @@ def bpe(data, model, vocab_size, coverage, n_threads, pad_id, unk_id, bos_id, eo
     "--stream", is_flag=True, help="Process each line before reading the next one."
 )
 @click.option(
-    "--dropout_prob", type=click.FLOAT, default=0, show_default=True, help="Process each line before reading the next one."
+    "--dropout_prob",
+    type=click.FLOAT,
+    default=0,
+    show_default=True,
+    help="Process each line before reading the next one.",
 )
 def encode(model, output_type, n_threads, bos, eos, reverse, stream, dropout_prob):
     """Encode text to ids or subwords."""
