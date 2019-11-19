@@ -103,7 +103,7 @@ def bpe(data, model, vocab_size, coverage, n_threads, pad_id, unk_id, bos_id, eo
     type=click.FLOAT,
     default=0,
     show_default=True,
-    help="Drop-out probability (the probability of a merge being dropped)",
+    help="BPE-dropout probability (the probability of a merge being dropped)",
 )
 def encode(model, output_type, n_threads, bos, eos, reverse, stream, dropout_prob):
     """Encode text to ids or subwords."""
