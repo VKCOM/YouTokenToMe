@@ -18,6 +18,9 @@ Key advantages:
 * Highly efficient implementation in C++
 * Python wrapper and command-line interface
 
+Extra features:
+* BPE-dropout (as described in [Provilkov at al, 2019](https://arxiv.org/abs/1910.13267))
+
 As well as in the algorithm from the original paper, ours does not consider tokens 
 that cross word boundaries. Just like in [SentencePiece](https://github.com/google/sentencepiece), all space symbols were replaced by meta symbol "▁" (U+2581). It allows sequences of tokens to be converted back to text and for word boundaries to be restored.
 
