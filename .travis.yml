@@ -52,6 +52,7 @@ jobs:
 install:
   - pip install -U pip
   - pip install cibuildwheel==1.0.0 twine==1.15.0
+  - pip install -r requirements.txt
 
 script:
   - cibuildwheel --output-dir wheelhouse
