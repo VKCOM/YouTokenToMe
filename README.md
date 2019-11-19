@@ -107,7 +107,7 @@ Class constructor. Loads the trained model.
 Class `youtokentome.BPE` has the following methods:
 #### encode 
 ```python
-encode(self, sentences, output_type=yttm.OutputType.ID, bos=False, eos=False, reverse=False)
+encode(self, sentences, output_type=yttm.OutputType.ID, bos=False, eos=False, reverse=False, dropout_prob=0)
 ```
 
 **Args:**
@@ -117,6 +117,7 @@ encode(self, sentences, output_type=yttm.OutputType.ID, bos=False, eos=False, re
 * `bos`: bool, if True then token “beginning of sentence” will be added
 * `eos`: bool, if True then token “end of sentence” will be added
 * `reverse`: bool, if True the output sequence of tokens will be reversed
+* `dropout_prob`: float, BPE-dropout probability (the probability of a merge being dropped). Must be in the range [0, 1].
 
   
 **Returns:** If `output_type` is equal to `youtokentome.OutputType.ID` or `youtokentome.OutputType.SUBWORD` 
@@ -258,6 +259,7 @@ Options:
   --eos                Add tab 'end of sentence'.
   --reverse            Reverse output sequence of tokens.
   --stream             Process each line before reading the next one.
+  --dropout_prob       BPE-dropout probability (the probability of a merge being dropped). [default: 0]
   --help               Show this message and exit.
 ```
 

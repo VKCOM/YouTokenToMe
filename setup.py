@@ -26,7 +26,7 @@ with io.open(
 
 setup(
     name="youtokentome",
-    version="1.0.3",
+    version="1.0.4",
     packages=find_packages(),
     description="Unsupervised text tokenizer focused on computational efficiency",
     long_description=LONG_DESCRIPTION,
@@ -50,3 +50,4 @@ setup(
     ],
     ext_modules=cythonize(extensions),
 )
+

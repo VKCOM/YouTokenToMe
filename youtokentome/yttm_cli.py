@@ -26,7 +26,7 @@ def main():
 @click.option(
     "--coverage",
     type=click.FLOAT,
-    help="Amount of characters covered by the model.",
+    help="Percentage of characters covered by the model.",
     default=1.0,
     show_default=True,
 )
@@ -98,7 +98,14 @@ def bpe(data, model, vocab_size, coverage, n_threads, pad_id, unk_id, bos_id, eo
 @click.option(
     "--stream", is_flag=True, help="Process each line before reading the next one."
 )
-def encode(model, output_type, n_threads, bos, eos, reverse, stream):
+@click.option(
+    "--dropout_prob",
+    type=click.FLOAT,
+    default=0,
+    show_default=True,
+    help="BPE-dropout probability (the probability of a merge being dropped)",
+)
+def encode(model, output_type, n_threads, bos, eos, reverse, stream, dropout_prob):
     """Encode text to ids or subwords."""
     if n_threads < -1 or n_threads == 0:
         raise ValueError(
@@ -107,7 +114,7 @@ def encode(model, output_type, n_threads, bos, eos, reverse, stream):
         )
 
     bpe = yttmc.BPE(model, n_threads)
-    bpe.encode_cli(output_type, stream, bos, eos, reverse)
+    bpe.encode_cli(output_type, stream, bos, eos, reverse, dropout_prob)
 
 
 def validate_ignore_ids(ctx, param, value):
