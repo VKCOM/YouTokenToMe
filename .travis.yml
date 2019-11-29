@@ -48,9 +48,10 @@ jobs:
         - CIBW_BEFORE_BUILD="pip install -r requirements.txt"
         - CXX="g++"
         - CC="gcc"
+      install:
+        - brew install python
 
 install:
-  - brew install python
   - pip install -U pip
   - pip install cibuildwheel==1.0.0 twine==1.15.0
   - pip install -r requirements.txt
