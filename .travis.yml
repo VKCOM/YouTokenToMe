@@ -11,7 +11,7 @@ jobs:
       name: "Black"
       language: python
       python: "3.7"
-      install: pip2 install black
+      install: pip install black
       script: black --check youtokentome
     
     - stage: test
@@ -19,7 +19,7 @@ jobs:
       language: python
       python: "3.7"
       install:
-        - pip2 install -r requirements.txt
+        - pip install -r requirements.txt
         - python setup.py install
       script:
         - cd tests/unit_tests
@@ -34,7 +34,7 @@ jobs:
       env:
         - CIBW_SKIP="cp27-* cp33-* cp34-* *win* *i686*"
         - CIBW_MANYLINUX_X86_64_IMAGE=manylinux2010
-        - CIBW_BEFORE_BUILD="pip2 install -r requirements.txt"
+        - CIBW_BEFORE_BUILD="pip install -r requirements.txt"
 
     - name: "macOS wheels building"
       os: osx
@@ -45,14 +45,15 @@ jobs:
         - MACOSX_DEPLOYMENT_TARGET=10.14
         - CIBW_SKIP="cp27-* cp33-* cp34-* *win* *i686*"
         - CIBW_MANYLINUX_X86_64_IMAGE=manylinux2010
-        - CIBW_BEFORE_BUILD="pip2 install -r requirements.txt"
+        - CIBW_BEFORE_BUILD="pip install -r requirements.txt"
         - CXX="g++"
         - CC="gcc"
 
 install:
-  - pip2 install -U pip
-  - pip2 install cibuildwheel==1.0.0 twine==1.15.0
-  - pip2 install -r requirements.txt
+  - brew install python
+  - pip install -U pip
+  - pip install cibuildwheel==1.0.0 twine==1.15.0
+  - pip install -r requirements.txt
 
 script:
   - cibuildwheel --output-dir wheelhouse
