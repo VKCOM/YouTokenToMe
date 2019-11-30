@@ -48,8 +48,9 @@ jobs:
         - CIBW_BEFORE_BUILD="pip install -r requirements.txt"
         - CXX="g++"
         - CC="gcc"
-      install:
-        - brew install python
+      before_install:
+        - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+        - python3 get-pip.py
 
 install:
   - pip install -U pip
