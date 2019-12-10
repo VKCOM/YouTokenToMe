@@ -30,10 +30,10 @@ BPEState learn_bpe_slow(const string &text_utf8, int n_token, string, BpeConfig 
     }
   }
   for (; !row_data.empty() && is_space(row_data.back()); row_data.pop_back());
-  ska::flat_hash_set<uint32_t> removed_chars;
+  flat_hash_set<uint32_t> removed_chars;
   auto char2id = compute_alphabet(row_data, removed_chars, bpe_config);
   remove_rare_chars(row_data, removed_chars);
-  ska::flat_hash_map<uint32_t, uint32_t> id2char;
+  flat_hash_map<uint32_t, uint32_t> id2char;
   for (auto x: char2id) {
     id2char[x.second] = x.first;
   }

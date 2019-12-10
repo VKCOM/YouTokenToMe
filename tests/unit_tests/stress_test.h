@@ -4,12 +4,12 @@
 #include "../../youtokentome/cpp/utils.h"
 
 namespace vkcom {
-ska::flat_hash_map<uint32_t, uint32_t>
+flat_hash_map<uint32_t, uint32_t>
 compute_alphabet(const std::vector<uint32_t> &data,
-                 ska::flat_hash_set<uint32_t> &removed_chars,
+                 flat_hash_set<uint32_t> &removed_chars,
                  const BpeConfig &bpe_config);
 
-void remove_rare_chars(std::vector<uint32_t> &data, const ska::flat_hash_set<uint32_t> &removed_chars);
+void remove_rare_chars(std::vector<uint32_t> &data, const flat_hash_set<uint32_t> &removed_chars);
 
 Status learn_bpe_from_string(std::string &text_utf8,
                              int n_tokens,
