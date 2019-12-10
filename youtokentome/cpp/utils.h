@@ -64,7 +64,7 @@ struct Status {
 };
 
 struct BPEState {
-  ska::flat_hash_map<uint32_t, uint32_t> char2id;
+  flat_hash_map<uint32_t, uint32_t> char2id;
   std::vector<BPE_Rule> rules;
   SpecialTokens special_tokens;
 

@@ -87,7 +87,7 @@ Status fast_read_file_utf8(const string &file_name, string *file_content) {
 }
 
 string token2word(const vector<uint32_t> &source,
-                  const ska::flat_hash_map<uint32_t, uint32_t> &id2char) {
+                  const flat_hash_map<uint32_t, uint32_t> &id2char) {
   vector<uint32_t> res;
   for (int i : source) {
     assert(id2char.count(i) == 1);
@@ -325,9 +325,9 @@ struct PriorityQueue {
   }
 };
 
-ska::flat_hash_map<uint32_t, uint32_t> compute_alphabet_helper(
-    const ska::flat_hash_map<uint32_t, uint64_t> &char_cnt, uint64_t data_len,
-    ska::flat_hash_set<uint32_t> &removed_chars, const BpeConfig &bpe_config) {
+flat_hash_map<uint32_t, uint32_t> compute_alphabet_helper(
+    const flat_hash_map<uint32_t, uint64_t> &char_cnt, uint64_t data_len,
+    flat_hash_set<uint32_t> &removed_chars, const BpeConfig &bpe_config) {
   vector<std::pair<uint64_t, uint32_t>> frequencies;
 
   for (auto x : char_cnt) {
@@ -349,7 +349,7 @@ ska::flat_hash_map<uint32_t, uint32_t> compute_alphabet_helper(
   std::cerr << "number of unique characters left: " << frequencies.size() - cur
             << std::endl;
 
-  ska::flat_hash_map<uint32_t, uint32_t> char2id;
+  flat_hash_map<uint32_t, uint32_t> char2id;
   uint64_t used_ids = bpe_config.special_tokens.n_special_tokens();
   char2id[SPACE_TOKEN] = used_ids++;
 
@@ -367,7 +367,7 @@ ska::flat_hash_map<uint32_t, uint32_t> compute_alphabet_helper(
 }
 
 void remove_rare_chars(vector<uint32_t> &data,
-                       const ska::flat_hash_set<uint32_t> &removed_chars) {
+                       const flat_hash_set<uint32_t> &removed_chars) {
   if (removed_chars.empty()) {
     return;
   }
@@ -382,10 +382,10 @@ struct WordCount {
   uint64_t cnt;
 };
 
-ska::flat_hash_map<VectorSegment, WordCount> compute_word_count_helper(
+flat_hash_map<VectorSegment, WordCount> compute_word_count_helper(
     const vector<uint32_t> &row_data,
-    const ska::flat_hash_map<uint32_t, uint32_t> &char2id) {
-  ska::flat_hash_map<VectorSegment, WordCount> hash2wordcnt;
+    const flat_hash_map<uint32_t, uint32_t> &char2id) {
+  flat_hash_map<VectorSegment, WordCount> hash2wordcnt;
   vector<uint32_t> word;
 
   for (auto loop_it = row_data.begin(); loop_it != row_data.end();) {
@@ -413,7 +413,7 @@ ska::flat_hash_map<VectorSegment, WordCount> compute_word_count_helper(
 
 vector<WordCount> compute_word_count(
     const vector<uint32_t> &row_data,
-    const ska::flat_hash_map<uint32_t, uint32_t> &char2id) {
+    const flat_hash_map<uint32_t, uint32_t> &char2id) {
   auto hash2wordcnt = compute_word_count_helper(row_data, char2id);
   vector<WordCount> word_cnt(hash2wordcnt.size());
   std::transform(
@@ -439,8 +439,8 @@ struct NodeEncoder {
 
 void build_linked_list(const vector<WordCount> &word_cnt,
                        vector<vector<NodeEncoder>> &list,
-                       ska::flat_hash_map<uint64_t, vector<Position>> &pair2pos,
-                       ska::flat_hash_map<uint64_t, uint64_t> &pair2cnt) {
+                       flat_hash_map<uint64_t, vector<Position>> &pair2pos,
+                       flat_hash_map<uint64_t, uint64_t> &pair2cnt) {
   list.resize(word_cnt.size());
   for (uint64_t i = 0; i < word_cnt.size(); i++) {
     for (uint32_t ch : word_cnt[i].word) {
@@ -508,9 +508,9 @@ double time_check_silent() {
 
 int alive_tokens;
 
-void init_recipe(const ska::flat_hash_map<uint32_t, uint32_t> &char2id,
-                 ska::flat_hash_map<uint32_t, vector<uint32_t>> &recipe,
-                 ska::flat_hash_map<uint32_t, string> &recipe_s) {
+void init_recipe(const flat_hash_map<uint32_t, uint32_t> &char2id,
+                 flat_hash_map<uint32_t, vector<uint32_t>> &recipe,
+                 flat_hash_map<uint32_t, string> &recipe_s) {
   for (auto token_id : char2id) {
     uint32_t ch = token_id.first;
     uint32_t id = token_id.second;
@@ -521,20 +521,20 @@ void init_recipe(const ska::flat_hash_map<uint32_t, uint32_t> &char2id,
 
 void worker_doing_merge(
     uint64_t thread_id, vector<vector<NodeEncoder>> &lists_of_tokens,
-    vector<ska::flat_hash_map<uint64_t, uint64_t>> &pair2cnt_g,
-    ska::flat_hash_map<uint64_t, vector<Position>> &pair2pos,
+    vector<flat_hash_map<uint64_t, uint64_t>> &pair2cnt_g,
+    flat_hash_map<uint64_t, vector<Position>> &pair2pos,
     vector<uint64_t> &word_freq, vector<std::mutex> &mt,
     vector<std::condition_variable> &cv, vector<BPE_Rule> &task_order,
     vector<std::atomic_bool> &thread_use_hs,
-    ska::flat_hash_map<uint32_t, uint32_t> &char2id,
-    vector<vector<ska::flat_hash_map<uint32_t, uint64_t>>> &left_tokens_submit,
-    vector<vector<ska::flat_hash_map<uint32_t, uint64_t>>> &right_tokens_submit,
+    flat_hash_map<uint32_t, uint32_t> &char2id,
+    vector<vector<flat_hash_map<uint32_t, uint64_t>>> &left_tokens_submit,
+    vector<vector<flat_hash_map<uint32_t, uint64_t>>> &right_tokens_submit,
     std::atomic<uint32_t> &real_n_tokens,
     vector<std::atomic<uint32_t>> &results_ready, const BpeConfig &bpe_config,
     std::mutex &main_loop_mt, std::condition_variable &main_loop_cv) {
   auto &pair2cnt = pair2cnt_g[thread_id];
-  ska::flat_hash_set<uint32_t> left_tokens;
-  ska::flat_hash_set<uint32_t> right_tokens;
+  flat_hash_set<uint32_t> left_tokens;
+  flat_hash_set<uint32_t> right_tokens;
 
   uint32_t cur_token_rule =
       char2id.size() + bpe_config.special_tokens.n_special_tokens();
@@ -841,10 +841,10 @@ void worker_doing_merge(
   }
 }
 
-void rename_tokens(ska::flat_hash_map<uint32_t, uint32_t> &char2id,
+void rename_tokens(flat_hash_map<uint32_t, uint32_t> &char2id,
                    vector<BPE_Rule> &rules, const SpecialTokens &special_tokens,
                    uint32_t n_tokens) {
-  ska::flat_hash_map<uint32_t, uint32_t> renaming;
+  flat_hash_map<uint32_t, uint32_t> renaming;
   uint32_t cur = special_tokens.n_special_tokens();
   for (uint32_t i = 0; i < n_tokens; i++) {
     if (!special_tokens.taken_id(i)) {
@@ -884,7 +884,7 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
     split_pos.push_back(candidate);
   }
 
-  vector<ska::flat_hash_map<uint32_t, uint64_t>> shared_char_cnt(n_threads);
+  vector<flat_hash_map<uint32_t, uint64_t>> shared_char_cnt(n_threads);
 
   vector<std::mutex> mt(n_threads);
   vector<std::condition_variable> cv(n_threads);
@@ -892,16 +892,16 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
   vector<char> main_finished(n_threads, 0);
   vector<uint64_t> text_len(n_threads);
 
-  ska::flat_hash_set<uint32_t> removed_chars;
-  ska::flat_hash_map<uint32_t, uint32_t> char2id;
+  flat_hash_set<uint32_t> removed_chars;
+  flat_hash_map<uint32_t, uint32_t> char2id;
 
-  vector<ska::flat_hash_map<VectorSegment, WordCount>> hash2wordcnt(n_threads);
+  vector<flat_hash_map<VectorSegment, WordCount>> hash2wordcnt(n_threads);
   int error_flag = 0;
 
-  ska::flat_hash_map<uint32_t, vector<uint32_t>> recipe;
-  ska::flat_hash_map<uint32_t, string> recipe_s;
-  vector<ska::flat_hash_map<uint64_t, uint64_t>> pair2cnt_g(n_threads);
-  ska::flat_hash_map<uint64_t, vector<Position>> pair2pos;
+  flat_hash_map<uint32_t, vector<uint32_t>> recipe;
+  flat_hash_map<uint32_t, string> recipe_s;
+  vector<flat_hash_map<uint64_t, uint64_t>> pair2cnt_g(n_threads);
+  flat_hash_map<uint64_t, vector<Position>> pair2pos;
   PriorityQueue merge_order(1);
   vector<uint64_t> split_word_cnt;
   vector<WordCount> word_cnt_global;
@@ -911,10 +911,10 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
     c = static_cast<uint32_t>(a & UINT32_MAX);
   };
 
-  vector<vector<ska::flat_hash_map<uint32_t, uint64_t>>> left_tokens_submit(
-      2, vector<ska::flat_hash_map<uint32_t, uint64_t>>(n_threads));
-  vector<vector<ska::flat_hash_map<uint32_t, uint64_t>>> right_tokens_submit(
-      2, vector<ska::flat_hash_map<uint32_t, uint64_t>>(n_threads));
+  vector<vector<flat_hash_map<uint32_t, uint64_t>>> left_tokens_submit(
+      2, vector<flat_hash_map<uint32_t, uint64_t>>(n_threads));
+  vector<vector<flat_hash_map<uint32_t, uint64_t>>> right_tokens_submit(
+      2, vector<flat_hash_map<uint32_t, uint64_t>>(n_threads));
   vector<std::atomic<uint32_t>> results_ready(n_threads);
   for (uint64_t i = 0; i < n_threads; i++) {
     results_ready[i] = 0;
@@ -936,7 +936,7 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
           // threads are working 1
 
           vector<vector<NodeEncoder>> lists_of_tokens;
-          ska::flat_hash_map<uint64_t, vector<Position>> pair2pos;
+          flat_hash_map<uint64_t, vector<Position>> pair2pos;
           vector<uint64_t> word_freq;
 
           auto thread_awake_main = [&]() {
@@ -954,7 +954,7 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
           };
 
           vector<uint32_t> utf_code_points;
-          ska::flat_hash_map<uint32_t, uint64_t> char_cnt;
+          flat_hash_map<uint32_t, uint64_t> char_cnt;
           utf_code_points =
               decode_utf8(text_utf8.data() + split_pos[thread_id],
                           text_utf8.data() + split_pos[thread_id + 1]);
@@ -1089,7 +1089,7 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
   main_wait_threads();
   // main is working 3
 
-  ska::flat_hash_map<uint64_t, uint64_t> real_pair_cnt;
+  flat_hash_map<uint64_t, uint64_t> real_pair_cnt;
 
   for (uint64_t i = 0; i < n_threads; i++) {
     for (const auto &x : pair2cnt_g[i]) {
@@ -1126,10 +1126,10 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
   uint64_t finished_cur = used_ids;
   uint64_t last_failed_try = 0;
 
-  ska::flat_hash_map<uint32_t, uint64_t> all_res;
+  flat_hash_map<uint32_t, uint64_t> all_res;
   vector<char> local_check_list(n_threads);
-  ska::flat_hash_map<uint32_t, uint64_t> global_ht_update_left;
-  ska::flat_hash_map<uint32_t, uint64_t> global_ht_update_right;
+  flat_hash_map<uint32_t, uint64_t> global_ht_update_left;
+  flat_hash_map<uint32_t, uint64_t> global_ht_update_right;
 
   int inter_fail = 0;
   int equal_fail = 0;
@@ -1310,7 +1310,7 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
 
 void build_linked_list(
     const vector<WordCount> &word_cnt, vector<vector<NodeEncoder>> &list,
-    ska::flat_hash_map<uint64_t, PositionsCnt> &pair2poscnt) {
+    flat_hash_map<uint64_t, PositionsCnt> &pair2poscnt) {
   list.resize(word_cnt.size());
   for (uint64_t i = 0; i < word_cnt.size(); i++) {
     for (uint32_t ch : word_cnt[i].word) {
@@ -1351,10 +1351,10 @@ void build_linked_list(
   }
 }
 
-ska::flat_hash_map<uint32_t, uint32_t> compute_alphabet(
-    const vector<uint32_t> &data, ska::flat_hash_set<uint32_t> &removed_chars,
+flat_hash_map<uint32_t, uint32_t> compute_alphabet(
+    const vector<uint32_t> &data, flat_hash_set<uint32_t> &removed_chars,
     const BpeConfig &bpe_config) {
-  ska::flat_hash_map<uint32_t, uint64_t> char_cnt;
+  flat_hash_map<uint32_t, uint64_t> char_cnt;
   for (auto ch : data) {
     if (!is_space(ch)) {
       char_cnt[ch]++;
@@ -1395,7 +1395,7 @@ Status check_config(BpeConfig &bpe_config, int vocab_size) {
         std::to_string(vocab_size) + " eos_id = " + std::to_string(bpe_config.special_tokens.eos_id));
   }
 
-  ska::flat_hash_set<int> ids;
+  flat_hash_set<int> ids;
   uint64_t cnt_add = 0;
   if (bpe_config.special_tokens.pad_id != -1) {
     ids.insert(bpe_config.special_tokens.pad_id);
@@ -1563,7 +1563,7 @@ DecodeResult BaseEncoder::encode_sentence(const std::string &sentence_utf8,
   }
 
   vector<NodeDecoder> list;
-  ska::flat_hash_map<uint32_t, string> unrecognized_tokens;
+  flat_hash_map<uint32_t, string> unrecognized_tokens;
 
   auto text = decode_utf8(sentence_utf8.data(),
                           sentence_utf8.data() + sentence_utf8.size());
@@ -1975,7 +1975,7 @@ void BaseEncoder::vocab_cli(bool verbose) const {
   n_tokens = std::max(n_tokens, bpe_state.special_tokens.max_id());
   n_tokens++;
 
-  ska::flat_hash_map<uint32_t, std::pair<uint32_t, uint32_t>> reversed_rules;
+  flat_hash_map<uint32_t, std::pair<uint32_t, uint32_t>> reversed_rules;
   if (verbose) {
     for (auto rule : bpe_state.rules) {
       reversed_rules[rule.z] = {rule.x, rule.y};
