@@ -4,6 +4,7 @@ from pathlib import Path
 from time import time
 
 from tabulate import tabulate
+from tokenizers import BPETokenizer
 
 MODEL_FILE_NAME = "bpe.model"
 MODEL_SUFFIX = ".model"
@@ -14,6 +15,14 @@ FAST_BPE = "fastBPE"
 
 PATH_TO_FASTBPE = "./fastBPE"
 
+class HuggingfaceInterface:
+    def train_from_file(self, train_file, vocab_size, model_file, _):
+        tokenizer = BPETokenizer()
+        tokenizer.train(train_file, vocab_size=vocab_size)
+        tokenizer.save('.', model_file)
+
+    def encode_file(self, model_path, path_in, path_out, _):
+        tokenizer = BPETokenizer(model_path + '-merges.txt', model_path + '-vocab.json')
 
 class SentencePieceInterface:
     def train_from_file(self, train_file, vocab_size, model_file, _):

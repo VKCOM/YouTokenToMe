@@ -18,7 +18,7 @@ Substitute `PATH_TO_DOWNLOADED_DATA` with absolute path to the directory where
 wiki dumps will be downloaded.
 
 ```
-cd tests
+cd tests/speed_test
 docker build -t yttm/speed_test .
 docker run --rm -v PATH_TO_DOWNLOADED_DATA:/test_dir/data -it yttm/speed_test:latest
 ```
