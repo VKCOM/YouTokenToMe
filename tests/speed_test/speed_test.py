@@ -12,17 +12,20 @@ MODEL_SUFFIX = ".model"
 YOU_TOKEN_TO_ME = "YouTokenToMe"
 SENTENCE_PIECE = "SentencePiece"
 FAST_BPE = "fastBPE"
+HUGGING_FACE_BPE = "HUGGING_FACE_BPE"
 
 PATH_TO_FASTBPE = "./fastBPE"
+
 
 class HuggingfaceInterface:
     def train_from_file(self, train_file, vocab_size, model_file, _):
         tokenizer = BPETokenizer()
         tokenizer.train(train_file, vocab_size=vocab_size)
-        tokenizer.save('.', model_file)
+        tokenizer.save(".", model_file)
 
     def encode_file(self, model_path, path_in, path_out, _):
-        tokenizer = BPETokenizer(model_path + '-merges.txt', model_path + '-vocab.json')
+        tokenizer = BPETokenizer(model_path + "-merges.txt", model_path + "-vocab.json")
+
 
 class SentencePieceInterface:
     def train_from_file(self, train_file, vocab_size, model_file, _):
@@ -78,6 +81,8 @@ def get_bpe(impl_name):
         return SentencePieceInterface()
     if impl_name == FAST_BPE:
         return FastBPEInterface()
+    if impl_name == HUGGING_FACE_BPE:
+        return HuggingfaceInterface()
     assert False
 
 
@@ -215,7 +220,7 @@ if __name__ == "__main__":
             os.system(f"wget -O {zip_file} {link}")
         corpuses[lang] = prepare_data(zip_file, args.corpus_size)
 
-    algorithms = [YOU_TOKEN_TO_ME, SENTENCE_PIECE, FAST_BPE]
+    algorithms = [YOU_TOKEN_TO_ME, SENTENCE_PIECE, FAST_BPE, HUGGING_FACE_BPE]
 
     global_train = {}
     global_tokenization = {}
