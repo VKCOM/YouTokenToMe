@@ -227,8 +227,8 @@ if __name__ == "__main__":
             os.system(f"wget -O {zip_file} {link}")
         corpuses[lang] = prepare_data(zip_file, args.corpus_size)
 
-    algorithms = [YOU_TOKEN_TO_ME, SENTENCE_PIECE, FAST_BPE, HUGGING_FACE_BPE]
-    #algorithms = [HUGGING_FACE_BPE]
+    #algorithms = [YOU_TOKEN_TO_ME, SENTENCE_PIECE, FAST_BPE, HUGGING_FACE_BPE]
+    algorithms = [HUGGING_FACE_BPE]
 
     global_train = {}
     global_tokenization = {}
