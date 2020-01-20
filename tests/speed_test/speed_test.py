@@ -12,7 +12,7 @@ MODEL_SUFFIX = ".model"
 YOU_TOKEN_TO_ME = "YouTokenToMe"
 SENTENCE_PIECE = "SentencePiece"
 FAST_BPE = "fastBPE"
-HUGGING_FACE_BPE = "HUGGING_FACE_BPE"
+HUGGING_FACE_BPE = "Hugging_Face_BPE"
 
 PATH_TO_FASTBPE = "./fastBPE"
 
@@ -29,7 +29,6 @@ class HuggingfaceInterface:
         f2 = str(model_path) + "-merges.txt"
         print(f1, f2)
         tokenizer = BPETokenizer(f1, f2)
-        # tokenizer = BPETokenizer(f1, f2)
         with open(path_in) as fin:
             full_text = fin.readlines()
         tokenizer.encode_batch(full_text)
