@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	make \
 	g++ \
 	wget && \
-    pip3 install tabulate youtokentome
+    pip3 install tabulate youtokentome tokenizers
 
 WORKDIR /repos
 
@@ -29,4 +29,4 @@ WORKDIR /workspace
 COPY ./speed_test.py ./speed_test.py
 RUN cp /repos/fastBPE/fast /workspace/fastBPE
 
-CMD ["python", "speed_test.py"]
+CMD ["python", "speed_test.py", "--langs", "ru", "--corpus_size", "10", "--vocab_size", "30000"]

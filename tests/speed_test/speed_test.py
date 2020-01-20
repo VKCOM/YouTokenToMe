@@ -4,6 +4,7 @@ from pathlib import Path
 from time import time
 
 from tabulate import tabulate
+from tokenizers import BPETokenizer as HuggingFaceBPETokenizer
 
 MODEL_FILE_NAME = "bpe.model"
 MODEL_SUFFIX = ".model"
@@ -11,8 +12,24 @@ MODEL_SUFFIX = ".model"
 YOU_TOKEN_TO_ME = "YouTokenToMe"
 SENTENCE_PIECE = "SentencePiece"
 FAST_BPE = "fastBPE"
+HUGGING_FACE_BPE = "Hugging_Face_BPE"
 
 PATH_TO_FASTBPE = "./fastBPE"
+
+
+class HuggingfaceInterface:
+    def train_from_file(self, train_file, vocab_size, model_file, _):
+        tokenizer = HuggingFaceBPETokenizer()
+        tokenizer.train(str(train_file), vocab_size=vocab_size)
+        tokenizer.save(".", model_file)
+
+    def encode_file(self, model_path, path_in, path_out, _):
+        f1 = str(model_path) + "-vocab.json"
+        f2 = str(model_path) + "-merges.txt"
+        tokenizer = HuggingFaceBPETokenizer(f1, f2)
+        with open(path_in) as fin:
+            full_text = fin.readlines()
+        tokenizer.encode_batch(full_text)
 
 
 class SentencePieceInterface:
@@ -69,6 +86,8 @@ def get_bpe(impl_name):
         return SentencePieceInterface()
     if impl_name == FAST_BPE:
         return FastBPEInterface()
+    if impl_name == HUGGING_FACE_BPE:
+        return HuggingfaceInterface()
     assert False
 
 
@@ -158,7 +177,7 @@ def print_results(cfg, result_name, corpuses, algorithms):
     print(tabulate(result_table, table_header, tablefmt="grid"))
 
 
-if __name__ == "__main__":
+def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--vocab_size", type=int, default=30000)
@@ -174,8 +193,12 @@ if __name__ == "__main__":
         default="ru",
     )
 
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def main(args):
     langs = args.langs if isinstance(args.langs, list) else [args.langs]
+    os.environ["RAYON_RS_NUM_CPUS"] = str(args.n_threads)
 
     short_to_long_names = {
         "en": "English",
@@ -197,7 +220,6 @@ if __name__ == "__main__":
     }
 
     corpuses = {}
-
     Path("data").mkdir(exist_ok=True)
     for lang, link in links.items():
         Path(f"data/{lang}").mkdir(exist_ok=True)
@@ -206,7 +228,7 @@ if __name__ == "__main__":
             os.system(f"wget -O {zip_file} {link}")
         corpuses[lang] = prepare_data(zip_file, args.corpus_size)
 
-    algorithms = [YOU_TOKEN_TO_ME, SENTENCE_PIECE, FAST_BPE]
+    algorithms = [YOU_TOKEN_TO_ME, SENTENCE_PIECE, FAST_BPE, HUGGING_FACE_BPE]
 
     global_train = {}
     global_tokenization = {}
@@ -220,3 +242,8 @@ if __name__ == "__main__":
 
     print_results(global_train, "Train", corpuses, algorithms)
     print_results(global_tokenization, "Tokenization", corpuses, algorithms)
+
+
+if __name__ == "__main__":
+    args = parse_args()
+    main(args)
