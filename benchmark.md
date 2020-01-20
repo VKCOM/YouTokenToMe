@@ -2,8 +2,8 @@
 
 ## Speed tests
 
-`YouTokenToMe` will be compared with [SentencePiece](https://github.com/google/sentencepiece/)
- and [fastBPE](https://github.com/glample/fastBPE). These two algorithms are considered to be fast.
+`YouTokenToMe` will be compared with [Hugging Face](https://github.com/huggingface/tokenizers), [SentencePiece](https://github.com/google/sentencepiece/)
+ and [fastBPE](https://github.com/glample/fastBPE). These three algorithms are considered to be fast.
  
 Data from [Wikipedia](https://linguatools.org/tools/corpora/wikipedia-monolingual-corpora/) was used to evaluate algorithm speed. In a similar way to `enwik8` and `enwik9`, the experiments were run on first `10^8` and `10^9` bytes of datasets for English, Russian, Chinese and Japanese.
 
@@ -43,7 +43,7 @@ YouTokenToMe|**3.2** (x1)|**5.0** (x1)|**3.3** (x1)|**2.9** (x1)
 :-----:|:-----:|:-----:|:-----:|:-----:
 SentencePiece|455.9 (x14.9)|454.5 (x15.5)|3035.7 (x31.7)|5485.7 (x53.0)
 fastBPE|293.3 (x9.6)|253.4 (x8.6)|4388.2 (x45.8)|4554.8 (x44.0)
-Hugging Face|274.8 (x9.0) | 295.1(x10.0) | 2149.0(x22.2) | 1949.9 (x18.8)
+Hugging Face|274.8 (x9.0) | 295.1(x10.0) | 2149.0(x22.4) | 1949.9 (x18.8)
 YouTokenToMe|**30.4** (x1)|**29.3** (x1)|**95.7** (x1)|**103.5** (x1)
 
 
