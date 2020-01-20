@@ -2,6 +2,7 @@
 
 * Install [YouTokenToMe](https://github.com/vkcom/youtokentome)
 * Install [SentencePiece](https://github.com/google/sentencepiece)
+* Install [Hugging Face Tokenizer](https://github.com/huggingface/tokenizers)
 * Compile [fastBPE](https://github.com/glample/fastBPE) and specify path to binary file in variable
  `PATH_TO_FASTBPE` in `speed_test.py`  
 * `python speed_test.py`

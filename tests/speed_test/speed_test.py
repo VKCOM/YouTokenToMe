@@ -4,7 +4,7 @@ from pathlib import Path
 from time import time
 
 from tabulate import tabulate
-from tokenizers import BPETokenizer
+from tokenizers import BPETokenizer as HuggingFaceBPETokenizer
 
 MODEL_FILE_NAME = "bpe.model"
 MODEL_SUFFIX = ".model"
@@ -19,16 +19,14 @@ PATH_TO_FASTBPE = "./fastBPE"
 
 class HuggingfaceInterface:
     def train_from_file(self, train_file, vocab_size, model_file, _):
-        tokenizer = BPETokenizer()
+        tokenizer = HuggingFaceBPETokenizer()
         tokenizer.train(str(train_file), vocab_size=vocab_size)
         tokenizer.save(".", model_file)
-        print("save:", model_file)
 
     def encode_file(self, model_path, path_in, path_out, _):
         f1 = str(model_path) + "-vocab.json"
         f2 = str(model_path) + "-merges.txt"
-        print(f1, f2)
-        tokenizer = BPETokenizer(f1, f2)
+        tokenizer = HuggingFaceBPETokenizer(f1, f2)
         with open(path_in) as fin:
             full_text = fin.readlines()
         tokenizer.encode_batch(full_text)
