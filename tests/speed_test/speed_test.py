@@ -220,8 +220,8 @@ def main(args):
         short_to_long_names[lang]: all_links[short_to_long_names[lang]]
         for lang in langs
     }
-    corpuses = {}
 
+    corpuses = {}
     Path("data").mkdir(exist_ok=True)
     for lang, link in links.items():
         Path(f"data/{lang}").mkdir(exist_ok=True)
