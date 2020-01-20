@@ -4,7 +4,7 @@ from pathlib import Path
 from time import time
 
 from tabulate import tabulate
-from tokenizers import BPETokenizer
+from tokenizers import SentencePieceBPETokenizer
 
 MODEL_FILE_NAME = "bpe.model"
 MODEL_SUFFIX = ".model"
@@ -19,16 +19,18 @@ PATH_TO_FASTBPE = "./fastBPE"
 
 class HuggingfaceInterface:
     def train_from_file(self, train_file, vocab_size, model_file, _):
-        tokenizer = BPETokenizer()
+        # tokenizer = BPETokenizer()
+        tokenizer = SentencePieceBPETokenizer()
         tokenizer.train(str(train_file), vocab_size=vocab_size)
         tokenizer.save(".", model_file)
-        print('save:', model_file)
+        print("save:", model_file)
 
     def encode_file(self, model_path, path_in, path_out, _):
         f1 = str(model_path) + "-vocab.json"
         f2 = str(model_path) + "-merges.txt"
         print(f1, f2)
-        tokenizer = BPETokenizer(f1, f2)
+        tokenizer = SentencePieceBPETokenizer(f1, f2)
+        # tokenizer = BPETokenizer(f1, f2)
         with open(path_in) as fin:
             full_text = fin.readlines()
         tokenizer.encode_batch(full_text)
@@ -179,7 +181,7 @@ def print_results(cfg, result_name, corpuses, algorithms):
     print(tabulate(result_table, table_header, tablefmt="grid"))
 
 
-if __name__ == "__main__":
+def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--vocab_size", type=int, default=30000)
@@ -195,8 +197,12 @@ if __name__ == "__main__":
         default="ru",
     )
 
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def main(args):
     langs = args.langs if isinstance(args.langs, list) else [args.langs]
+    os.environ["RAYON_RS_NUM_CPUS"] = str(args.n_threads)
 
     short_to_long_names = {
         "en": "English",
@@ -216,7 +222,6 @@ if __name__ == "__main__":
         short_to_long_names[lang]: all_links[short_to_long_names[lang]]
         for lang in langs
     }
-
     corpuses = {}
 
     Path("data").mkdir(exist_ok=True)
@@ -227,8 +232,8 @@ if __name__ == "__main__":
             os.system(f"wget -O {zip_file} {link}")
         corpuses[lang] = prepare_data(zip_file, args.corpus_size)
 
-    #algorithms = [YOU_TOKEN_TO_ME, SENTENCE_PIECE, FAST_BPE, HUGGING_FACE_BPE]
-    algorithms = [HUGGING_FACE_BPE]
+    # algorithms = [YOU_TOKEN_TO_ME, SENTENCE_PIECE, FAST_BPE, HUGGING_FACE_BPE]
+    algorithms = [HUGGING_FACE_BPE, YOU_TOKEN_TO_ME]
 
     global_train = {}
     global_tokenization = {}
@@ -242,3 +247,8 @@ if __name__ == "__main__":
 
     print_results(global_train, "Train", corpuses, algorithms)
     print_results(global_tokenization, "Tokenization", corpuses, algorithms)
+
+
+if __name__ == "__main__":
+    args = parse_args()
+    main(args)

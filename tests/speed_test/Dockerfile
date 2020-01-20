@@ -26,7 +26,8 @@ RUN g++ -std=c++11 -pthread -O3 fastBPE/main.cc -IfastBPE -o fast
 
 WORKDIR /workspace
 
-COPY ./speed_test.py ./speed_test.py 
+COPY ./speed_test.py ./speed_test.py
 RUN cp /repos/fastBPE/fast /workspace/fastBPE
 
-CMD ["python", "speed_test.py", "--langs", "ru", "en", "zh", "ja"]
+CMD ["python", "speed_test.py", "--langs", "en", "ja", "--corpus_size", "100"]
+#CMD ["python", "speed_test.py", "--langs", "en", ]
