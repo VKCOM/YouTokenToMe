@@ -31,15 +31,15 @@ struct VectorSegment {
   constexpr static uint64_t MOD = 2032191299;
   constexpr static uint64_t P = 726328703;
 
-  vector<uint32_t>::const_iterator begin, end;
+  const char* begin;
+  const char* end;
   uint64_t hash;
 
-  VectorSegment(vector<uint32_t>::const_iterator begin,
-                vector<uint32_t>::const_iterator end)
-      : begin(begin), end(end) {
+  VectorSegment(const char* begin, const char* end): begin(begin), end(end) {
     hash = 0;
     for (auto it = begin; it != end; it++) {
-      hash = (hash * P + *it) % MOD;
+      hash = (hash * P + (unsigned char)(*it)) % MOD;
+      assert (hash >= 0);
     }
   }
 
@@ -132,6 +132,57 @@ struct MergeCandidate {
     return left_token < other.left_token;
   }
 };
+
+struct StringIterator {
+  StringIterator(char* begin, char* end):begin(begin), end(end) {}
+
+  void move() {
+    if (!state) {
+      parse();
+    }
+    assert(begin < end);
+    assert(1 <= utf8_len && utf8_len <= 4);
+    begin += utf8_len;
+    state = false;
+  }
+
+  uint32_t get() {
+    if (!state) {
+      parse();
+    }
+    assert(begin < end);
+    return code_point;
+  }
+  char* get_begin() {
+    return begin;
+  }
+  uint64_t get_utf8_len() {
+    if (!state) {
+      parse();
+    }
+    return utf8_len;
+  }
+
+  bool empty() {
+    assert(begin <= end);
+    return begin == end;
+  }
+ private:
+  char *begin, *end;
+  uint32_t code_point = 0;
+  uint64_t utf8_len = 0;
+  bool state = false;
+  void parse() {
+    if (state) {
+      return;
+    }
+    assert(begin < end);
+    code_point = chars_to_utf8(begin, end - begin, &utf8_len);
+    assert(utf8_len > 0);
+    state = true;
+  }
+};
+
 
 struct Position {
   uint64_t word_id, pos_id;
@@ -371,10 +422,36 @@ void remove_rare_chars(vector<uint32_t> &data,
   if (removed_chars.empty()) {
     return;
   }
-  auto it_first_rare_char =
-      std::remove_if(data.begin(), data.end(),
-                     [&](uint32_t c) { return removed_chars.count(c) != 0; });
+  auto it_first_rare_char = std::remove_if(data.begin(), data.end(), [&](uint32_t c) { return removed_chars.count(c) != 0; });
   data.erase(it_first_rare_char, data.end());
+}
+
+char* remove_rare_chars(char* begin, char* end, const flat_hash_set<uint32_t> &removed_chars) {
+  if (removed_chars.empty()) {
+    return end;
+  }
+  char* end_candidate = begin;
+  uint64_t utf8_len = 0;
+  bool invalid_input = false;
+  StringIterator s_iterator(begin, end);
+  for (;!s_iterator.empty(); s_iterator.move()) {
+//  for (; begin < end; begin += utf8_len) {
+//    uint32_t code_point = chars_to_utf8(begin, end - begin, &utf8_len);
+    if (s_iterator.get() != INVALID_UNICODE) {
+      if (removed_chars.count(s_iterator.get()) == 0) {
+        for (uint32_t ii = 0; ii < s_iterator.get_utf8_len(); ii++) {
+          end_candidate[ii] = s_iterator.get_begin()[ii];
+        }
+        end_candidate += s_iterator.get_utf8_len();
+      }
+    } else {
+      invalid_input = true;
+    }
+  }
+  if (invalid_input) {
+    std::cerr << "WARNING Input contains invalid unicode characters." << std::endl;
+  }
+  return end_candidate;
 }
 
 struct WordCount {
@@ -382,45 +459,215 @@ struct WordCount {
   uint64_t cnt;
 };
 
-flat_hash_map<VectorSegment, WordCount> compute_word_count_helper(
-    const vector<uint32_t> &row_data,
-    const flat_hash_map<uint32_t, uint32_t> &char2id) {
+//flat_hash_map<VectorSegment, WordCount> compute_word_count_helper(
+//    const vector<uint32_t> &row_data,
+//    const flat_hash_map<uint32_t, uint32_t> &char2id) {
+//  flat_hash_map<VectorSegment, WordCount> hash2wordcnt;
+//  vector<uint32_t> word;
+//
+//  for (auto loop_it = row_data.begin(); loop_it != row_data.end();) {
+//    auto begin_of_word = std::find_if_not(loop_it, row_data.end(), is_space);
+//    if (begin_of_word == row_data.end()) {
+//      break;
+//    }
+//    auto end_of_word = std::find_if(begin_of_word, row_data.end(), is_space);
+//
+//    VectorSegment word_hash(begin_of_word, end_of_word);
+//    auto it = hash2wordcnt.find(word_hash);
+//    if (it == hash2wordcnt.end()) {
+//      word.clear();
+//      word.push_back(char2id.at(SPACE_TOKEN));
+//      std::transform(begin_of_word, end_of_word, std::back_inserter(word),
+//                     [&](uint32_t ch) { return char2id.at(ch); });
+//      hash2wordcnt[word_hash] = {word, 1};
+//    } else {
+//      it->second.cnt++;
+//    }
+//    loop_it = end_of_word;
+//  }
+//  return hash2wordcnt;
+//}
+
+
+flat_hash_map<VectorSegment, WordCount> compute_word_count_helper_3(
+  char* sbegin, char* send,
+  const flat_hash_map<uint32_t, uint32_t> &char2id) {
   flat_hash_map<VectorSegment, WordCount> hash2wordcnt;
   vector<uint32_t> word;
+  StringIterator s_iterator(sbegin, send);
 
-  for (auto loop_it = row_data.begin(); loop_it != row_data.end();) {
-    auto begin_of_word = std::find_if_not(loop_it, row_data.end(), is_space);
-    if (begin_of_word == row_data.end()) {
+  for (;!s_iterator.empty();) {
+    for (;!s_iterator.empty() && is_space(s_iterator.get()); s_iterator.move());
+    if (s_iterator.empty()) {
       break;
     }
-    auto end_of_word = std::find_if(begin_of_word, row_data.end(), is_space);
-
+    char* begin_of_word = s_iterator.get_begin();
+    for (;!s_iterator.empty() && !is_space(s_iterator.get()); s_iterator.move());
+    char* end_of_word = s_iterator.get_begin();
     VectorSegment word_hash(begin_of_word, end_of_word);
     auto it = hash2wordcnt.find(word_hash);
     if (it == hash2wordcnt.end()) {
       word.clear();
       word.push_back(char2id.at(SPACE_TOKEN));
-      std::transform(begin_of_word, end_of_word, std::back_inserter(word),
-                     [&](uint32_t ch) { return char2id.at(ch); });
+      StringIterator word_iter(begin_of_word, end_of_word);
+      for (; !word_iter.empty(); word_iter.move()) {
+        word.push_back(char2id.at(word_iter.get()));
+      }
       hash2wordcnt[word_hash] = {word, 1};
     } else {
       it->second.cnt++;
     }
-    loop_it = end_of_word;
   }
+//  db2("ret", hash2wordcnt.size());
   return hash2wordcnt;
 }
 
-vector<WordCount> compute_word_count(
-    const vector<uint32_t> &row_data,
-    const flat_hash_map<uint32_t, uint32_t> &char2id) {
-  auto hash2wordcnt = compute_word_count_helper(row_data, char2id);
-  vector<WordCount> word_cnt(hash2wordcnt.size());
-  std::transform(
-      hash2wordcnt.begin(), hash2wordcnt.end(), word_cnt.begin(),
-      [](const std::pair<VectorSegment, WordCount> &x) { return x.second; });
-  return word_cnt;
-}
+
+//flat_hash_map<VectorSegment, WordCount> compute_word_count_helper_2(
+//  char* sbegin, char* send,
+//  const flat_hash_map<uint32_t, uint32_t> &char2id) {
+//
+//  flat_hash_map<VectorSegment, WordCount> hash2wordcnt;
+//  vector<uint32_t> word;
+//  for (;sbegin < send; ) {
+//    bool found_non_space = false;
+//    for (;sbegin < send;) {
+//      uint64_t utf8_len;
+//      uint32_t code_point = chars_to_utf8(sbegin, send - sbegin, &utf8_len);
+//      assert(code_point != INVALID_UNICODE);
+//      if (is_space(code_point)) {
+//        sbegin += utf8_len;
+//      }
+//      else {
+//        found_non_space = true;
+//        break;
+//      }
+//    }
+//    if (!found_non_space) {
+//      assert(sbegin >= send);
+//      break;
+//    }
+//    vector<uint32_t> tword;
+//    for (;sbegin < send;) {
+//      uint64_t utf8_len;
+//      uint32_t code_point = chars_to_utf8(sbegin, send - sbegin, &utf8_len);
+//      assert(code_point != INVALID_UNICODE);
+//      if (is_space(code_point)) {
+//        break;
+//      }
+//      else {
+//        tword.push_back(code_point);
+//        sbegin += utf8_len;
+//      }
+//    }
+//
+//    VectorSegment word_hash(tword.begin(), tword.end());
+//    auto it = hash2wordcnt.find(word_hash);
+//    if (it == hash2wordcnt.end()) {
+//      word.clear();
+//      word.push_back(char2id.at(SPACE_TOKEN));
+//      std::transform(tword.begin(), tword.end(), std::back_inserter(word),
+//                     [&](uint32_t ch) { return char2id.at(ch); });
+//      hash2wordcnt[word_hash] = {word, 1};
+//    } else {
+//      it->second.cnt++;
+//    }
+//
+//  }
+//  for (auto loop_it = row_data.begin(); loop_it != row_data.end();) {
+//    auto begin_of_word = std::find_if_not(loop_it, row_data.end(), is_space);
+//    if (begin_of_word == row_data.end()) {
+//      break;
+//    }
+//    auto end_of_word = std::find_if(begin_of_word, row_data.end(), is_space);
+//
+//    VectorSegment word_hash(begin_of_word, end_of_word);
+//    auto it = hash2wordcnt.find(word_hash);
+//    if (it == hash2wordcnt.end()) {
+//      word.clear();
+//      word.push_back(char2id.at(SPACE_TOKEN));
+//      std::transform(begin_of_word, end_of_word, std::back_inserter(word),
+//                     [&](uint32_t ch) { return char2id.at(ch); });
+//      hash2wordcnt[word_hash] = {word, 1};
+//    } else {
+//      it->second.cnt++;
+//    }
+//    loop_it = end_of_word;
+//  }
+//  return hash2wordcnt;
+//}
+
+
+//flat_hash_map<VectorSegment, WordCount> compute_word_count_helper(
+//  char* begin,
+//  char* end,
+//  const flat_hash_map<uint32_t, uint32_t> &char2id) {
+//  flat_hash_map<VectorSegment, WordCount> hash2wordcnt;
+//  vector<uint32_t> word;
+//
+//  vector<uint32_t> tmp_word;
+//  for (;begin < end;) {
+////    auto begin_of_word = std::find_if_not(loop_it, row_data.end(), is_space);
+////    char *begin_of_word = nullptr;
+//    bool found_non_space = false;
+//    for (;begin < end;) {
+//      uint64_t utf8_len = 0;
+//      uint32_t code_point = chars_to_utf8(begin, end - begin, &utf8_len);
+//      assert(code_point != INVALID_UNICODE);
+//      if (!is_space(code_point)) {
+//        found_non_space = true;
+//        break;
+//      }
+//      else {
+//        begin += utf8_len;
+//      }
+//    }
+//    if (!found_non_space) {
+//      break;
+//    }
+//    tmp_word.clear();
+//    for (;begin < end;) {
+//      uint64_t utf8_len = 0;
+//      uint32_t code_point = chars_to_utf8(begin, end - begin, &utf8_len);
+//      assert(code_point != INVALID_UNICODE);
+//      if (is_space(code_point)) {
+//        break;
+//      }
+//      else {
+//        tmp_word.push_back(code_point);
+//        begin += utf8_len;
+//      }
+//    }
+////    auto end_of_word = std::find_if(begin_of_word, row_data.end(), is_space);
+//
+////    VectorSegment word_hash(begin_of_word, end_of_word);
+//    VectorSegment word_hash(tmp_word.begin(), tmp_word.end());
+//    auto it = hash2wordcnt.find(word_hash);
+//    if (it == hash2wordcnt.end()) {
+//      word.clear();
+//      word.push_back(char2id.at(SPACE_TOKEN));
+//      std::transform(tmp_word.begin(), tmp_word.end(), std::back_inserter(word),
+//                     [&](uint32_t ch) { return char2id.at(ch); });
+//      hash2wordcnt[word_hash] = {word, 1};
+//    } else {
+//      it->second.cnt++;
+//    }
+//  }
+//  return hash2wordcnt;
+//}
+
+
+//
+//vector<WordCount> compute_word_count(
+//    const vector<uint32_t> &row_data,
+//    const flat_hash_map<uint32_t, uint32_t> &char2id) {
+//  auto hash2wordcnt = compute_word_count_helper(row_data, char2id);
+//  vector<WordCount> word_cnt(hash2wordcnt.size());
+//  std::transform(
+//      hash2wordcnt.begin(), hash2wordcnt.end(), word_cnt.begin(),
+//      [](const std::pair<VectorSegment, WordCount> &x) { return x.second; });
+//  return word_cnt;
+//}
 
 struct NodeEncoder {
   uint32_t val;
@@ -866,9 +1113,37 @@ void rename_tokens(flat_hash_map<uint32_t, uint32_t> &char2id,
   }
 }
 
+//flat_hash_map<VectorSegment, WordCount> magic(char* seg_begin, char* seg_end, const flat_hash_map<uint32_t, uint32_t> &char2id) {
+//  vector<uint32_t> utf_code_points = decode_utf8(seg_begin, seg_end);
+//  return compute_word_count_helper(utf_code_points, char2id);
+//}
+
+uint64_t compute_char_count(flat_hash_map<uint32_t, uint64_t>& char_cnt, const char* begin, const char* end) {
+//  uint32_t chars_to_utf8(const char* begin, uint64_t size, uint64_t* utf8_len) {
+  uint64_t utf8_len = 0;
+  uint64_t char_count = 0;
+  bool invalid_input = false;
+  for (; begin < end; begin += utf8_len, char_count++) {
+    uint32_t code_point = chars_to_utf8(begin, end - begin, &utf8_len);
+    if (code_point != INVALID_UNICODE) {
+      if (!is_space(code_point)) {
+        char_cnt[code_point]++;
+      }
+    } else {
+      invalid_input = true;
+    }
+  }
+  if (invalid_input) {
+    std::cerr << "WARNING Input contains invalid unicode characters."
+              << std::endl;
+  }
+  return char_count;
+}
+
 Status learn_bpe_from_string(string &text_utf8, int n_tokens,
                              const string &output_file,
                              BpeConfig bpe_config, BPEState *bpe_state) {
+//  db(bpe_config.character_coverage);
   vector<std::thread> threads;
   assert(bpe_config.n_threads >= 1 || bpe_config.n_threads == -1);
   uint64_t n_threads = bpe_config.n_threads;
@@ -877,13 +1152,10 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
   split_pos.push_back(0);
   for (uint64_t i = 1; i <= n_threads; i++) {
     uint64_t candidate = text_utf8.size() * i / n_threads;
-    for (; candidate < text_utf8.size() && !is_space(text_utf8[candidate]);
-           candidate++) {
-    }
+    for (; candidate < text_utf8.size() && !is_space(text_utf8[candidate]); candidate++) { }
 
     split_pos.push_back(candidate);
   }
-
   vector<flat_hash_map<uint32_t, uint64_t>> shared_char_cnt(n_threads);
 
   vector<std::mutex> mt(n_threads);
@@ -953,19 +1225,11 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
             main_finished[thread_id] = 0;
           };
 
-          vector<uint32_t> utf_code_points;
           flat_hash_map<uint32_t, uint64_t> char_cnt;
-          utf_code_points =
-              decode_utf8(text_utf8.data() + split_pos[thread_id],
-                          text_utf8.data() + split_pos[thread_id + 1]);
 
-          for (auto ch : utf_code_points) {
-            if (!is_space(ch)) {
-              char_cnt[ch]++;
-            }
-          }
-
-          text_len[thread_id] = utf_code_points.size();
+          uint64_t char_count = compute_char_count(char_cnt, text_utf8.data() + split_pos[thread_id], text_utf8.data() + split_pos[thread_id + 1]);
+//          db(char_cnt.size());
+          text_len[thread_id] = char_count;
           shared_char_cnt[thread_id] = char_cnt;
 
           thread_awake_main();
@@ -973,9 +1237,65 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
           thread_wait_main();
           // threads are working 2
 
-          remove_rare_chars(utf_code_points, removed_chars);
-          hash2wordcnt[thread_id] =
-              compute_word_count_helper(utf_code_points, char2id);
+//          vector<uint32_t> utf_code_points;
+//          utf_code_points = decode_utf8(text_utf8.data() + split_pos[thread_id],
+//                                        text_utf8.data() + split_pos[thread_id + 1]);
+//          remove_rare_chars(utf_code_points, removed_chars);
+          char* seg_begin = &text_utf8[0] + split_pos[thread_id];
+          char* seg_end = &text_utf8[0] + split_pos[thread_id + 1];
+//          db(removed_chars.size());
+          char* new_seg_end = remove_rare_chars(seg_begin, seg_end, removed_chars);
+          assert(new_seg_end <= seg_end);
+//          db2(seg_end - seg_begin, new_seg_end - seg_begin);
+          seg_end = new_seg_end;
+
+//          auto magic_2 = [](char* seg_begin, char* seg_end, const flat_hash_map<uint32_t, uint32_t> &char2id) {
+//            vector<uint32_t> utf_code_points = decode_utf8(seg_begin, seg_end);
+//            return compute_word_count_helper(utf_code_points, char2id);
+//          };
+
+//          auto magic_3 = [&](char* seg_begin, char* seg_end, const flat_hash_map<uint32_t, uint32_t> &char2id) {
+//                return decode_utf8(seg_begin, seg_end);
+//          };
+//          auto magic_4 = [&](const vector<uint32_t>& utf_code_points, const flat_hash_map<uint32_t, uint32_t> &char2id) {
+//                return compute_word_count_helper(utf_code_points, char2id);
+//          };
+
+          // 1 OK
+//          vector<uint32_t> utf_code_points = decode_utf8(seg_begin, seg_end);
+//          flat_hash_map<VectorSegment, WordCount> cc = compute_word_count_helper(utf_code_points, char2id);
+//          hash2wordcnt[thread_id] = std::move(cc);
+
+          // 2 OK
+//          vector<uint32_t> utf_code_points = magic_3(seg_begin, seg_end, char2id);
+//          hash2wordcnt[thread_id] = compute_word_count_helper(utf_code_points, char2id);
+          // 3 FAIL
+//          hash2wordcnt[thread_id] = magic_2(seg_begin, seg_end, char2id);
+
+          // 4 OK
+//          vector<uint32_t> utf_code_points = decode_utf8(seg_begin, seg_end);
+//          hash2wordcnt[thread_id] = magic_4(utf_code_points, char2id);
+
+//          flat_hash_map<VectorSegment, WordCount> dd;
+//          dd = magic_2(seg_begin, seg_end, char2id);
+//          string prefix = "--" + std::to_string(thread_id) + "  ";
+//          std::stringstream ss;
+//          ss << prefix << " " << dd.size() << std::endl;
+////          db(dd.size());
+//          for (auto x: dd) {
+//              ss << prefix;
+//              ss << "  hash: " << x.first.hash << "    cnt: " << x.second.cnt << std::endl;
+////              db2(x.first.hash, x.second.cnt);
+//              ss << prefix << " some_size: " << x.second.word.size() << std::endl;
+////              dbv(x.second.word);
+//          }
+//          std::cout << ss.str();
+//          hash2wordcnt[thread_id] = dd;
+
+
+//          db2("just before", seg_end - seg_begin);
+          hash2wordcnt[thread_id] = compute_word_count_helper_3(seg_begin, seg_end, char2id);
+//          db(hash2wordcnt[thread_id].size());
 
           thread_awake_main();
           // main is working 2
@@ -1050,6 +1370,7 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
     for (const auto &x : hash2wordcnt[i]) {
       auto it = hash2wordcnt[0].find(x.first);
       if (it == hash2wordcnt[0].end()) {
+//        hash2wordcnt[0].insert(x);
         hash2wordcnt[0][x.first] = x.second;
       } else {
         it->second.cnt += x.second.cnt;
