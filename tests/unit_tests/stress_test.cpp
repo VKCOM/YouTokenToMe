@@ -269,7 +269,7 @@ string generate_text(int n_limit, bool flag_train, mt19937& rnd) {
       int seg = uniform_dist_int(rnd, 1, 5);
       vector<uint32_t> tmp;
       for (int i = 0; i < seg; i++) {
-          add_char(sigma[uniform_dist_int(rnd, 0, sigma.size())]);
+        add_char(sigma[uniform_dist_int(rnd, 0, sigma.size())]);
       }
       for (int i = 0; i < l; i++) {
         for (auto ch: tmp) {
