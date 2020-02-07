@@ -968,10 +968,13 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
   split_pos.push_back(0);
   for (uint64_t i = 1; i <= n_threads; i++) {
     uint64_t candidate = text_utf8.size() * i / n_threads;
-    for (; candidate < text_utf8.size() && !is_space(text_utf8[candidate]); candidate++) { }
+    for (; candidate < text_utf8.size() && !is_space(text_utf8[candidate]);
+           candidate++) {
+    }
 
     split_pos.push_back(candidate);
   }
+
   vector<flat_hash_map<uint32_t, uint64_t>> shared_char_cnt(n_threads);
 
   vector<std::mutex> mt(n_threads);
@@ -1133,7 +1136,6 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
     for (const auto &x : hash2wordcnt[i]) {
       auto it = hash2wordcnt[0].find(x.first);
       if (it == hash2wordcnt[0].end()) {
-//        hash2wordcnt[0].insert(x);
         hash2wordcnt[0][x.first] = x.second;
       } else {
         it->second.cnt += x.second.cnt;

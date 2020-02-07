@@ -108,7 +108,6 @@ string encode_utf8(const vector<uint32_t>& text) {
   return utf8_text;
 }
 
-
 vector<uint32_t> decode_utf8(const char* begin, const char* end) {
   vector<uint32_t> decoded_text;
   uint64_t utf8_len = 0;
