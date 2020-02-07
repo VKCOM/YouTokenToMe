@@ -937,16 +937,14 @@ void rename_tokens(flat_hash_map<uint32_t, uint32_t> &char2id,
   }
 }
 
-uint64_t compute_char_count(flat_hash_map<uint32_t, uint64_t>& char_cnt, const char* begin, const char* end) {
-  uint64_t utf8_len = 0;
-  uint64_t char_count = 0;
+uint64_t compute_char_count(flat_hash_map<uint32_t, uint64_t>& char_cnt, char* begin, char* end) {
   bool invalid_input = false;
-  
-  for (; begin < end; begin += utf8_len, char_count++) {
-    uint32_t code_point = chars_to_utf8(begin, end - begin, &utf8_len);
-    if (code_point != INVALID_UNICODE) {
-      if (!is_space(code_point)) {
-        char_cnt[code_point]++;
+  StringIterator s_iterator(begin, end);
+  uint64_t char_count = 0;
+  for (; !s_iterator.empty(); char_count++, s_iterator.move()) {
+    if (s_iterator.get() != INVALID_UNICODE) {
+      if (!is_space(s_iterator.get())) {
+        char_cnt[s_iterator.get()]++;
       }
     } else {
       invalid_input = true;
@@ -1045,7 +1043,7 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
 
           flat_hash_map<uint32_t, uint64_t> char_cnt;
 
-          uint64_t char_count = compute_char_count(char_cnt, text_utf8.data() + split_pos[thread_id], text_utf8.data() + split_pos[thread_id + 1]);
+          uint64_t char_count = compute_char_count(char_cnt, &text_utf8[0] + split_pos[thread_id], &text_utf8[0] + split_pos[thread_id + 1]);
           text_len[thread_id] = char_count;
           shared_char_cnt[thread_id] = char_cnt;
 
