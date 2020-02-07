@@ -700,7 +700,7 @@ void worker_doing_merge(
       }
     }
   };
-
+  long long total_remove = 0;
   while (true) {
     {
       std::unique_lock<std::mutex> ul(mt[thread_id]);
@@ -724,9 +724,17 @@ void worker_doing_merge(
     left_tokens.insert(z);
     int real_merge = 0;
     int not_real_merge = 0;
+	if (rand() % 5000 == 0) {
+	  long long ss = 0;
+	  for (const auto& x: pair2pos) {
+		ss += x.second.size() * 16 + 24;
+	  }
+	  std::cerr << "pair2pos " <<  ss / 1e6 << "MB   total_remove: " <<  total_remove / 1e6 << "MB" << std::endl;
+	}
 
-    if (x == y) {
+	if (x == y) {
       const vector<Position> &merge_candidates = pair2pos[int2comb(x, y)];
+
       std::unique_lock<std::mutex> lk(mt[thread_id]);
       for (auto word_pos : merge_candidates) {
         cv[thread_id].wait(lk, [&] { return thread_use_hs[thread_id].load(); });
@@ -887,6 +895,8 @@ void worker_doing_merge(
         }
       }
     }
+	total_remove += pair2pos[int2comb(x, y)].size() * 16;
+	pair2pos.erase(int2comb(x, y));
     {
       std::unique_lock<std::mutex> lk(mt[thread_id]);
 
@@ -992,7 +1002,6 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
   flat_hash_map<uint32_t, vector<uint32_t>> recipe;
   flat_hash_map<uint32_t, string> recipe_s;
   vector<flat_hash_map<uint64_t, uint64_t>> pair2cnt_g(n_threads);
-  flat_hash_map<uint64_t, vector<Position>> pair2pos;
   PriorityQueue merge_order(1);
   vector<uint64_t> split_word_cnt;
   vector<WordCount> word_cnt_global;
@@ -1026,8 +1035,6 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
         [&](uint64_t thread_id) {
           // threads are working 1
 
-          vector<vector<NodeEncoder>> lists_of_tokens;
-          flat_hash_map<uint64_t, vector<Position>> pair2pos;
           vector<uint64_t> word_freq;
 
           auto thread_awake_main = [&]() {
@@ -1049,6 +1056,9 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
           uint64_t char_count = compute_char_count(char_cnt, &text_utf8[0] + split_pos[thread_id], &text_utf8[0] + split_pos[thread_id + 1]);
           text_len[thread_id] = char_count;
           shared_char_cnt[thread_id] = char_cnt;
+          std::cerr << "@@@@ compute_char_count done " + std::to_string(thread_id) + "\n";
+          std::cerr << std::flush;
+//          std::flush(std::cerr);
 
           thread_awake_main();
           // main is working  1
@@ -1071,11 +1081,18 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
             return;
           }
 
-          build_linked_list(
+		  flat_hash_map<uint64_t, vector<Position>> pair2pos;
+		  vector<vector<NodeEncoder>> lists_of_tokens;
+		  build_linked_list(
               {word_cnt_global.begin() + split_word_cnt[thread_id],
                word_cnt_global.begin() + split_word_cnt[thread_id + 1]},
               lists_of_tokens, pair2pos, pair2cnt_g[thread_id]);
 
+          long long pair2pos_size = 0;
+          for (const auto& x: pair2pos) {
+           	pair2pos_size += x.second.size() * 16 + 24;
+          }
+          std::cerr << "pair2pos: " << pair2pos_size / 1e6 << "MB" << std::endl;
           std::transform(
               word_cnt_global.begin() + split_word_cnt[thread_id],
               word_cnt_global.begin() + split_word_cnt[thread_id + 1],
@@ -1141,12 +1158,32 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
         it->second.cnt += x.second.cnt;
       }
     }
+    hash2wordcnt[i].clear();
   }
 
   word_cnt_global.resize(hash2wordcnt[0].size());
   std::transform(
       hash2wordcnt[0].begin(), hash2wordcnt[0].end(), word_cnt_global.begin(),
       [](const std::pair<VectorSegment, WordCount> &x) { return x.second; });
+  long long total_len = 0;
+  for (const auto& x: word_cnt_global) {
+	total_len += x.word.size();
+  }
+  std::cerr << "total len: " << total_len * 4 / 1e6 << "MB" << std::endl;
+
+  std::cerr << "start sleeeep " << std::endl;
+//  std::this_thread::sleep_for(std::chrono::milliseconds(1000 * 15));
+
+  std::cerr << "clear a looooot of memory BEFORE" << std::endl;
+  hash2wordcnt = vector<flat_hash_map<VectorSegment, WordCount>>();
+  std::cerr << "clear a looooot of memory AFTER 1" << std::endl;
+  std::cerr << "free up main string: " << text_utf8.capacity() / 1e6 << "MB " << std::endl;
+  text_utf8 = string();
+  std::cerr << "clear a looooot of memory AFTER 2" << std::endl;
+  std::cerr << "second sleeeep  BEGIN" << std::endl;
+//  std::this_thread::sleep_for(std::chrono::milliseconds(1000 * 15));
+  std::cerr << "second sleeeep  END" << std::endl;
+
   merge_order = PriorityQueue(text_len[0]);
 
   uint64_t used_ids =
@@ -1172,9 +1209,9 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
   main_awake_threads();
   // threads are working 3
 
+  std::cerr << "main thread 3 " << std::endl;
   main_wait_threads();
   // main is working 3
-
   flat_hash_map<uint64_t, uint64_t> real_pair_cnt;
 
   for (uint64_t i = 0; i < n_threads; i++) {
@@ -1220,6 +1257,9 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
   int inter_fail = 0;
   int equal_fail = 0;
   vector<std::pair<int, double>> progress_debug;
+  std::cerr << "just before start loop " << std::endl;
+  std::cerr << "word count global: " << word_cnt_global.size() << std::endl;
+
   while (used_ids < (uint64_t) n_tokens) {
     uint32_t x, y, z;
     assert(finished_cur <= used_ids && used_ids <= finished_cur + 2);
@@ -1318,7 +1358,13 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
             }
             std::cerr << "  subword: " << recipe_s[z] << "="
                       << recipe_s[x] + "+" + recipe_s[y] << std::endl;
+            long long ss = 0;
+            for (const auto& x: pair2cnt_g) {
+              ss += x.size() * 16;
+            }
+            std::cerr << "merge_order_size: " << merge_order.size() * 16 / 1e6  << "MB    pair2cnt_g: " << ss / 1e6 << "MB " << std::endl;
           }
+
           used_ids++;
           rules.emplace_back(x, y, z);
         }
