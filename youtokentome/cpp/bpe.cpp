@@ -424,7 +424,7 @@ void remove_rare_chars(vector<uint32_t> &data,
   }
   auto it_first_rare_char =
       std::remove_if(data.begin(), data.end(),
-          [&](uint32_t c) { return removed_chars.count(c) != 0; });
+               [&](uint32_t c) { return removed_chars.count(c) != 0; });
   data.erase(it_first_rare_char, data.end());
 }
 
@@ -460,7 +460,7 @@ struct WordCount {
 };
 
 
-flat_hash_map<VectorSegment, WordCount> compute_word_count_helper_3(
+flat_hash_map<VectorSegment, WordCount> compute_word_count(
   char* sbegin, char* send,
   const flat_hash_map<uint32_t, uint32_t> &char2id) {
   flat_hash_map<VectorSegment, WordCount> hash2wordcnt;
@@ -941,6 +941,7 @@ uint64_t compute_char_count(flat_hash_map<uint32_t, uint64_t>& char_cnt, const c
   uint64_t utf8_len = 0;
   uint64_t char_count = 0;
   bool invalid_input = false;
+  
   for (; begin < end; begin += utf8_len, char_count++) {
     uint32_t code_point = chars_to_utf8(begin, end - begin, &utf8_len);
     if (code_point != INVALID_UNICODE) {
@@ -1059,7 +1060,7 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
           assert(new_seg_end <= seg_end);
           seg_end = new_seg_end;
 
-          hash2wordcnt[thread_id] = compute_word_count_helper_3(seg_begin, seg_end, char2id);
+          hash2wordcnt[thread_id] = compute_word_count(seg_begin, seg_end, char2id);
 
           thread_awake_main();
           // main is working 2
