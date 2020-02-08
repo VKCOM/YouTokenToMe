@@ -1220,7 +1220,6 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
   int inter_fail = 0;
   int equal_fail = 0;
   vector<std::pair<int, double>> progress_debug;
-
   while (used_ids < (uint64_t) n_tokens) {
     uint32_t x, y, z;
     assert(finished_cur <= used_ids && used_ids <= finished_cur + 2);
@@ -1320,7 +1319,6 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
             std::cerr << "  subword: " << recipe_s[z] << "="
                       << recipe_s[x] + "+" + recipe_s[y] << std::endl;
           }
-
           used_ids++;
           rules.emplace_back(x, y, z);
         }
@@ -2191,5 +2189,3 @@ Status BaseEncoder::decode_cli(const std::unordered_set<int> *ignore_ids) const 
 }
 
 }  // namespace vkcom
-
-
