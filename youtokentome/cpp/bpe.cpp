@@ -970,10 +970,8 @@ uint64_t compute_char_count(flat_hash_map<uint32_t, uint64_t>& char_cnt, char* b
 Status learn_bpe_from_string(string &text_utf8, int n_tokens,
                              const string &output_file,
                              BpeConfig bpe_config, BPEState *bpe_state) {
-  vector<std::thread> threads;
   assert(bpe_config.n_threads >= 1 || bpe_config.n_threads == -1);
   uint64_t n_threads = bpe_config.n_threads;
-
   vector<uint64_t> split_pos;
   split_pos.push_back(0);
   for (uint64_t i = 1; i <= n_threads; i++) {
@@ -1030,12 +1028,12 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
   std::mutex main_loop_mt;
   std::condition_variable main_loop_cv;
 
+  vector<std::thread> threads;
   for (uint64_t i = 0; i < n_threads; i++) {
     threads.emplace_back(
         [&](uint64_t thread_id) {
           // threads are working 1
 
-          vector<uint64_t> word_freq;
 
           auto thread_awake_main = [&]() {
             {
@@ -1052,23 +1050,17 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
           };
 
           flat_hash_map<uint32_t, uint64_t> char_cnt;
-
           uint64_t char_count = compute_char_count(char_cnt, &text_utf8[0] + split_pos[thread_id], &text_utf8[0] + split_pos[thread_id + 1]);
           text_len[thread_id] = char_count;
           shared_char_cnt[thread_id] = char_cnt;
-          std::cerr << "@@@@ compute_char_count done " + std::to_string(thread_id) + "\n";
-          std::cerr << std::flush;
-//          std::flush(std::cerr);
 
           thread_awake_main();
           // main is working  1
           thread_wait_main();
           // threads are working 2
-
           char* seg_begin = &text_utf8[0] + split_pos[thread_id];
           char* seg_end = &text_utf8[0] + split_pos[thread_id + 1];
           char* new_seg_end = remove_rare_chars(seg_begin, seg_end, removed_chars);
-          assert(new_seg_end <= seg_end);
           seg_end = new_seg_end;
 
           hash2wordcnt[thread_id] = compute_word_count(seg_begin, seg_end, char2id);
@@ -1083,16 +1075,12 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
 
 		  flat_hash_map<uint64_t, vector<Position>> pair2pos;
 		  vector<vector<NodeEncoder>> lists_of_tokens;
+		  vector<uint64_t> word_freq;
 		  build_linked_list(
               {word_cnt_global.begin() + split_word_cnt[thread_id],
                word_cnt_global.begin() + split_word_cnt[thread_id + 1]},
               lists_of_tokens, pair2pos, pair2cnt_g[thread_id]);
 
-          long long pair2pos_size = 0;
-          for (const auto& x: pair2pos) {
-           	pair2pos_size += x.second.size() * 16 + 24;
-          }
-          std::cerr << "pair2pos: " << pair2pos_size / 1e6 << "MB" << std::endl;
           std::transform(
               word_cnt_global.begin() + split_word_cnt[thread_id],
               word_cnt_global.begin() + split_word_cnt[thread_id + 1],
@@ -1165,24 +1153,9 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
   std::transform(
       hash2wordcnt[0].begin(), hash2wordcnt[0].end(), word_cnt_global.begin(),
       [](const std::pair<VectorSegment, WordCount> &x) { return x.second; });
-  long long total_len = 0;
-  for (const auto& x: word_cnt_global) {
-	total_len += x.word.size();
-  }
-  std::cerr << "total len: " << total_len * 4 / 1e6 << "MB" << std::endl;
 
-  std::cerr << "start sleeeep " << std::endl;
-//  std::this_thread::sleep_for(std::chrono::milliseconds(1000 * 15));
-
-  std::cerr << "clear a looooot of memory BEFORE" << std::endl;
-  hash2wordcnt = vector<flat_hash_map<VectorSegment, WordCount>>();
-  std::cerr << "clear a looooot of memory AFTER 1" << std::endl;
-  std::cerr << "free up main string: " << text_utf8.capacity() / 1e6 << "MB " << std::endl;
-  text_utf8 = string();
-  std::cerr << "clear a looooot of memory AFTER 2" << std::endl;
-  std::cerr << "second sleeeep  BEGIN" << std::endl;
-//  std::this_thread::sleep_for(std::chrono::milliseconds(1000 * 15));
-  std::cerr << "second sleeeep  END" << std::endl;
+  vector<flat_hash_map<VectorSegment, WordCount>>().swap(hash2wordcnt);
+  string().swap(text_utf8);
 
   merge_order = PriorityQueue(text_len[0]);
 
@@ -2235,3 +2208,5 @@ Status BaseEncoder::decode_cli(const std::unordered_set<int> *ignore_ids) const 
 }
 
 }  // namespace vkcom
+
+
