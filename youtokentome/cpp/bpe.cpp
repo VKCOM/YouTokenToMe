@@ -17,6 +17,7 @@
 #include <vector>
 #include <random>
 #include <unordered_set>
+#include <cstring>
 
 #include "third_party/flat_hash_map.h"
 #include "utf8.h"
@@ -39,7 +40,6 @@ struct VectorSegment {
     hash = 0;
     for (auto it = begin; it != end; it++) {
       hash = (hash * P + (unsigned char)(*it)) % MOD;
-      assert (hash >= 0);
     }
   }
 
@@ -140,8 +140,6 @@ struct StringIterator {
     if (!state) {
       parse();
     }
-    assert(begin < end);
-    assert(1 <= utf8_len && utf8_len <= 4);
     begin += utf8_len;
     state = false;
   }
@@ -150,7 +148,6 @@ struct StringIterator {
     if (!state) {
       parse();
     }
-    assert(begin < end);
     return code_point;
   }
   char* get_begin() {
@@ -176,9 +173,8 @@ struct StringIterator {
     if (state) {
       return;
     }
-    assert(begin < end);
+    assert(!empty());
     code_point = chars_to_utf8(begin, end - begin, &utf8_len);
-    assert(utf8_len > 0);
     state = true;
   }
 };
@@ -433,15 +429,12 @@ char* remove_rare_chars(char* begin, char* end, const flat_hash_set<uint32_t> &r
     return end;
   }
   char* end_candidate = begin;
-  uint64_t utf8_len = 0;
   bool invalid_input = false;
   StringIterator s_iterator(begin, end);
   for (;!s_iterator.empty(); s_iterator.move()) {
     if (s_iterator.get() != INVALID_UNICODE) {
       if (removed_chars.count(s_iterator.get()) == 0) {
-        for (uint32_t ii = 0; ii < s_iterator.get_utf8_len(); ii++) {
-          end_candidate[ii] = s_iterator.get_begin()[ii];
-        }
+        memcpy(end_candidate, s_iterator.get_begin(), s_iterator.get_utf8_len());
         end_candidate += s_iterator.get_utf8_len();
       }
     } else {
