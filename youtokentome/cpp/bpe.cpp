@@ -133,30 +133,37 @@ struct MergeCandidate {
   }
 };
 
-struct StringIterator {
-  StringIterator(char* begin, char* end):begin(begin), end(end) {}
+struct UTF8Iterator {
+  UTF8Iterator(char* begin, char* end): begin(begin), end(end) {}
 
-  void move() {
-    if (!state) {
-      parse();
-    }
-    begin += utf8_len;
-    state = false;
+  UTF8Iterator operator++() {
+	if (!state) {
+	  parse();
+	}
+	begin += utf8_len;
+	state = false;
+	return *this;
   }
 
-  uint32_t get() {
-    if (!state) {
-      parse();
-    }
-    return code_point;
+  uint32_t operator*() {
+	if (!state) {
+	  parse();
+	}
+	return code_point;
   }
+
+  void get_cur_token(char*& l, uint64_t& r) {
+	if (!state) {
+	  parse();
+	}
+	l = begin;
+	r = utf8_len;
+  }
+
   char* get_begin() {
     return begin;
   }
   uint64_t get_utf8_len() {
-    if (!state) {
-      parse();
-    }
     return utf8_len;
   }
 
@@ -430,12 +437,15 @@ char* remove_rare_chars(char* begin, char* end, const flat_hash_set<uint32_t> &r
   }
   char* end_candidate = begin;
   bool invalid_input = false;
-  StringIterator s_iterator(begin, end);
-  for (;!s_iterator.empty(); s_iterator.move()) {
-    if (s_iterator.get() != INVALID_UNICODE) {
-      if (removed_chars.count(s_iterator.get()) == 0) {
-        memcpy(end_candidate, s_iterator.get_begin(), s_iterator.get_utf8_len());
-        end_candidate += s_iterator.get_utf8_len();
+  UTF8Iterator utf8_iter(begin, end);
+  for (; !utf8_iter.empty(); ++utf8_iter) {
+    if (*utf8_iter != INVALID_UNICODE) {
+      if (removed_chars.count(*utf8_iter) == 0) {
+        char* token_begin;
+        uint64_t token_len;
+        utf8_iter.get_cur_token(token_begin, token_len);
+		memcpy(end_candidate, token_begin, token_len);
+		end_candidate += token_len;
       }
     } else {
       invalid_input = true;
@@ -458,24 +468,24 @@ flat_hash_map<VectorSegment, WordCount> compute_word_count(
   const flat_hash_map<uint32_t, uint32_t> &char2id) {
   flat_hash_map<VectorSegment, WordCount> hash2wordcnt;
   vector<uint32_t> word;
-  StringIterator s_iterator(sbegin, send);
+  UTF8Iterator utf8_iter(sbegin, send);
 
-  for (;!s_iterator.empty();) {
-    for (;!s_iterator.empty() && is_space(s_iterator.get()); s_iterator.move());
-    if (s_iterator.empty()) {
+  for (;!utf8_iter.empty();) {
+    for (; !utf8_iter.empty() && is_space(*utf8_iter); ++utf8_iter);
+    if (utf8_iter.empty()) {
       break;
     }
-    char* begin_of_word = s_iterator.get_begin();
-    for (;!s_iterator.empty() && !is_space(s_iterator.get()); s_iterator.move());
-    char* end_of_word = s_iterator.get_begin();
+    char* begin_of_word = utf8_iter.get_begin();
+    for (; !utf8_iter.empty() && !is_space(*utf8_iter); ++utf8_iter);
+    char* end_of_word = utf8_iter.get_begin();
     VectorSegment word_hash(begin_of_word, end_of_word);
     auto it = hash2wordcnt.find(word_hash);
     if (it == hash2wordcnt.end()) {
       word.clear();
       word.push_back(char2id.at(SPACE_TOKEN));
-      StringIterator word_iter(begin_of_word, end_of_word);
-      for (; !word_iter.empty(); word_iter.move()) {
-        word.push_back(char2id.at(word_iter.get()));
+      UTF8Iterator word_iter(begin_of_word, end_of_word);
+      for (; !word_iter.empty(); ++word_iter) {
+        word.push_back(char2id.at(*word_iter));
       }
       hash2wordcnt[word_hash] = {word, 1};
     } else {
@@ -933,12 +943,12 @@ void rename_tokens(flat_hash_map<uint32_t, uint32_t> &char2id,
 
 uint64_t compute_char_count(flat_hash_map<uint32_t, uint64_t>& char_cnt, char* begin, char* end) {
   bool invalid_input = false;
-  StringIterator s_iterator(begin, end);
+  UTF8Iterator utf8_iter(begin, end);
   uint64_t char_count = 0;
-  for (; !s_iterator.empty(); char_count++, s_iterator.move()) {
-    if (s_iterator.get() != INVALID_UNICODE) {
-      if (!is_space(s_iterator.get())) {
-        char_cnt[s_iterator.get()]++;
+  for (; !utf8_iter.empty(); char_count++, ++utf8_iter) {
+    if (*utf8_iter != INVALID_UNICODE) {
+      if (!is_space(*utf8_iter)) {
+        char_cnt[*utf8_iter]++;
       }
     } else {
       invalid_input = true;
