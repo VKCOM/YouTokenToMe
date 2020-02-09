@@ -152,15 +152,7 @@ struct UTF8Iterator {
 	return code_point;
   }
 
-  void get_cur_token(char*& l, uint64_t& r) {
-	if (!state) {
-	  parse();
-	}
-	l = begin;
-	r = utf8_len;
-  }
-
-  char* get_begin() {
+  char* get_ptr() {
     return begin;
   }
   uint64_t get_utf8_len() {
@@ -441,9 +433,8 @@ char* remove_rare_chars(char* begin, char* end, const flat_hash_set<uint32_t> &r
   for (; !utf8_iter.empty(); ++utf8_iter) {
     if (*utf8_iter != INVALID_UNICODE) {
       if (removed_chars.count(*utf8_iter) == 0) {
-        char* token_begin;
-        uint64_t token_len;
-        utf8_iter.get_cur_token(token_begin, token_len);
+        char* token_begin = utf8_iter.get_ptr();
+        uint64_t token_len = utf8_iter.get_utf8_len();
 		memcpy(end_candidate, token_begin, token_len);
 		end_candidate += token_len;
       }
@@ -475,9 +466,9 @@ flat_hash_map<VectorSegment, WordCount> compute_word_count(
     if (utf8_iter.empty()) {
       break;
     }
-    char* begin_of_word = utf8_iter.get_begin();
+    char* begin_of_word = utf8_iter.get_ptr();
     for (; !utf8_iter.empty() && !is_space(*utf8_iter); ++utf8_iter);
-    char* end_of_word = utf8_iter.get_begin();
+    char* end_of_word = utf8_iter.get_ptr();
     VectorSegment word_hash(begin_of_word, end_of_word);
     auto it = hash2wordcnt.find(word_hash);
     if (it == hash2wordcnt.end()) {
