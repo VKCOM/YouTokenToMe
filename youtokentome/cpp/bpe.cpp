@@ -1139,8 +1139,8 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
       hash2wordcnt[0].begin(), hash2wordcnt[0].end(), word_cnt_global.begin(),
       [](const std::pair<VectorSegment, WordCount> &x) { return x.second; });
 
-  vector<flat_hash_map<VectorSegment, WordCount>>().swap(hash2wordcnt);
-  string().swap(text_utf8);
+  hash2wordcnt.shrink_to_fit();
+  text_utf8.shrink_to_fit();
 
   merge_order = PriorityQueue(text_len[0]);
 
