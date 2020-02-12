@@ -44,7 +44,7 @@ def test_english():
     MODEL_PATH = "model.yttm"
     with open(TRAIN_DATA_PATH, "w") as fin:
         fin.write(train_text)
-    model = yttm.BPE.train(TRAIN_DATA_PATH, MODEL_PATH, 200)
+    model = yttm.BPE.train(TRAIN_DATA_PATH, MODEL_PATH, 200, n_threads=1)
     tokenized_text = model.encode([test_text], output_type=yttm.OutputType.SUBWORD)
     expected_result = [['▁chrono', 'c', 'l', 'i', 'n', 'e', '▁', 'sy', 'n', 'ch', 'r', 'o', 's', 'co', 'p', 'e']]
     assert tokenized_text == expected_result

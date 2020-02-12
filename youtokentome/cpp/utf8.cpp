@@ -10,7 +10,6 @@ namespace vkcom {
 using std::string;
 using std::vector;
 
-constexpr static uint32_t INVALID_UNICODE = 0x0fffffff;
 
 bool check_byte(char x) { return (static_cast<uint8_t>(x) & 0xc0u) == 0x80u; }
 

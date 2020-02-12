@@ -21,6 +21,30 @@ extern int alive_tokens;
 
 using char32=uint32_t;
 
+// random number from the range [l, r)
+long long uniform_dist_int(mt19937& rnd, long long l, long long r) {
+  uint64_t range = r - l;
+  const uint64_t generator_range = rnd.max() - rnd.min();
+  assert(generator_range >= range);
+  if (range == 1)
+    return l;
+
+  const uint64_t reject = generator_range % range;
+  if (reject + 1 == range)
+    return (rnd() - rnd.min()) % range + l;
+
+  uint64_t n;
+  do {
+    n = rnd() - rnd.min();
+  } while (n <= reject);
+  return (n % range) + l;
+}
+
+double uniform_dist_double(mt19937& rnd, double l, double r) {
+    const uint64_t generator_range = rnd.max() - rnd.min();
+    return static_cast<double>(rnd() - rnd.min()) / generator_range * (r - l) + l;
+};
+
 BPEState learn_bpe_slow(const string &text_utf8, int n_token, string, BpeConfig bpe_config) {
   auto row_data = decode_utf8(text_utf8.data(), text_utf8.data() + text_utf8.size());
   vector<vector<uint32_t>> splited_text;
@@ -225,10 +249,10 @@ DecodeResult decode_slow(const string &text_utf8, const BaseEncoder &bpe_applyer
   return {ids, pieces};
 }
 
-string generate_text(int n_limit, bool flag_train) {
+string generate_text(int n_limit, bool flag_train, mt19937& rnd) {
   string sigma = flag_train ? "abc " : "abcd ";
   vector<uint32_t> a;
-  int n = rand() % 1000 + 1;
+  int n = uniform_dist_int(rnd, 1, 1001);
   n = min(n, n_limit);
   string row_data;
   row_data.push_back(sigma[0]);
@@ -238,14 +262,14 @@ string generate_text(int n_limit, bool flag_train) {
   };
 
   for (; (int) row_data.size() < n;) {
-    if (rand() % 2) {
-      add_char(sigma[rand() % sigma.size()]);
+    if (uniform_dist_int(rnd, 0, 2)) {
+      add_char(sigma[uniform_dist_int(rnd, 0, sigma.size())]);
     } else {
-      int l = rand() % 5 + 2;
-      int seg = rand() % 4 + 1;
+      int l = uniform_dist_int(rnd, 2, 7);
+      int seg = uniform_dist_int(rnd, 1, 5);
       vector<uint32_t> tmp;
       for (int i = 0; i < seg; i++) {
-        add_char(sigma[rand() % sigma.size()]);
+        add_char(sigma[uniform_dist_int(rnd, 0, sigma.size())]);
       }
       for (int i = 0; i < l; i++) {
         for (auto ch: tmp) {
@@ -305,20 +329,21 @@ vector<uint32_t> to_no_space_tokens(string raw_string) {
 }
 
 void parallel_test(int n_iter, int n_threads) {
+  mt19937 rnd;
   Status status;
   for (int i = 0; i < n_iter; i++) {
-    srand(i);
+    rnd.seed(i);
     int test_size = 1000;
-    auto train_data = generate_text(test_size, true);
+    auto train_data = generate_text(test_size, true, rnd);
     int n_sentences = 1000;
     vector<string> inference_data;
     for (int i = 0; i < n_sentences; i++) {
-      inference_data.push_back(generate_text(20, false));
+      inference_data.push_back(generate_text(20, false, rnd));
     }
     set<uint32_t> unique_input_chars(train_data.begin(), train_data.end());
-    int vocab_size = unique_input_chars.size() + 4 + rand() % 40;
-    double character_coverage = 1 - (rand() * 1.0 / RAND_MAX) * 0.4;
-    if (rand() % 2 == 0) {
+    int vocab_size = unique_input_chars.size() + uniform_dist_int(rnd, 4, 44);
+    double character_coverage = 1 - (uniform_dist_double(rnd, 0, 1)) * 0.4;
+    if (uniform_dist_int(rnd, 0, 2) == 0) {
       character_coverage = 1;
     }
 
@@ -344,24 +369,25 @@ void parallel_test(int n_iter, int n_threads) {
 }
 
 void base_stress(int n_iter) {
+  mt19937 rnd;
   int n_threads = 8;
   const int NUMBER_OF_SPECIAL_TOKENS_LOCAL = 4;
   Status status;
   for (int it = 0; it != n_iter; it++) {
-    srand(it);
+    rnd.seed(it);
     cerr << "-------------------- new test " << it << " --------------- " << endl;
     int test_size = 1000;
 
-    auto train_data = generate_text(test_size, true);
+    auto train_data = generate_text(test_size, true, rnd);
     set<uint32_t> unique_train_symbols(train_data.begin(), train_data.end());
     unique_train_symbols.insert(' ');
-    int vocab_size = unique_train_symbols.size() + NUMBER_OF_SPECIAL_TOKENS_LOCAL + rand() % 40;
+    int vocab_size = unique_train_symbols.size() + NUMBER_OF_SPECIAL_TOKENS_LOCAL + uniform_dist_int(rnd, 0, 40);
 
     cerr << "train_data: !" << train_data << "! (vocab_size, len): (" << vocab_size << ", " << train_data.size()
          << ")" << endl;
 
-    double character_coverage = 1 - (rand() * 1.0 / RAND_MAX) * 0.4;
-    if (rand() % 2 == 0) {
+    double character_coverage = 1 - uniform_dist_double(rnd, 0, 1) * 0.4;
+    if (uniform_dist_int(rnd, 0, 2) == 0) {
       character_coverage = 1;
     }
     auto train_data_copy = train_data;
@@ -389,7 +415,7 @@ void base_stress(int n_iter) {
 
     BaseEncoder applyer(fast_solution_model, 1);
 
-    auto inference_data = generate_text(test_size, false);
+    auto inference_data = generate_text(test_size, false, rnd);
     cerr << "inference_data: " << inference_data << endl;
     vector<vector<int>> fast_ids_tmp;
     status = applyer.encode_as_ids({inference_data}, &fast_ids_tmp);

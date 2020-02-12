@@ -17,6 +17,7 @@
 #include <vector>
 #include <random>
 #include <unordered_set>
+#include <cstring>
 
 #include "third_party/flat_hash_map.h"
 #include "utf8.h"
@@ -31,15 +32,14 @@ struct VectorSegment {
   constexpr static uint64_t MOD = 2032191299;
   constexpr static uint64_t P = 726328703;
 
-  vector<uint32_t>::const_iterator begin, end;
+  const char* begin;
+  const char* end;
   uint64_t hash;
 
-  VectorSegment(vector<uint32_t>::const_iterator begin,
-                vector<uint32_t>::const_iterator end)
-      : begin(begin), end(end) {
+  VectorSegment(const char* begin, const char* end): begin(begin), end(end) {
     hash = 0;
     for (auto it = begin; it != end; it++) {
-      hash = (hash * P + *it) % MOD;
+      hash = (hash * P + (unsigned char)(*it)) % MOD;
     }
   }
 
@@ -132,6 +132,52 @@ struct MergeCandidate {
     return left_token < other.left_token;
   }
 };
+
+struct UTF8Iterator {
+  UTF8Iterator(char* begin, char* end): begin(begin), end(end) {}
+
+  UTF8Iterator operator++() {
+	if (!state) {
+	  parse();
+	}
+	begin += utf8_len;
+	state = false;
+	return *this;
+  }
+
+  uint32_t operator*() {
+	if (!state) {
+	  parse();
+	}
+	return code_point;
+  }
+
+  char* get_ptr() {
+    return begin;
+  }
+  uint64_t get_utf8_len() {
+    return utf8_len;
+  }
+
+  bool empty() {
+    assert(begin <= end);
+    return begin == end;
+  }
+ private:
+  char *begin, *end;
+  uint32_t code_point = 0;
+  uint64_t utf8_len = 0;
+  bool state = false;
+  void parse() {
+    if (state) {
+      return;
+    }
+    assert(!empty());
+    code_point = chars_to_utf8(begin, end - begin, &utf8_len);
+    state = true;
+  }
+};
+
 
 struct Position {
   uint64_t word_id, pos_id;
@@ -377,50 +423,69 @@ void remove_rare_chars(vector<uint32_t> &data,
   data.erase(it_first_rare_char, data.end());
 }
 
+char* remove_rare_chars(char* begin, char* end, const flat_hash_set<uint32_t> &removed_chars) {
+  if (removed_chars.empty()) {
+    return end;
+  }
+  char* end_candidate = begin;
+  bool invalid_input = false;
+  UTF8Iterator utf8_iter(begin, end);
+  for (; !utf8_iter.empty(); ++utf8_iter) {
+    if (*utf8_iter != INVALID_UNICODE) {
+      if (removed_chars.count(*utf8_iter) == 0) {
+        char* token_begin = utf8_iter.get_ptr();
+        uint64_t token_len = utf8_iter.get_utf8_len();
+		memcpy(end_candidate, token_begin, token_len);
+		end_candidate += token_len;
+      }
+    } else {
+      invalid_input = true;
+    }
+  }
+  if (invalid_input) {
+    std::cerr << "WARNING Input contains invalid unicode characters." << std::endl;
+  }
+  return end_candidate;
+}
+
 struct WordCount {
   vector<uint32_t> word;
   uint64_t cnt;
 };
 
-flat_hash_map<VectorSegment, WordCount> compute_word_count_helper(
-    const vector<uint32_t> &row_data,
-    const flat_hash_map<uint32_t, uint32_t> &char2id) {
+
+flat_hash_map<VectorSegment, WordCount> compute_word_count(
+  char* sbegin, char* send,
+  const flat_hash_map<uint32_t, uint32_t> &char2id) {
   flat_hash_map<VectorSegment, WordCount> hash2wordcnt;
   vector<uint32_t> word;
+  UTF8Iterator utf8_iter(sbegin, send);
 
-  for (auto loop_it = row_data.begin(); loop_it != row_data.end();) {
-    auto begin_of_word = std::find_if_not(loop_it, row_data.end(), is_space);
-    if (begin_of_word == row_data.end()) {
+  for (;!utf8_iter.empty();) {
+    for (; !utf8_iter.empty() && is_space(*utf8_iter); ++utf8_iter);
+    if (utf8_iter.empty()) {
       break;
     }
-    auto end_of_word = std::find_if(begin_of_word, row_data.end(), is_space);
-
+    char* begin_of_word = utf8_iter.get_ptr();
+    for (; !utf8_iter.empty() && !is_space(*utf8_iter); ++utf8_iter);
+    char* end_of_word = utf8_iter.get_ptr();
     VectorSegment word_hash(begin_of_word, end_of_word);
     auto it = hash2wordcnt.find(word_hash);
     if (it == hash2wordcnt.end()) {
       word.clear();
       word.push_back(char2id.at(SPACE_TOKEN));
-      std::transform(begin_of_word, end_of_word, std::back_inserter(word),
-                     [&](uint32_t ch) { return char2id.at(ch); });
+      UTF8Iterator word_iter(begin_of_word, end_of_word);
+      for (; !word_iter.empty(); ++word_iter) {
+        word.push_back(char2id.at(*word_iter));
+      }
       hash2wordcnt[word_hash] = {word, 1};
     } else {
       it->second.cnt++;
     }
-    loop_it = end_of_word;
   }
   return hash2wordcnt;
 }
 
-vector<WordCount> compute_word_count(
-    const vector<uint32_t> &row_data,
-    const flat_hash_map<uint32_t, uint32_t> &char2id) {
-  auto hash2wordcnt = compute_word_count_helper(row_data, char2id);
-  vector<WordCount> word_cnt(hash2wordcnt.size());
-  std::transform(
-      hash2wordcnt.begin(), hash2wordcnt.end(), word_cnt.begin(),
-      [](const std::pair<VectorSegment, WordCount> &x) { return x.second; });
-  return word_cnt;
-}
 
 struct NodeEncoder {
   uint32_t val;
@@ -629,7 +694,6 @@ void worker_doing_merge(
       }
     }
   };
-
   while (true) {
     {
       std::unique_lock<std::mutex> ul(mt[thread_id]);
@@ -656,6 +720,7 @@ void worker_doing_merge(
 
     if (x == y) {
       const vector<Position> &merge_candidates = pair2pos[int2comb(x, y)];
+
       std::unique_lock<std::mutex> lk(mt[thread_id]);
       for (auto word_pos : merge_candidates) {
         cv[thread_id].wait(lk, [&] { return thread_use_hs[thread_id].load(); });
@@ -816,6 +881,7 @@ void worker_doing_merge(
         }
       }
     }
+    pair2pos.erase(int2comb(x, y));
     {
       std::unique_lock<std::mutex> lk(mt[thread_id]);
 
@@ -866,13 +932,31 @@ void rename_tokens(flat_hash_map<uint32_t, uint32_t> &char2id,
   }
 }
 
+uint64_t compute_char_count(flat_hash_map<uint32_t, uint64_t>& char_cnt, char* begin, char* end) {
+  bool invalid_input = false;
+  UTF8Iterator utf8_iter(begin, end);
+  uint64_t char_count = 0;
+  for (; !utf8_iter.empty(); char_count++, ++utf8_iter) {
+    if (*utf8_iter != INVALID_UNICODE) {
+      if (!is_space(*utf8_iter)) {
+        char_cnt[*utf8_iter]++;
+      }
+    } else {
+      invalid_input = true;
+    }
+  }
+  if (invalid_input) {
+    std::cerr << "WARNING Input contains invalid unicode characters."
+              << std::endl;
+  }
+  return char_count;
+}
+
 Status learn_bpe_from_string(string &text_utf8, int n_tokens,
                              const string &output_file,
                              BpeConfig bpe_config, BPEState *bpe_state) {
-  vector<std::thread> threads;
   assert(bpe_config.n_threads >= 1 || bpe_config.n_threads == -1);
   uint64_t n_threads = bpe_config.n_threads;
-
   vector<uint64_t> split_pos;
   split_pos.push_back(0);
   for (uint64_t i = 1; i <= n_threads; i++) {
@@ -901,7 +985,6 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
   flat_hash_map<uint32_t, vector<uint32_t>> recipe;
   flat_hash_map<uint32_t, string> recipe_s;
   vector<flat_hash_map<uint64_t, uint64_t>> pair2cnt_g(n_threads);
-  flat_hash_map<uint64_t, vector<Position>> pair2pos;
   PriorityQueue merge_order(1);
   vector<uint64_t> split_word_cnt;
   vector<WordCount> word_cnt_global;
@@ -930,14 +1013,12 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
   std::mutex main_loop_mt;
   std::condition_variable main_loop_cv;
 
+  vector<std::thread> threads;
   for (uint64_t i = 0; i < n_threads; i++) {
     threads.emplace_back(
         [&](uint64_t thread_id) {
           // threads are working 1
 
-          vector<vector<NodeEncoder>> lists_of_tokens;
-          flat_hash_map<uint64_t, vector<Position>> pair2pos;
-          vector<uint64_t> word_freq;
 
           auto thread_awake_main = [&]() {
             {
@@ -953,29 +1034,21 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
             main_finished[thread_id] = 0;
           };
 
-          vector<uint32_t> utf_code_points;
           flat_hash_map<uint32_t, uint64_t> char_cnt;
-          utf_code_points =
-              decode_utf8(text_utf8.data() + split_pos[thread_id],
-                          text_utf8.data() + split_pos[thread_id + 1]);
-
-          for (auto ch : utf_code_points) {
-            if (!is_space(ch)) {
-              char_cnt[ch]++;
-            }
-          }
-
-          text_len[thread_id] = utf_code_points.size();
+          uint64_t char_count = compute_char_count(char_cnt, &text_utf8[0] + split_pos[thread_id], &text_utf8[0] + split_pos[thread_id + 1]);
+          text_len[thread_id] = char_count;
           shared_char_cnt[thread_id] = char_cnt;
 
           thread_awake_main();
           // main is working  1
           thread_wait_main();
           // threads are working 2
+          char* seg_begin = &text_utf8[0] + split_pos[thread_id];
+          char* seg_end = &text_utf8[0] + split_pos[thread_id + 1];
+          char* new_seg_end = remove_rare_chars(seg_begin, seg_end, removed_chars);
+          seg_end = new_seg_end;
 
-          remove_rare_chars(utf_code_points, removed_chars);
-          hash2wordcnt[thread_id] =
-              compute_word_count_helper(utf_code_points, char2id);
+          hash2wordcnt[thread_id] = compute_word_count(seg_begin, seg_end, char2id);
 
           thread_awake_main();
           // main is working 2
@@ -985,6 +1058,9 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
             return;
           }
 
+          flat_hash_map<uint64_t, vector<Position>> pair2pos;
+          vector<vector<NodeEncoder>> lists_of_tokens;
+          vector<uint64_t> word_freq;
           build_linked_list(
               {word_cnt_global.begin() + split_word_cnt[thread_id],
                word_cnt_global.begin() + split_word_cnt[thread_id + 1]},
@@ -1055,12 +1131,17 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
         it->second.cnt += x.second.cnt;
       }
     }
+    hash2wordcnt[i].clear();
   }
 
   word_cnt_global.resize(hash2wordcnt[0].size());
   std::transform(
       hash2wordcnt[0].begin(), hash2wordcnt[0].end(), word_cnt_global.begin(),
       [](const std::pair<VectorSegment, WordCount> &x) { return x.second; });
+
+  hash2wordcnt.shrink_to_fit();
+  text_utf8.shrink_to_fit();
+
   merge_order = PriorityQueue(text_len[0]);
 
   uint64_t used_ids =
@@ -1088,7 +1169,6 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
 
   main_wait_threads();
   // main is working 3
-
   flat_hash_map<uint64_t, uint64_t> real_pair_cnt;
 
   for (uint64_t i = 0; i < n_threads; i++) {
