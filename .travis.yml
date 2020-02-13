@@ -53,15 +53,16 @@ jobs:
         - python3 get-pip.py
 
 install:
-  - pip install -U pip
-  - pip install cibuildwheel==1.0.0 twine==1.15.0
-  - pip install -r requirements.txt
+  - python3 -m pip install -U pip
+  - python3 -m pip install cibuildwheel==1.1.0 twine==1.15.0
+  - python3 -m pip install -r requirements.txt
 
 script:
   - cibuildwheel --output-dir wheelhouse
   - ls -l wheelhouse
+  - python3 -m pip list
   - |
     if [[ $TRAVIS_TAG ]]; then
-      rm -rf dist && python setup.py sdist
+      rm -rf dist && python3 setup.py sdist
       twine upload -u __token__ -p $PYPI_TOKEN --skip-existing dist/*.tar.gz wheelhouse/*.whl
     fi
