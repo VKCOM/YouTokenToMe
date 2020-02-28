@@ -97,7 +97,7 @@ string token2word(const vector<uint32_t> &source,
 }
 
 bool is_space(uint32_t ch) {
-  return (ch < 256 && isspace(ch)) || (ch == SPACE_TOKEN);
+  return ch == ((uint32_t)'\n') || (ch == SPACE_TOKEN);
 }
 
 uint64_t int2comb(uint32_t a, uint32_t b) {
@@ -473,7 +473,7 @@ flat_hash_map<VectorSegment, WordCount> compute_word_count(
     auto it = hash2wordcnt.find(word_hash);
     if (it == hash2wordcnt.end()) {
       word.clear();
-      word.push_back(char2id.at(SPACE_TOKEN));
+      //word.push_back(char2id.at(SPACE_TOKEN));
       UTF8Iterator word_iter(begin_of_word, end_of_word);
       for (; !word_iter.empty(); ++word_iter) {
         word.push_back(char2id.at(*word_iter));
@@ -1952,7 +1952,7 @@ Status BaseEncoder::id_to_subword(int id, string *subword, bool replace_space) c
   if (replace_space) {
     auto symbols = recipe.at(id);
     if (id2char.at(symbols[0]) == SPACE_TOKEN) {
-      *subword = " " + token2word({symbols.begin() + 1, symbols.end()}, id2char);
+      *subword = "\n" + token2word({symbols.begin() + 1, symbols.end()}, id2char);
       return Status();
     }
   }
