@@ -1650,8 +1650,8 @@ DecodeResult BaseEncoder::encode_sentence(const std::string &sentence_utf8,
 
   assert(bpe_state.char2id.count(SPACE_TOKEN));
 
-  for (; !text.empty() && is_space(text.back()); text.pop_back()) {
-  }
+  //for (; !text.empty() && is_space(text.back()); text.pop_back()) {
+  //}
 
   const int new_tokens_start = static_cast<int>(
       1e9);  // just some number that bigger than any subword id
