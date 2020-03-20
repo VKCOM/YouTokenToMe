@@ -1995,7 +1995,7 @@ Status BaseEncoder::decode(const vector<vector<int>> &ids,
 }
 
 Status BaseEncoder::decode(const vector<int> &ids, string *sentence, const unordered_set<int> *ignore_ids) const {
-  bool first_iter = true;
+  //bool first_iter = true;
   for (auto id : ids) {
     string subword;
 
@@ -2005,10 +2005,10 @@ Status BaseEncoder::decode(const vector<int> &ids, string *sentence, const unord
         return status;
       }
       *sentence += subword;
-      if (first_iter && sentence->at(0) == ' ') {
-        *sentence = sentence->substr(1);
-      }
-      first_iter = false;
+      //if (first_iter && sentence->at(0) == ' ') {
+      //  *sentence = sentence->substr(1);
+      //}
+      //first_iter = false;
     }
   }
   return Status();
