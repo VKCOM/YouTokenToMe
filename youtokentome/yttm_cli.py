@@ -105,7 +105,14 @@ def bpe(data, model, vocab_size, coverage, n_threads, pad_id, unk_id, bos_id, eo
     show_default=True,
     help="BPE-dropout probability (the probability of a merge being dropped)",
 )
-def encode(model, output_type, n_threads, bos, eos, reverse, stream, dropout_prob):
+@click.option(
+    "--dropout_seed",
+    type=click.IntRange(min=0, max=2**32-1),
+    default=None,
+    show_default=True,
+    help="BPE-dropout seed for random engine",
+)
+def encode(model, output_type, n_threads, bos, eos, reverse, stream, dropout_prob, dropout_seed):
     """Encode text to ids or subwords."""
     if n_threads < -1 or n_threads == 0:
         raise ValueError(
@@ -114,7 +121,7 @@ def encode(model, output_type, n_threads, bos, eos, reverse, stream, dropout_pro
         )
 
     bpe = yttmc.BPE(model, n_threads)
-    bpe.encode_cli(output_type, stream, bos, eos, reverse, dropout_prob)
+    bpe.encode_cli(output_type, stream, bos, eos, reverse, dropout_prob, dropout_seed)
 
 
 def validate_ignore_ids(ctx, param, value):

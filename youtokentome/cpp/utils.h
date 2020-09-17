@@ -83,6 +83,7 @@ struct EncodingConfig {
   bool eos;
   bool reverse;
   double dropout_prob;
+  uint32_t dropout_seed;
 };
 
 bool is_space(uint32_t ch);

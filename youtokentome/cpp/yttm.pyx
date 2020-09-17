@@ -32,10 +32,10 @@ cdef extern from "bpe.h" namespace "vkcom":
     cdef cppclass BaseEncoder:
         BaseEncoder(const string& model_path, int n_threads, Status* status)
 
-        Status encode_as_ids(const vector[string] &sentences, vector[vector[int]]* ids, bool bos, bool eos, bool reverse, double dropout_prob) const
-        Status encode_as_subwords(const vector[string]& sentences, vector[vector[string]]* subwords, bool bos, bool eos, bool reverse, double dropout_prob) const
+        Status encode_as_ids(const vector[string] &sentences, vector[vector[int]]* ids, bool bos, bool eos, bool reverse, double dropout_prob, unsigned int dropout_seed) const
+        Status encode_as_subwords(const vector[string]& sentences, vector[vector[string]]* subwords, bool bos, bool eos, bool reverse, double dropout_prob, unsigned int dropout_seed) const
 
-        Status encode_cli(string output_type, bool stream, bool bos, bool eos, bool reverse, double dropout_prob) const
+        Status encode_cli(string output_type, bool stream, bool bos, bool eos, bool reverse, double dropout_prob, unsigned int dropout_seed) const
 
         Status decode_cli(const unordered_set[int]* ignore_ids) const
 
@@ -47,6 +47,8 @@ cdef extern from "bpe.h" namespace "vkcom":
         Status decode(const vector[vector[int]]& ids, vector[string]* output, const unordered_set[int]* ignore_ids) const
         int vocab_size() const
         vector[string] vocabulary() const
+
+    cdef unsigned int DEFAULT_SEED = DEFAULT_SEED
 
 
 cdef class BPE:
@@ -84,31 +86,32 @@ cdef class BPE:
         if status.code != 0:
             raise ValueError(status.message.decode())
 
-    def encode(self, sentences, output_type, bos, eos, reverse, dropout_prob):
+    def encode(self, sentences, output_type, bos, eos, reverse, dropout_prob, dropout_seed):
         cdef vector[string] s
         cdef vector[vector[string]] ret_subwords
         cdef vector[vector[int]] ret_ids
         cdef Status status
+        seed = dropout_seed if dropout_seed != None else DEFAULT_SEED
         if dropout_prob < 0 or dropout_prob > 1:
             raise ValueError("dropout_prob value must be in the range [0, 1]. Current value of dropout_prob = " + str(dropout_prob))
         if output_type == 'id':
             if isinstance(sentences, str):
                 s = [sentences.encode()]
-                status = self.encoder.encode_as_ids(s, &ret_ids, bos, eos, reverse, dropout_prob)
+                status = self.encoder.encode_as_ids(s, &ret_ids, bos, eos, reverse, dropout_prob, seed)
                 if status.code != 0:
                     raise ValueError(status.message.decode())
                 return ret_ids[0]
 
             assert isinstance(sentences, list) or isinstance(sentences, tuple)
             s = [x.encode() for x in sentences]
-            status = self.encoder.encode_as_ids(s, &ret_ids, bos, eos, reverse, dropout_prob)
+            status = self.encoder.encode_as_ids(s, &ret_ids, bos, eos, reverse, dropout_prob, seed)
             if status.code != 0:
                 raise ValueError(status.message.decode())
             return ret_ids
         elif output_type == 'subword':
             if isinstance(sentences, str):
                 s = [sentences.encode()]
-                status = self.encoder.encode_as_subwords(s, &ret_subwords, bos, eos, reverse, dropout_prob)
+                status = self.encoder.encode_as_subwords(s, &ret_subwords, bos, eos, reverse, dropout_prob, seed)
                 if status.code != 0:
                     raise ValueError(status.message.decode())
                 assert len(ret_subwords) == 1
@@ -116,7 +119,7 @@ cdef class BPE:
 
             assert isinstance(sentences, list) or isinstance(sentences, tuple)
             s = [x.encode() for x in sentences]
-            status = self.encoder.encode_as_subwords(s, &ret_subwords, bos, eos, reverse, dropout_prob)
+            status = self.encoder.encode_as_subwords(s, &ret_subwords, bos, eos, reverse, dropout_prob, seed)
             if status.code != 0:
                 raise ValueError(status.message.decode())
             return [[piece.decode() for piece in sentence] for sentence in ret_subwords]
@@ -164,8 +167,9 @@ cdef class BPE:
         cdef vector[string] vocab = self.encoder.vocabulary()
         return [token.decode() for token in vocab]
 
-    def encode_cli(self, output_type, stream, bos, eos, reverse, dropout_prob):
-        cdef Status status = self.encoder.encode_cli(output_type.encode(), stream, bos, eos, reverse, dropout_prob)
+    def encode_cli(self, output_type, stream, bos, eos, reverse, dropout_prob, dropout_seed):
+        seed = dropout_seed if dropout_seed != None else DEFAULT_SEED
+        cdef Status status = self.encoder.encode_cli(output_type.encode(), stream, bos, eos, reverse, dropout_prob, seed)
         if status.code != 0:
             raise ValueError(status.message.decode())
 
