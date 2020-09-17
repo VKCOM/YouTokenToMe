@@ -54,7 +54,7 @@ jobs:
 
 install:
   - python3 -m pip install -U pip
-  - python3 -m pip install cibuildwheel==1.6.0 twine==3.2.0
+  - python3 -m pip install cibuildwheel==1.1.0 twine==3.2.0
   - python3 -m pip install -r requirements.txt
 
 script:
