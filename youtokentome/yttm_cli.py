@@ -107,12 +107,14 @@ def bpe(data, model, vocab_size, coverage, n_threads, pad_id, unk_id, bos_id, eo
 )
 @click.option(
     "--dropout_seed",
-    type=click.IntRange(min=0, max=2**32-1),
+    type=click.IntRange(min=0, max=2 ** 32 - 1),
     default=None,
     show_default=True,
     help="BPE-dropout seed for random engine",
 )
-def encode(model, output_type, n_threads, bos, eos, reverse, stream, dropout_prob, dropout_seed):
+def encode(
+    model, output_type, n_threads, bos, eos, reverse, stream, dropout_prob, dropout_seed
+):
     """Encode text to ids or subwords."""
     if n_threads < -1 or n_threads == 0:
         raise ValueError(
