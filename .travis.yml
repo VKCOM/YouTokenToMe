@@ -42,7 +42,7 @@ jobs:
       language: shell
       compiler: clang
       env:
-        - MACOSX_DEPLOYMENT_TARGET=10.14
+        - MACOSX_DEPLOYMENT_TARGET=10.15
         - CIBW_SKIP="cp27-* cp33-* cp34-* *win* *i686*"
         - CIBW_MANYLINUX_X86_64_IMAGE=manylinux2010
         - CIBW_BEFORE_BUILD="pip install -r requirements.txt"
@@ -54,7 +54,7 @@ jobs:
 
 install:
   - python3 -m pip install -U pip
-  - python3 -m pip install cibuildwheel==1.1.0 twine==1.15.0
+  - python3 -m pip install cibuildwheel==1.6.0 twine==3.2.0
   - python3 -m pip install -r requirements.txt
 
 script:
