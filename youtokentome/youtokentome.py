@@ -80,5 +80,5 @@ class BPE:
 
     def decode(
         self, ids: List[int], ignore_ids: Optional[Collection[int]] = None
-    ) -> str:
+    ) -> List[str]:
         return self.bpe_cython.decode(ids, ignore_ids)
