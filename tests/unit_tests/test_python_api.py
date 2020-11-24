@@ -29,6 +29,8 @@ def test_encode_decode():
     bpe = yttm.BPE(BASE_MODEL_FILE)
     text_in = [" ".join("".join([random.choice("abcd ") for _ in range(50)]).split())]
     ids = bpe.encode(text_in, yttm.OutputType.ID)
+    # It is necessary to add first empty line, since everything in BPE starts from a new line
+    text_in[0] = "\n" + text_in[0]
     assert text_in == bpe.decode(ids)
     ids_bos_eos = bpe.encode(text_in, yttm.OutputType.ID, bos=True, eos=True)
     assert text_in == bpe.decode(ids_bos_eos, ignore_ids=[BOS_ID, EOS_ID])
