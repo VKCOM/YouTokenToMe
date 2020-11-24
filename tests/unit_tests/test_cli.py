@@ -170,6 +170,7 @@ def test_decode():
     )
 
     with open("decode_text_out.txt", "r") as fin:
+        fin.readline()
         text_out = fin.readline()
 
     assert text_in == text_out[:-1]
@@ -203,6 +204,8 @@ def test_decode():
     )
 
     with open("decode_text_out.txt", "r") as fin:
+        # It is necessary to skip the first line, since everything in BPE starts from a new line
+        fin.readline()
         text_out = fin.readline()
 
     assert text_in == text_out[:-1]
