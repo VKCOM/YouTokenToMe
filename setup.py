@@ -1,8 +1,15 @@
 import io
 import os
 
-from setuptools import Extension, find_packages, setup
 from Cython.Build import cythonize
+from setuptools import Extension, find_packages, setup
+
+
+def setup_version() -> str:
+    version_prefix = "1.0"
+    version = os.environ.get("BUILD_NUMBER") if bool(os.environ.get("TEAMCITY_VERSION")) else "SNAPSHOT"
+    return f"{version_prefix}.{version}"
+
 
 extensions = [
     Extension(
@@ -26,7 +33,7 @@ with io.open(
 
 setup(
     name="youtokentome",
-    version="1.0.6",
+    version=setup_version(),
     packages=find_packages(),
     description="Unsupervised text tokenizer focused on computational efficiency",
     long_description=LONG_DESCRIPTION,
@@ -51,4 +58,3 @@ setup(
     ],
     ext_modules=cythonize(extensions),
 )
-
