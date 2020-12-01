@@ -8,7 +8,7 @@ from setuptools import Extension, find_packages, setup
 def setup_version() -> str:
     version_prefix = "1.0"
     version = os.environ.get("BUILD_NUMBER") if bool(os.environ.get("TEAMCITY_VERSION")) else "SNAPSHOT"
-    return f"{version_prefix}.{version}"
+    return version_prefix + "." + version
 
 
 extensions = [
