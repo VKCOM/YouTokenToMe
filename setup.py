@@ -1,8 +1,15 @@
 import io
 import os
 
-from setuptools import Extension, find_packages, setup
 from Cython.Build import cythonize
+from setuptools import Extension, find_packages, setup
+
+
+def setup_version() -> str:
+    version_prefix = "1.0"
+    version = os.environ.get("BUILD_NUMBER") if bool(os.environ.get("TEAMCITY_VERSION")) else "SNAPSHOT"
+    return version_prefix + "." + version
+
 
 extensions = [
     Extension(
@@ -26,13 +33,13 @@ with io.open(
 
 setup(
     name="youtokentome",
-    version="1.0.6",
+    version=setup_version(),
     packages=find_packages(),
     description="Unsupervised text tokenizer focused on computational efficiency",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     url="https://github.com/vkcom/youtokentome",
-    python_requires=">=3.5.0",
+    python_requires=">=3.6.0",
     install_requires=["Click>=7.0"],
     entry_points={"console_scripts": ["yttm = youtokentome.yttm_cli:main"]},
     author="Ivan Belonogov",
@@ -41,7 +48,6 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
@@ -51,4 +57,3 @@ setup(
     ],
     ext_modules=cythonize(extensions),
 )
-

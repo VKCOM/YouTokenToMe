@@ -7,7 +7,3 @@ include youtokentome/cpp/third_party/LICENSE
 include LICENSE
 include README.md
 include requirements.txt
-include yttm_cli.py
-
-
-
