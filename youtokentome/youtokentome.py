@@ -11,6 +11,9 @@ class OutputType(Enum):
 
 class BPE:
     def __init__(self, model: str, n_threads: int = -1):
+        self.model = model
+        self.n_threads = n_threads
+
         self.bpe_cython = _youtokentome_cython.BPE(
             model_path=model, n_threads=n_threads
         )
@@ -82,3 +85,14 @@ class BPE:
         self, ids: List[int], ignore_ids: Optional[Collection[int]] = None
     ) -> str:
         return self.bpe_cython.decode(ids, ignore_ids)
+
+    def __getstate__(self):
+        return {"model": self.model, "n_threads": self.n_threads}
+
+    def __setstate__(self, dict):
+        self.model = dict["model"]
+        self.n_threads = dict["n_threads"]
+
+        self.bpe_cython = _youtokentome_cython.BPE(
+            model_path=self.model, n_threads=self.n_threads
+        )
