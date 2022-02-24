@@ -371,44 +371,90 @@ struct PriorityQueue {
   }
 };
 
+uint64_t compute_char_count(flat_hash_map<uint32_t, uint64_t>& char_cnt, char* begin, char* end) {
+  bool invalid_input = false;
+  UTF8Iterator utf8_iter(begin, end);
+  uint64_t char_count = 0;
+  for (; !utf8_iter.empty(); char_count++, ++utf8_iter) {
+    if (*utf8_iter != INVALID_UNICODE) {
+      if (!is_space(*utf8_iter)) {
+        char_cnt[*utf8_iter]++;
+      }
+    } else {
+      invalid_input = true;
+    }
+  }
+  if (invalid_input) {
+    std::cerr << "WARNING Input contains invalid unicode characters."
+              << std::endl;
+  }
+  return char_count;
+}
+
 flat_hash_map<uint32_t, uint32_t> compute_alphabet_helper(
     const flat_hash_map<uint32_t, uint64_t> &char_cnt, uint64_t data_len,
     flat_hash_set<uint32_t> &removed_chars, const BpeConfig &bpe_config) {
-  vector<std::pair<uint64_t, uint32_t>> frequencies;
-
-  for (auto x : char_cnt) {
-    frequencies.emplace_back(x.second, x.first);
-  }
-  sort(frequencies.begin(), frequencies.end());
-
-  uint64_t cur = 0;
-  uint64_t n_removed = 0;
-  for (; cur < frequencies.size() &&
-      (data_len - n_removed - frequencies[cur].first) >
-          data_len * bpe_config.character_coverage;
-         cur++) {
-    n_removed += frequencies[cur].first;
-  }
-  std::cerr << "number of unique characters in the training data: "
-            << frequencies.size() << std::endl;
-  std::cerr << "number of deleted characters: " << cur << std::endl;
-  std::cerr << "number of unique characters left: " << frequencies.size() - cur
-            << std::endl;
 
   flat_hash_map<uint32_t, uint32_t> char2id;
   uint64_t used_ids = bpe_config.special_tokens.n_special_tokens();
   char2id[SPACE_TOKEN] = used_ids++;
 
-  for (uint64_t i = 0; i < cur; i++) {
-    removed_chars.insert(frequencies[i].second);
-  }
+  if (bpe_config.alphabet.size() > 0) {
+    std::cerr << "using given alphabet: " << bpe_config.alphabet << std::endl;
+    flat_hash_map<uint32_t, uint64_t> alphabet_char_cnt;
+    uint64_t char_count = compute_char_count(alphabet_char_cnt, (char *)&bpe_config.alphabet[0], (char *)&bpe_config.alphabet[0] + bpe_config.alphabet.size());
+    std::cerr << "number of unique characters in the alphabet: " << char_count << std::endl;
 
-  for (int i = frequencies.size() - 1; i >= static_cast<int>(cur); i--) {
-    if (!is_space(frequencies[i].second)) {
-      assert(char2id.count(frequencies[i].second) == 0);
-      char2id[frequencies[i].second] = used_ids++;
+    flat_hash_set<uint32_t> alphabet_chars;
+
+    for (auto x : alphabet_char_cnt) {
+        alphabet_chars.insert(x.first);
+        if (!is_space(x.first)) {
+          assert(char2id.count(x.first) == 0);
+          char2id[x.first] = used_ids++;
+        }
+    }
+
+    for (auto x : char_cnt) {
+      if (alphabet_chars.find(x.first) == alphabet_chars.end()) {
+        removed_chars.insert(x.first);
+      }
     }
   }
+  else {
+    vector<std::pair<uint64_t, uint32_t>> frequencies;
+
+    for (auto x : char_cnt) {
+      frequencies.emplace_back(x.second, x.first);
+    }
+    sort(frequencies.begin(), frequencies.end());
+
+    uint64_t cur = 0;
+    uint64_t n_removed = 0;
+    for (; cur < frequencies.size() &&
+        (data_len - n_removed - frequencies[cur].first) >
+            data_len * bpe_config.character_coverage;
+           cur++) {
+      n_removed += frequencies[cur].first;
+    }
+    std::cerr << "number of unique characters in the training data: "
+              << frequencies.size() << std::endl;
+    std::cerr << "number of deleted characters: " << cur << std::endl;
+    std::cerr << "number of unique characters left: " << frequencies.size() - cur
+              << std::endl;
+
+    for (uint64_t i = 0; i < cur; i++) {
+      removed_chars.insert(frequencies[i].second);
+    }
+
+    for (int i = frequencies.size() - 1; i >= static_cast<int>(cur); i--) {
+      if (!is_space(frequencies[i].second)) {
+        assert(char2id.count(frequencies[i].second) == 0);
+        char2id[frequencies[i].second] = used_ids++;
+      }
+    }
+  }
+
   return char2id;
 }
 
@@ -930,26 +976,6 @@ void rename_tokens(flat_hash_map<uint32_t, uint32_t> &char2id,
     rule.y = renaming[rule.y];
     rule.z = renaming[rule.z];
   }
-}
-
-uint64_t compute_char_count(flat_hash_map<uint32_t, uint64_t>& char_cnt, char* begin, char* end) {
-  bool invalid_input = false;
-  UTF8Iterator utf8_iter(begin, end);
-  uint64_t char_count = 0;
-  for (; !utf8_iter.empty(); char_count++, ++utf8_iter) {
-    if (*utf8_iter != INVALID_UNICODE) {
-      if (!is_space(*utf8_iter)) {
-        char_cnt[*utf8_iter]++;
-      }
-    } else {
-      invalid_input = true;
-    }
-  }
-  if (invalid_input) {
-    std::cerr << "WARNING Input contains invalid unicode characters."
-              << std::endl;
-  }
-  return char_count;
 }
 
 Status learn_bpe_from_string(string &text_utf8, int n_tokens,

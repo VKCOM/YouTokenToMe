@@ -93,10 +93,11 @@ Status BPEState::load(const string &file_name) {
 }
 
 BpeConfig::BpeConfig(double _character_coverage, int _n_threads,
-                     const SpecialTokens &_special_tokens)
+                     const SpecialTokens &_special_tokens, std::string alphabet)
     : character_coverage(_character_coverage),
       n_threads(_n_threads),
-      special_tokens(_special_tokens) {}
+      special_tokens(_special_tokens),
+      alphabet(std::move(alphabet)) {}
 
 vector<string> read_lines_from_stdin(uint64_t batch_limit, uint64_t *processed) {
   vector<string> sentences;
