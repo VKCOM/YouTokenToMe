@@ -1,3 +1,4 @@
+
 import _youtokentome_cython
 from enum import Enum
 from typing import List, Union, Optional, Collection
@@ -28,6 +29,7 @@ class BPE:
         unk_id: int = 1,
         bos_id: int = 2,
         eos_id: int = 3,
+        alphabet: Optional[str] = None,
     ) -> "BPE":
         _youtokentome_cython.BPE.train(
             data=data,
@@ -39,6 +41,7 @@ class BPE:
             unk_id=unk_id,
             bos_id=bos_id,
             eos_id=eos_id,
+            alphabet=alphabet if alphabet is not None else "",
         )
 
         return BPE(model=model, n_threads=n_threads)

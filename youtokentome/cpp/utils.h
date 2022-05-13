@@ -46,11 +46,12 @@ struct BpeConfig {
   double character_coverage = 1;
   int n_threads = 0;
   SpecialTokens special_tokens;
+  std::string alphabet;
 
   BpeConfig() = default;
 
   BpeConfig(double character_coverage, int n_threads,
-            const SpecialTokens &special_tokens);
+            const SpecialTokens &special_tokens, std::string alphabet);
 };
 
 struct Status {
