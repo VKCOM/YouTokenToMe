@@ -298,7 +298,7 @@ void manual_test() {
 
   auto trn_data_copy = trn_data;
   SpecialTokens special_tokens_config = {0, 1, 2, 3};
-  BpeConfig bpe_config = {1.0, 1, special_tokens_config};
+  BpeConfig bpe_config = {1.0, 1, special_tokens_config, ""};
 
   BPEState model_fast;
   status = learn_bpe_from_string(trn_data_copy, n_tokens, "remove_it.txt", bpe_config, &model_fast);
@@ -348,7 +348,7 @@ void parallel_test(int n_iter, int n_threads) {
     }
 
     auto train_data_copy = train_data;
-    BpeConfig bpe_config = {character_coverage, n_threads, {0, 1, 2, 3}};
+    BpeConfig bpe_config = {character_coverage, n_threads, {0, 1, 2, 3}, ""};
     BPEState learned_model;
     status = learn_bpe_from_string(train_data_copy, vocab_size, "remove_it.txt", bpe_config, &learned_model);
     assert(status.ok());
@@ -391,7 +391,7 @@ void base_stress(int n_iter) {
       character_coverage = 1;
     }
     auto train_data_copy = train_data;
-    BpeConfig bpe_config = {character_coverage, n_threads, {0, 1, 2, 3}};
+    BpeConfig bpe_config = {character_coverage, n_threads, {0, 1, 2, 3}, ""};
     BPEState fast_solution_model;
     status = learn_bpe_from_string(train_data_copy, vocab_size, "remove_it.txt", bpe_config, &fast_solution_model);
     assert(status.ok());
