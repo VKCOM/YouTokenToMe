@@ -6,7 +6,7 @@
 #include "third_party/flat_hash_map.h"
 
 namespace vkcom {
-const uint32_t SPACE_TOKEN = 9601;
+const uint32_t SPACE_TOKEN = '\n';
 
 struct BPE_Rule {
   // x + y -> z

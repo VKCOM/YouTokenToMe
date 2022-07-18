@@ -10,7 +10,8 @@ def test_russian():
         """
 
     test_text = """
-        собранный собрание прибор
+        собранный собрание
+        прибор
         """
 
     TRAIN_DATA_PATH = "train_data.txt"
@@ -20,7 +21,7 @@ def test_russian():
     model = yttm.BPE.train(TRAIN_DATA_PATH, MODEL_PATH, 50)
     tokenized_text = model.encode([test_text], output_type=yttm.OutputType.SUBWORD)
     expected_result = [
-        ["▁", "        ", "с", "об", "ранный", " ", "с", "об", "ран", "и", "е", " ", "п", "р", "и", "бор", "▁", "        "]
+        ["\n", "        ", "с", "об", "ранный", " ", "с", "об", "ран", "и", "е", "\n", "        ", "п", "р", "и", "бор", "\n", "        "]
     ]
     assert tokenized_text == expected_result
     print(tokenized_text)
@@ -47,7 +48,7 @@ def test_english():
     model = yttm.BPE.train(TRAIN_DATA_PATH, MODEL_PATH, 200, n_threads=1)
     tokenized_text = model.encode([test_text], output_type=yttm.OutputType.SUBWORD)
     expected_result = [
-        ["▁", "chrono", "c", "l", "i", "n", "e", " ", "s", "y", "n", "ch", "r", "o", "s", "co", "p", "e", " "]
+        ["\n", "chrono", "c", "l", "i", "n", "e", " ", "s", "y", "n", "ch", "r", "o", "s", "co", "p", "e", " "]
     ]
     assert tokenized_text == expected_result
     print(tokenized_text)
@@ -72,7 +73,7 @@ def test_japanese():
     model = yttm.BPE.train(TRAIN_DATA_PATH, MODEL_PATH, 100)
     tokenized_text = model.encode([test_text], output_type=yttm.OutputType.SUBWORD)
     expected_result = [
-        ["▁", " ", "おばあさん ", "が", "  ", "川", " ", "で", " ", "せ", "ん", " "]
+        ["\n", " ", "おばあさん ", "が", "  ", "川", " ", "で", " ", "せ", "ん", " "]
     ]
     assert tokenized_text == expected_result
     print(tokenized_text)

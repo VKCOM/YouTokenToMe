@@ -97,7 +97,7 @@ string token2word(const vector<uint32_t> &source,
 }
 
 bool is_space(uint32_t ch) {
-  return ch == ((uint32_t)'\n') || (ch == SPACE_TOKEN);
+  return ch == SPACE_TOKEN;
 }
 
 uint64_t int2comb(uint32_t a, uint32_t b) {
@@ -1975,13 +1975,13 @@ Status BaseEncoder::id_to_subword(int id, string *subword, bool replace_space) c
   }
 
   assert(recipe.count(id));
-  if (replace_space) {
-    auto symbols = recipe.at(id);
-    if (id2char.at(symbols[0]) == SPACE_TOKEN) {
-      *subword = "\n" + token2word({symbols.begin() + 1, symbols.end()}, id2char);
-      return Status();
-    }
-  }
+//  if (replace_space) {
+//    auto symbols = recipe.at(id);
+//    if (id2char.at(symbols[0]) == SPACE_TOKEN) {
+//      *subword = "\n" + token2word({symbols.begin() + 1, symbols.end()}, id2char);
+//      return Status();
+//    }
+//  }
   *subword = token2word(recipe.at(id), id2char);
   return Status();
 }
