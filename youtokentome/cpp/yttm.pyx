@@ -14,6 +14,7 @@ cdef extern from "bpe.h" namespace "vkcom":
         int unk_id
         int bos_id
         int eos_id
+        vector[string] custom_tokens
 
     cdef cppclass BpeConfig:
         double character_coverage
@@ -67,6 +68,7 @@ cdef class BPE:
               vocab_size,
               coverage=1.0,
               n_threads=-1,
+              custom_tokens=[],
               pad_id=0,
               unk_id=1,
               bos_id=2,
@@ -79,6 +81,7 @@ cdef class BPE:
         bpe_config.special_tokens.unk_id = unk_id
         bpe_config.special_tokens.bos_id = bos_id
         bpe_config.special_tokens.eos_id = eos_id
+        bpe_config.special_tokens.custom_tokens = custom_tokens
 
         cdef Status status = train_bpe(data.encode(), model.encode(), vocab_size, bpe_config)
         if status.code != 0:

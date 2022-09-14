@@ -10,15 +10,20 @@ using std::string;
 using std::vector;
 
 void SpecialTokens::dump(std::ofstream &fout) {
-  fout << unk_id << " " << pad_id << " " << bos_id << " " << eos_id
-       << std::endl;
+  fout << unk_id << " " << pad_id << " " << bos_id << " " << eos_id << " ";
+  for (auto token: custom_tokens) fout << token << " ";
+  fout << std::endl;
+
 }
 
 void SpecialTokens::load(std::ifstream &fin) {
   fin >> unk_id >> pad_id >> bos_id >> eos_id;
+  std::string token;
+  while (fin >> token)
+    custom_tokens.push_back(token);
 }
 
-uint32_t SpecialTokens::max_id() const {
+uint32_t SpecialTokens::max_predefined_id() const {
   int ret = 0;
   ret = std::max(ret, unk_id);
   ret = std::max(ret, pad_id);
@@ -27,8 +32,14 @@ uint32_t SpecialTokens::max_id() const {
   return ret;
 }
 
+uint32_t SpecialTokens::max_id() const {
+  int ret = max_predefined_id();
+  ret += custom_tokens.size();
+  return ret;
+}
+
 bool SpecialTokens::taken_id(int id) const {
-  return id == unk_id || id == pad_id || id == bos_id || id == eos_id;
+  return id == unk_id || id == pad_id || id == bos_id || id == eos_id || (id > max_predefined_id() && id <= max_id());
 }
 
 uint64_t SpecialTokens::n_special_tokens() const {
@@ -37,6 +48,7 @@ uint64_t SpecialTokens::n_special_tokens() const {
   cnt += (pad_id != -1);
   cnt += (bos_id != -1);
   cnt += (eos_id != -1);
+  cnt += custom_tokens.size();
   return cnt;
 }
 

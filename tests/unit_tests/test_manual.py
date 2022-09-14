@@ -73,3 +73,26 @@ def test_japanese():
     assert tokenized_text == expected_result
     print(tokenized_text)
     os.remove(TRAIN_DATA_PATH)
+
+def test_special_token():
+    train_text = """
+    [CLS] Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+    sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
+    nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in 
+    reprehenderit in voluptate velit [MASK] esse cillum dolore eu fugiat nulla
+    pariatur. Excepteur sint occaecat cupidatat non proident, sunt in 
+    culpa qui officia deserunt mollit <SEP> anim id est laborum.
+    """
+    test_text = "[CLS] Lorem ipsum [TOKEN] dolor <SEP> sit [MASK] amet"
+    TRAIN_DATA_PATH = "train_data.txt"
+    MODEL_PATH = "model.yttm"
+    with open(TRAIN_DATA_PATH, "w") as fin:
+        fin.write(train_text)
+    model = yttm.BPE.train(TRAIN_DATA_PATH, MODEL_PATH, 100, custom_tokens=[b'[CLS]',b'[MASK]',b'<SEP>'])
+    tokenized_text = model.encode([test_text], output_type=yttm.OutputType.SUBWORD)
+    expected_result = ['▁','[CLS]', '▁', 'L', 'or', 'e', 'm', '▁', 'ip', 's', 'um', '▁', '[TOKEN]', '▁dolor', '▁', '<SEP>', '▁s', 'it', '▁[', 'M', 'A', 'S', 'K', ']', '▁a', 'm', 'e', 't']
+    print(tokenized_text)
+    assert tokenized_text == expected_result
+    print(tokenized_text)
+    os.remove(TRAIN_DATA_PATH)
