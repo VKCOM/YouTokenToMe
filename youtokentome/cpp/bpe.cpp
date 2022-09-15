@@ -1663,6 +1663,19 @@ DecodeResult BaseEncoder::encode_sentence(const std::string &sentence_utf8,
     auto end_of_word = std::find_if(begin_of_word, text.end(), is_space);
     it_text = end_of_word;
 
+    auto word = encode_utf8({begin_of_word, end_of_word});
+
+    if (custom_token2id.count(word)) {
+      if (output_type == ID) {
+        output_ids.push_back(bpe_state.char2id.at(SPACE_TOKEN));
+        output_ids.push_back(custom_token2id.find(word) -> second);
+      } else {
+        output_pieces.push_back(encode_utf8({SPACE_TOKEN}));
+        output_pieces.push_back(word);
+      }
+      continue;
+    }
+
     uint32_t new_token_cur = new_tokens_start;
     list.emplace_back(bpe_state.char2id.at(SPACE_TOKEN), 0);
 
@@ -1840,6 +1853,11 @@ void BaseEncoder::fill_from_state() {
   }
   reversed_recipe[BOS_TOKEN] = bpe_state.special_tokens.bos_id;
   reversed_recipe[EOS_TOKEN] = bpe_state.special_tokens.eos_id;
+  uint32_t custom_id = bpe_state.special_tokens.max_predefined_id();
+  for (auto token : bpe_state.special_tokens.custom_tokens) {
+    ++custom_id;
+    custom_token2id[token] = custom_id;
+  }
 }
 
 int BaseEncoder::vocab_size() const {

@@ -89,9 +89,9 @@ def test_special_token():
     MODEL_PATH = "model.yttm"
     with open(TRAIN_DATA_PATH, "w") as fin:
         fin.write(train_text)
-    model = yttm.BPE.train(TRAIN_DATA_PATH, MODEL_PATH, 100, custom_tokens=[b'[CLS]',b'[MASK]',b'<SEP>'])
+    model = yttm.BPE.train(TRAIN_DATA_PATH, MODEL_PATH, 100, custom_tokens=[b'[CLS]',b'[TOKEN]',b'<SEP>'])
     tokenized_text = model.encode([test_text], output_type=yttm.OutputType.SUBWORD)
-    expected_result = ['▁','[CLS]', '▁', 'L', 'or', 'e', 'm', '▁', 'ip', 's', 'um', '▁', '[TOKEN]', '▁dolor', '▁', '<SEP>', '▁s', 'it', '▁[', 'M', 'A', 'S', 'K', ']', '▁a', 'm', 'e', 't']
+    expected_result = [['▁','[CLS]', '▁', 'L', 'or', 'e', 'm', '▁', 'ip', 's', 'um', '▁', '[TOKEN]', '▁dolor', '▁', '<SEP>', '▁s', 'it', '▁', '[', 'M', 'A', 'S', 'K', ']', '▁a', 'm', 'e', 't']]
     print(tokenized_text)
     assert tokenized_text == expected_result
     print(tokenized_text)

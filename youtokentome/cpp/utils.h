@@ -41,7 +41,6 @@ struct SpecialTokens {
   bool taken_id(int id) const;
 
   uint64_t n_special_tokens() const;
-  private:
   uint32_t max_predefined_id() const;
 };
 
