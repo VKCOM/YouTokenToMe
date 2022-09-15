@@ -1515,6 +1515,12 @@ void print_config(const string &input_path, const string &model_path,
   std::cerr << "  unk: " << bpe_config.special_tokens.unk_id << std::endl;
   std::cerr << "  bos: " << bpe_config.special_tokens.bos_id << std::endl;
   std::cerr << "  eos: " << bpe_config.special_tokens.eos_id << std::endl;
+  if (bpe_config.special_tokens.custom_tokens.size()) {
+    std::cerr << "  custom_tokens: ";
+    for (auto token:bpe_config.special_tokens.custom_tokens)
+      std::cerr << token << " ";
+    std::cerr << std::endl;
+  }
   std::cerr << std::endl;
 }
 
