@@ -1673,8 +1673,10 @@ DecodeResult BaseEncoder::encode_sentence(const std::string &sentence_utf8,
             it_char_in_word, end_of_word,
             [&](uint32_t ch) { return bpe_state.char2id.count(ch); });
 
-        unrecognized_tokens[new_token_cur] = utf8_text =
+        unrecognized_tokens[new_token_cur] =
             encode_utf8({it_char_in_word, it_unrecognized_word});
+        if (custom_token2id.size()) 
+          utf8_text.append(unrecognized_tokens[new_token_cur]);
         it_char_in_word = it_unrecognized_word;
 
         list.emplace_back(new_token_cur, list.size());
