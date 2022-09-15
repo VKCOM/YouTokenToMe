@@ -1663,21 +1663,9 @@ DecodeResult BaseEncoder::encode_sentence(const std::string &sentence_utf8,
     auto end_of_word = std::find_if(begin_of_word, text.end(), is_space);
     it_text = end_of_word;
 
-    auto word = encode_utf8({begin_of_word, end_of_word});
-
-    if (custom_token2id.count(word)) {
-      if (output_type == ID) {
-        output_ids.push_back(bpe_state.char2id.at(SPACE_TOKEN));
-        output_ids.push_back(custom_token2id.find(word) -> second);
-      } else {
-        output_pieces.push_back(encode_utf8({SPACE_TOKEN}));
-        output_pieces.push_back(word);
-      }
-      continue;
-    }
-
     uint32_t new_token_cur = new_tokens_start;
     list.emplace_back(bpe_state.char2id.at(SPACE_TOKEN), 0);
+    string utf8_text;
 
     for (auto it_char_in_word = begin_of_word; it_char_in_word < end_of_word;) {
       if (bpe_state.char2id.count(*it_char_in_word) == 0) {
@@ -1685,17 +1673,31 @@ DecodeResult BaseEncoder::encode_sentence(const std::string &sentence_utf8,
             it_char_in_word, end_of_word,
             [&](uint32_t ch) { return bpe_state.char2id.count(ch); });
 
-        unrecognized_tokens[new_token_cur] =
+        unrecognized_tokens[new_token_cur] = utf8_text =
             encode_utf8({it_char_in_word, it_unrecognized_word});
         it_char_in_word = it_unrecognized_word;
 
         list.emplace_back(new_token_cur, list.size());
         new_token_cur++;
       } else {
+        if (custom_token2id.size()) 
+          utf8_to_chars(*it_char_in_word, std::back_inserter(utf8_text));
         list.emplace_back(bpe_state.char2id.at(*it_char_in_word), list.size());
         ++it_char_in_word;
       }
     }
+
+    if (custom_token2id.size() && custom_token2id.count(utf8_text)) {
+      if (output_type == ID) {
+        output_ids.push_back(bpe_state.char2id.at(SPACE_TOKEN));
+        output_ids.push_back(custom_token2id.find(utf8_text) -> second);
+      } else {
+        output_pieces.push_back(encode_utf8({SPACE_TOKEN}));
+        output_pieces.push_back(utf8_text);
+      }
+      continue;
+    }
+    
     list.back().next = -1;
 
 
