@@ -1967,6 +1967,10 @@ Status BaseEncoder::id_to_subword(int id, string *subword, bool replace_space) c
     *subword = EOS_TOKEN;
     return Status();
   }
+  if (id <= bpe_state.special_tokens.max_id() && id > bpe_state.special_tokens.max_predefined_id()) {
+    *subword = bpe_state.special_tokens.custom_tokens[id - bpe_state.special_tokens.max_predefined_id() - 1];
+    return Status();
+  }
 
   assert(recipe.count(id));
   if (replace_space) {
