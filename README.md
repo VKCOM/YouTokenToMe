@@ -60,6 +60,9 @@ test_text = "".join([random.choice("abcde ") for _ in range(100)])
 # Training model
 yttm.BPE.train(data=train_data_path, vocab_size=5000, model=model_path)
 
+# Training model with custom tokens
+yttm.BPE.train(data=train_data_path, vocab_size=5000, model=model_path, custom_tokens=[b"[CLS]", b"[MASK]"])
+
 # Loading model
 bpe = yttm.BPE(model=model_path)
 
@@ -71,7 +74,7 @@ print(bpe.encode([test_text], output_type=yttm.OutputType.SUBWORD))
 &nbsp;
 ### Training model
 ```python
-youtokentome.BPE.train(data, model, vocab_size, coverage, n_threads=-1, pad_id=0, unk_id=1, bos_id=2, eos_id=3)
+youtokentome.BPE.train(data, model, vocab_size, coverage, n_threads=-1, pad_id=0, unk_id=1, bos_id=2, eos_id=3, custom_tokens=[])
 ```
 Trains BPE model and saves to file.
 
@@ -86,6 +89,7 @@ Trains BPE model and saves to file.
 * `unk_id`: int, reserved id for unknown symbols
 * `bos_id`: int, reserved id for begin of sentence token
 * `eos_id`: int, reserved id for end of sentence token
+* `custom_tokens`: List[bytes], tokens which will not be split into subwords.
  
 **Returns**: Class `youtokentome.BPE` with the loaded model.
  
@@ -191,7 +195,7 @@ Convert each id to subword and concatenate with space symbol.
 ### Example 
 
 ```bash
-$ yttm bpe --data TRAINING_DATA_FILE --model OUTPUT_MODEL_FILE --vocab_size 2000
+$ yttm bpe --data TRAINING_DATA_FILE --model OUTPUT_MODEL_FILE --vocab_size 2000 --custom_tokens "[CLS],[MASK]"
 $ yttm encode --model OUTPUT_MODEL_FILE --output_type subword < TEST_DATA_FILE > ENCODED_DATA 
 ```
 
@@ -234,6 +238,9 @@ Options:
   --unk_id INTEGER      Unknown token id.  [default: 1]
   --bos_id INTEGER      'Begin of sentence' token id.  [default: 2]
   --eos_id INTEGER      'End of sentence' token id.  [default: 3]
+  --custom_tokens TEXT  Tokens which will not be split into
+                        subwords, muiltple tokens should be
+                        provided with comma seperated.
   --help                Show this message and exit.
 ```
 
