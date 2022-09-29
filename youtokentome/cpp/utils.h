@@ -1,9 +1,9 @@
 #pragma once
 
+#include "third_party/flat_hash_map.h"
 #include <iostream>
 #include <string>
 #include <vector>
-#include "third_party/flat_hash_map.h"
 
 namespace vkcom {
 const uint32_t SPACE_TOKEN = 9601;
@@ -45,8 +45,7 @@ struct BpeConfig {
 
   BpeConfig() = default;
 
-  BpeConfig(double character_coverage, int n_threads,
-            const SpecialTokens &special_tokens);
+  BpeConfig(double character_coverage, int n_threads, const SpecialTokens &special_tokens);
 };
 
 struct Status {
@@ -85,7 +84,7 @@ bool is_space(uint32_t ch);
 
 std::vector<std::string> read_lines_from_stdin(uint64_t batch_limit, uint64_t *processed);
 
-template<typename T>
+template <typename T>
 void write_to_stdout(const std::vector<std::vector<T>> &sentences, bool flush) {
   for (const auto &sentence : sentences) {
     for (const auto &token : sentence) {
@@ -98,4 +97,4 @@ void write_to_stdout(const std::vector<std::vector<T>> &sentences, bool flush) {
   }
 }
 
-}  // namespace vkcom
+} // namespace vkcom

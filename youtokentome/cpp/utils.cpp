@@ -8,13 +8,10 @@
 namespace vkcom {
 
 void SpecialTokens::dump(std::ofstream &fout) {
-  fout << unk_id << " " << pad_id << " " << bos_id << " " << eos_id
-       << std::endl;
+  fout << unk_id << " " << pad_id << " " << bos_id << " " << eos_id << std::endl;
 }
 
-void SpecialTokens::load(std::ifstream &fin) {
-  fin >> unk_id >> pad_id >> bos_id >> eos_id;
-}
+void SpecialTokens::load(std::ifstream &fin) { fin >> unk_id >> pad_id >> bos_id >> eos_id; }
 
 uint32_t SpecialTokens::max_id() const {
   int ret = 0;
@@ -39,7 +36,7 @@ uint64_t SpecialTokens::n_special_tokens() const {
 }
 
 SpecialTokens::SpecialTokens(int pad_id, int unk_id, int bos_id, int eos_id)
-    : pad_id(pad_id), unk_id(unk_id), bos_id(bos_id), eos_id(eos_id) {}
+ : pad_id(pad_id), unk_id(unk_id), bos_id(bos_id), eos_id(eos_id) {}
 
 bool BPE_Rule::operator==(const BPE_Rule &other) const {
   return x == other.x && y == other.y && z == other.z;
@@ -88,19 +85,17 @@ Status BPEState::load(const std::string &file_name) {
   return Status();
 }
 
-BpeConfig::BpeConfig(double _character_coverage, int _n_threads,
+BpeConfig::BpeConfig(double _character_coverage,
+                     int _n_threads,
                      const SpecialTokens &_special_tokens)
-    : character_coverage(_character_coverage),
-      n_threads(_n_threads),
-      special_tokens(_special_tokens) {}
-
-bool is_space(uint32_t ch) {
-  return (ch < 256 && isspace(ch)) || (ch == SPACE_TOKEN);
+ : character_coverage(_character_coverage), n_threads(_n_threads), special_tokens(_special_tokens) {
 }
+
+bool is_space(uint32_t ch) { return (ch < 256 && isspace(ch)) || (ch == SPACE_TOKEN); }
 
 std::vector<std::string> read_lines_from_stdin(uint64_t batch_limit, uint64_t *processed) {
   std::vector<std::string> sentences;
-    std::string s;
+  std::string s;
   while (*processed < batch_limit && getline(std::cin, s)) {
     *processed += s.size();
     sentences.push_back(std::move(s));
@@ -110,10 +105,6 @@ std::vector<std::string> read_lines_from_stdin(uint64_t batch_limit, uint64_t *p
 
 Status::Status(int code, std::string message) : code(code), message(std::move(message)) {}
 
-const std::string &Status::error_message() const {
-  return message;
-}
-bool Status::ok() const {
-  return code == 0;
-}
-}  // namespace vkcom
+const std::string &Status::error_message() const { return message; }
+bool Status::ok() const { return code == 0; }
+} // namespace vkcom

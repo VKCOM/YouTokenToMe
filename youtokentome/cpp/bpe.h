@@ -1,9 +1,9 @@
 #pragma once
 
+#include "third_party/flat_hash_map.h"
 #include <map>
 #include <string>
 #include <unordered_set>
-#include "third_party/flat_hash_map.h"
 
 #include "utils.h"
 
@@ -16,8 +16,10 @@ const std::string EOS_TOKEN = "<EOS>";
 
 enum OutputType { ID, SUBWORD };
 
-Status train_bpe(const std::string &input_path, const std::string &model_path,
-                 int vocab_size, BpeConfig config);
+Status train_bpe(const std::string &input_path,
+                 const std::string &model_path,
+                 int vocab_size,
+                 BpeConfig config);
 
 class BaseEncoder {
  public:
@@ -32,15 +34,19 @@ class BaseEncoder {
 
   explicit BaseEncoder(const std::string &model_path, int n_threads, Status *ret_status);
 
-  Status encode_as_ids(
-      const std::vector<std::string> &sentences, std::vector<std::vector<int>> *ids, bool bos = false,
-      bool eos = false, bool reverse = false, double dropout_prob=0) const;
+  Status encode_as_ids(const std::vector<std::string> &sentences,
+                       std::vector<std::vector<int>> *ids,
+                       bool bos = false,
+                       bool eos = false,
+                       bool reverse = false,
+                       double dropout_prob = 0) const;
 
-  Status encode_as_subwords(
-      const std::vector<std::string> &sentences,
-      std::vector<std::vector<std::string>> *subwords,
-      bool bos = false,
-      bool eos = false, bool reverse = false, double dropout_prob=0) const;
+  Status encode_as_subwords(const std::vector<std::string> &sentences,
+                            std::vector<std::vector<std::string>> *subwords,
+                            bool bos = false,
+                            bool eos = false,
+                            bool reverse = false,
+                            double dropout_prob = 0) const;
 
   Status id_to_subword(int id, std::string *subword, bool replace_space = false) const;
 
@@ -50,7 +56,9 @@ class BaseEncoder {
                 std::vector<std::string> *sentences,
                 const std::unordered_set<int> *ignore_ids) const;
 
-  Status decode(const std::vector<int> &ids, std::string *sentence, const std::unordered_set<int> *ignore_ids) const;
+  Status decode(const std::vector<int> &ids,
+                std::string *sentence,
+                const std::unordered_set<int> *ignore_ids) const;
 
   Status decode(const std::vector<std::string> &ids,
                 std::vector<std::string> *sentences,
@@ -60,8 +68,12 @@ class BaseEncoder {
 
   std::vector<std::string> vocabulary() const;
 
-  Status encode_cli(const std::string &output_type, bool stream, bool bos = false,
-                    bool eos = false, bool reverse = false, double dropout_prob = 0) const;
+  Status encode_cli(const std::string &output_type,
+                    bool stream,
+                    bool bos = false,
+                    bool eos = false,
+                    bool reverse = false,
+                    double dropout_prob = 0) const;
 
   Status decode_cli(const std::unordered_set<int> *ignore_ids) const;
 
@@ -74,11 +86,10 @@ class BaseEncoder {
                                const EncodingConfig &encoding_config,
                                OutputType output_type) const;
 
-  Status encode_parallel(
-      const std::vector<std::string> &sentences,
-      const EncodingConfig &encoding_config, OutputType output_type,
-      std::vector<DecodeResult> *decoder_results
-  ) const;
+  Status encode_parallel(const std::vector<std::string> &sentences,
+                         const EncodingConfig &encoding_config,
+                         OutputType output_type,
+                         std::vector<DecodeResult> *decoder_results) const;
 };
 
-}  // namespace vkcom
+} // namespace vkcom

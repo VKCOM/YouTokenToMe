@@ -1,0 +1,87 @@
+# https://clang.llvm.org/extra/clang-tidy/checks/list.html
+# https://clang.llvm.org/extra/clang-tidy/checks/readability-identifier-naming.html
+Checks: |-
+  -*,
+  bugprone-bool-pointer-implicit-conversion,
+  bugprone-copy-constructor-init,
+  bugprone-fold-init-type,
+  bugprone-incorrect-roundings,
+  bugprone-integer-division,
+  bugprone-move-forwarding-reference,
+  bugprone-parent-virtual-call,
+  bugprone-undefined-memory-manipulation,
+  bugprone-use-after-move,
+  cert-dcl58-cpp,
+  cert-oop57-cpp,
+  cppcoreguidelines-avoid-non-const-global-variables,
+  cppcoreguidelines-narrowing-conversions,
+  cppcoreguidelines-pro-type-const-cast,
+  cppcoreguidelines-pro-type-static-cast-downcast,
+  cppcoreguidelines-slicing,
+  google-build-namespaces,
+  google-explicit-constructor,
+  google-readability-casting,
+  google-runtime-int,
+  misc-definitions-in-headers,
+  misc-misplaced-const,
+  misc-unused-parameters,
+  modernize-concat-nested-namespaces,
+  modernize-pass-by-value,
+  modernize-use-auto,
+  modernize-use-bool-literals,
+  modernize-use-emplace,
+  modernize-use-equals-default,
+  performance-for-range-copy,
+  performance-implicit-conversion-in-loop,
+  performance-inefficient-algorithm,
+  performance-inefficient-vector-operation,
+  performance-move-const-arg,
+  performance-no-automatic-move,
+  performance-noexcept-move-constructor,
+  performance-trivially-destructible,
+  performance-unnecessary-copy-initialization,
+  performance-unnecessary-value-param,
+  readability-const-return-type,
+  readability-convert-member-functions-to-static,
+  readability-duplicate-include,
+  readability-identifier-naming,
+  readability-implicit-bool-conversion,
+  readability-isolate-declaration,
+  readability-make-member-function-const,
+  readability-static-accessed-through-instance,
+CheckOptions:
+  # Classes, structs, ...
+  - { key: readability-identifier-naming.NamespaceCase, value: lower_case }
+  - { key: readability-identifier-naming.ClassCase, value: CamelCase }
+  - { key: readability-identifier-naming.StructCase, value: CamelCase }
+  - { key: readability-identifier-naming.AbstractClassPrefix, value: I }
+
+  # Variables, member variables, ...
+  - { key: readability-identifier-naming.VariableCase, value: lower_case }
+  - { key: readability-identifier-naming.ParameterCase, value: lower_case }
+  - { key: readability-identifier-naming.MemberCase, value: lower_case }
+
+  # Functions, methods, ...
+  - { key: readability-identifier-naming.FunctionCase, value: lower_case }
+  - { key: readability-identifier-naming.MethodCase, value: lower_case }
+
+  # Constants
+  - { key: readability-identifier-naming.ConstexprVariableCase, value: UPPER_CASE }
+  - { key: readability-identifier-naming.GlobalConstantCase, value: UPPER_CASE }
+  - { key: readability-identifier-naming.StaticConstantCase, value: CamelCase }
+  - { key: readability-identifier-naming.StaticVariablePrefix, value: '' }
+  - { key: readability-identifier-naming.StaticVariableCase, value: lower_case }
+  - { key: readability-identifier-naming.ConstantParameterPrefix, value: '' }
+  - { key: readability-identifier-naming.ConstantParameterCase, value: lower_case }
+  - { key: readability-identifier-naming.LocalConstantPrefix, value: '' }
+  - { key: readability-identifier-naming.LocalConstantCase, value: lower_case }
+
+  # Enums
+  - { key: readability-identifier-naming.EnumCase, value: CamelCase }
+  - { key: readability-identifier-naming.ScopedEnumConstantCase, value: UPPER_CASE }
+  - { key: readability-identifier-naming.EnumConstantCase, value: UPPER_CASE }
+
+  # Other options
+  - { key: performance-inefficient-vector-operation.EnableProto, value: 1 }
+FormatStyle: file
+HeaderFilterRegex: src/*
