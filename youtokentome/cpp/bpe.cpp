@@ -1,32 +1,27 @@
-#include <utility>
-
 #include "bpe.h"
 
 #include <algorithm>
 #include <atomic>
 #include <cassert>
 #include <condition_variable>
-#include <fstream>
+#include <cstring>
 #include <functional>
 #include <iostream>
 #include <mutex>
 #include <queue>
+#include <random>
 #include <sstream>
 #include <string>
 #include <thread>
-#include <vector>
-#include <random>
 #include <unordered_set>
-#include <cstring>
+#include <utility>
+#include <vector>
 
 #include "third_party/flat_hash_map.h"
 #include "utf8.h"
 #include "utils.h"
 
 namespace vkcom {
-using std::string;
-using std::vector;
-using std::unordered_set;
 
 struct VectorSegment {
   constexpr static uint64_t MOD = 2032191299;
@@ -67,12 +62,12 @@ struct hash<vkcom::VectorSegment> {
 
 namespace vkcom {
 
-Status fast_read_file_utf8(const string &file_name, string *file_content) {
+Status fast_read_file_utf8(const std::string &file_name, std::string *file_content) {
   static const int buf_size = 1000000;
   *file_content = "";
   auto fin = fopen(file_name.data(), "rb");
   if (fin == nullptr) {
-    return Status(1, "Failed to open file: " + file_name);
+    return Status{1, "Failed to open file: " + file_name};
   }
   while (true) {
     uint64_t cur_size = file_content->size();
@@ -86,18 +81,15 @@ Status fast_read_file_utf8(const string &file_name, string *file_content) {
   }
 }
 
-string token2word(const vector<uint32_t> &source,
-                  const flat_hash_map<uint32_t, uint32_t> &id2char) {
-  vector<uint32_t> res;
+std::string token2word(const std::vector<uint32_t> &source,
+                       const flat_hash_map<uint32_t, uint32_t> &id2char) {
+  std::vector<uint32_t> res;
+  res.reserve(source.size());
   for (int i : source) {
     assert(id2char.count(i) == 1);
     res.push_back(id2char.at(i));
   }
   return encode_utf8(res);
-}
-
-bool is_space(uint32_t ch) {
-  return (ch < 256 && isspace(ch)) || (ch == SPACE_TOKEN);
 }
 
 uint64_t int2comb(uint32_t a, uint32_t b) {
@@ -133,52 +125,6 @@ struct MergeCandidate {
   }
 };
 
-struct UTF8Iterator {
-  UTF8Iterator(char* begin, char* end): begin(begin), end(end) {}
-
-  UTF8Iterator operator++() {
-	if (!state) {
-	  parse();
-	}
-	begin += utf8_len;
-	state = false;
-	return *this;
-  }
-
-  uint32_t operator*() {
-	if (!state) {
-	  parse();
-	}
-	return code_point;
-  }
-
-  char* get_ptr() {
-    return begin;
-  }
-  uint64_t get_utf8_len() {
-    return utf8_len;
-  }
-
-  bool empty() {
-    assert(begin <= end);
-    return begin == end;
-  }
- private:
-  char *begin, *end;
-  uint32_t code_point = 0;
-  uint64_t utf8_len = 0;
-  bool state = false;
-  void parse() {
-    if (state) {
-      return;
-    }
-    assert(!empty());
-    code_point = chars_to_utf8(begin, end - begin, &utf8_len);
-    state = true;
-  }
-};
-
-
 struct Position {
   uint64_t word_id, pos_id;
 
@@ -195,17 +141,12 @@ int pairsInSeg(int x) {
   return x / 2;
 }
 
-struct PositionsCnt {
-  vector<Position> positions;
-  uint64_t cnt;
-};
 bool rule_intersection(BPE_Rule rule, uint32_t new_left, uint32_t new_right) {
   return rule.y == new_left || rule.x == new_right;
 }
 
 struct SmallObjectQueue {
-
-  vector<vector<MergeCandidate>> queue;
+  std::vector<std::vector<MergeCandidate>> queue;
   bool flag_started{false};
   uint64_t _size{0};
 
@@ -269,10 +210,10 @@ struct SmallObjectQueue {
 };
 
 struct BigObjectQueue {
-  vector<MergeCandidate> big_events;
+  std::vector<MergeCandidate> big_events;
   uint64_t big_event_bound;
 
-  BigObjectQueue(uint64_t big_event_bound) : big_event_bound(big_event_bound) {}
+  explicit BigObjectQueue(uint64_t big_event_bound) : big_event_bound(big_event_bound) {}
 
   void push(const MergeCandidate &event) {
     big_events.push_back(event);
@@ -374,7 +315,7 @@ struct PriorityQueue {
 flat_hash_map<uint32_t, uint32_t> compute_alphabet_helper(
     const flat_hash_map<uint32_t, uint64_t> &char_cnt, uint64_t data_len,
     flat_hash_set<uint32_t> &removed_chars, const BpeConfig &bpe_config) {
-  vector<std::pair<uint64_t, uint32_t>> frequencies;
+  std::vector<std::pair<uint64_t, uint32_t>> frequencies;
 
   for (auto x : char_cnt) {
     frequencies.emplace_back(x.second, x.first);
@@ -412,7 +353,7 @@ flat_hash_map<uint32_t, uint32_t> compute_alphabet_helper(
   return char2id;
 }
 
-void remove_rare_chars(vector<uint32_t> &data,
+void remove_rare_chars(std::vector<uint32_t> &data,
                        const flat_hash_set<uint32_t> &removed_chars) {
   if (removed_chars.empty()) {
     return;
@@ -449,16 +390,15 @@ char* remove_rare_chars(char* begin, char* end, const flat_hash_set<uint32_t> &r
 }
 
 struct WordCount {
-  vector<uint32_t> word;
+  std::vector<uint32_t> word;
   uint64_t cnt;
 };
-
 
 flat_hash_map<VectorSegment, WordCount> compute_word_count(
   char* sbegin, char* send,
   const flat_hash_map<uint32_t, uint32_t> &char2id) {
   flat_hash_map<VectorSegment, WordCount> hash2wordcnt;
-  vector<uint32_t> word;
+  std::vector<uint32_t> word;
   UTF8Iterator utf8_iter(sbegin, send);
 
   for (;!utf8_iter.empty();) {
@@ -502,9 +442,9 @@ struct NodeEncoder {
   }
 };
 
-void build_linked_list(const vector<WordCount> &word_cnt,
-                       vector<vector<NodeEncoder>> &list,
-                       flat_hash_map<uint64_t, vector<Position>> &pair2pos,
+void build_linked_list(const std::vector<WordCount> &word_cnt,
+                       std::vector<std::vector<NodeEncoder>> &list,
+                       flat_hash_map<uint64_t, std::vector<Position>> &pair2pos,
                        flat_hash_map<uint64_t, uint64_t> &pair2cnt) {
   list.resize(word_cnt.size());
   for (uint64_t i = 0; i < word_cnt.size(); i++) {
@@ -546,36 +486,9 @@ void build_linked_list(const vector<WordCount> &word_cnt,
   }
 }
 
-std::chrono::steady_clock::time_point last_time_stamp;
-
-void time_check(const string &message) {
-  auto cur_moment = std::chrono::steady_clock::now();
-  if (!message.empty()) {
-    std::cerr << "## time " << message << " ... "
-              << std::chrono::duration_cast<std::chrono::microseconds>(
-                  cur_moment - last_time_stamp)
-                  .count() *
-                  1.0 / 1e6
-              << std::endl;
-  }
-  last_time_stamp = cur_moment;
-}
-
-double time_check_silent() {
-  auto cur_moment = std::chrono::steady_clock::now();
-  double ret = std::chrono::duration_cast<std::chrono::microseconds>(
-      cur_moment - last_time_stamp)
-      .count() *
-      1.0 / 1e6;
-  last_time_stamp = cur_moment;
-  return ret;
-}
-
-int alive_tokens;
-
 void init_recipe(const flat_hash_map<uint32_t, uint32_t> &char2id,
-                 flat_hash_map<uint32_t, vector<uint32_t>> &recipe,
-                 flat_hash_map<uint32_t, string> &recipe_s) {
+                 flat_hash_map<uint32_t, std::vector<uint32_t>> &recipe,
+                 flat_hash_map<uint32_t, std::string> &recipe_s) {
   for (auto token_id : char2id) {
     uint32_t ch = token_id.first;
     uint32_t id = token_id.second;
@@ -585,17 +498,17 @@ void init_recipe(const flat_hash_map<uint32_t, uint32_t> &char2id,
 }
 
 void worker_doing_merge(
-    uint64_t thread_id, vector<vector<NodeEncoder>> &lists_of_tokens,
-    vector<flat_hash_map<uint64_t, uint64_t>> &pair2cnt_g,
-    flat_hash_map<uint64_t, vector<Position>> &pair2pos,
-    vector<uint64_t> &word_freq, vector<std::mutex> &mt,
-    vector<std::condition_variable> &cv, vector<BPE_Rule> &task_order,
-    vector<std::atomic_bool> &thread_use_hs,
+    uint64_t thread_id, std::vector<std::vector<NodeEncoder>> &lists_of_tokens,
+    std::vector<flat_hash_map<uint64_t, uint64_t>> &pair2cnt_g,
+    flat_hash_map<uint64_t, std::vector<Position>> &pair2pos,
+    std::vector<uint64_t> &word_freq, std::vector<std::mutex> &mt,
+    std::vector<std::condition_variable> &cv, std::vector<BPE_Rule> &task_order,
+    std::vector<std::atomic_bool> &thread_use_hs,
     flat_hash_map<uint32_t, uint32_t> &char2id,
-    vector<vector<flat_hash_map<uint32_t, uint64_t>>> &left_tokens_submit,
-    vector<vector<flat_hash_map<uint32_t, uint64_t>>> &right_tokens_submit,
+    std::vector<std::vector<flat_hash_map<uint32_t, uint64_t>>> &left_tokens_submit,
+    std::vector<std::vector<flat_hash_map<uint32_t, uint64_t>>> &right_tokens_submit,
     std::atomic<uint32_t> &real_n_tokens,
-    vector<std::atomic<uint32_t>> &results_ready, const BpeConfig &bpe_config,
+    std::vector<std::atomic<uint32_t>> &results_ready, const BpeConfig &bpe_config,
     std::mutex &main_loop_mt, std::condition_variable &main_loop_cv) {
   auto &pair2cnt = pair2cnt_g[thread_id];
   flat_hash_set<uint32_t> left_tokens;
@@ -676,7 +589,7 @@ void worker_doing_merge(
   };
 
   auto try_merge = [&](uint64_t word_id, uint64_t pos1, uint64_t pos2) {
-    vector<NodeEncoder> &cur_list = lists_of_tokens[word_id];
+    std::vector<NodeEncoder> &cur_list = lists_of_tokens[word_id];
     if (cur_list[pos1].val == cur_list[pos2].val) {
       int score_before =
           (cur_list[pos1].seg_len / 2) + (cur_list[pos2].seg_len / 2) + 1;
@@ -719,7 +632,7 @@ void worker_doing_merge(
     int not_real_merge = 0;
 
     if (x == y) {
-      const vector<Position> &merge_candidates = pair2pos[int2comb(x, y)];
+      const std::vector<Position> &merge_candidates = pair2pos[int2comb(x, y)];
 
       std::unique_lock<std::mutex> lk(mt[thread_id]);
       for (auto word_pos : merge_candidates) {
@@ -730,7 +643,7 @@ void worker_doing_merge(
         // merge will happen inside p1
 
         int word_id = word_pos.word_id;
-        vector<NodeEncoder> &cur_list = lists_of_tokens[word_id];
+        std::vector<NodeEncoder> &cur_list = lists_of_tokens[word_id];
         int p1 = word_pos.pos_id;
         if (cur_list[p1].val != x || cur_list[p1].seg_len < 2) {
           continue;
@@ -795,7 +708,7 @@ void worker_doing_merge(
         int word_id = word_pos.word_id;
 
         int p1 = word_pos.pos_id;
-        vector<NodeEncoder> &cur_list = lists_of_tokens[word_id];
+        std::vector<NodeEncoder> &cur_list = lists_of_tokens[word_id];
         int p2 = cur_list[p1].next;
         if (cur_list[p1].val != x || p2 == -1 || cur_list[p2].val != y) {
           continue;
@@ -908,7 +821,7 @@ void worker_doing_merge(
 }
 
 void rename_tokens(flat_hash_map<uint32_t, uint32_t> &char2id,
-                   vector<BPE_Rule> &rules, const SpecialTokens &special_tokens,
+                   std::vector<BPE_Rule> &rules, const SpecialTokens &special_tokens,
                    uint32_t n_tokens) {
   flat_hash_map<uint32_t, uint32_t> renaming;
   uint32_t cur = special_tokens.n_special_tokens();
@@ -952,12 +865,12 @@ uint64_t compute_char_count(flat_hash_map<uint32_t, uint64_t>& char_cnt, char* b
   return char_count;
 }
 
-Status learn_bpe_from_string(string &text_utf8, int n_tokens,
-                             const string &output_file,
+Status learn_bpe_from_string(std::string &text_utf8, int n_tokens,
+                             const std::string &output_file,
                              BpeConfig bpe_config, BPEState *bpe_state) {
   assert(bpe_config.n_threads >= 1 || bpe_config.n_threads == -1);
   uint64_t n_threads = bpe_config.n_threads;
-  vector<uint64_t> split_pos;
+  std::vector<uint64_t> split_pos;
   split_pos.push_back(0);
   for (uint64_t i = 1; i <= n_threads; i++) {
     uint64_t candidate = text_utf8.size() * i / n_threads;
@@ -968,52 +881,52 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
     split_pos.push_back(candidate);
   }
 
-  vector<flat_hash_map<uint32_t, uint64_t>> shared_char_cnt(n_threads);
+  std::vector<flat_hash_map<uint32_t, uint64_t>> shared_char_cnt(n_threads);
 
-  vector<std::mutex> mt(n_threads);
-  vector<std::condition_variable> cv(n_threads);
-  vector<char> thread_finished(n_threads, 0);
-  vector<char> main_finished(n_threads, 0);
-  vector<uint64_t> text_len(n_threads);
+  std::vector<std::mutex> mt(n_threads);
+  std::vector<std::condition_variable> cv(n_threads);
+  std::vector<char> thread_finished(n_threads, 0);
+  std::vector<char> main_finished(n_threads, 0);
+  std::vector<uint64_t> text_len(n_threads);
 
   flat_hash_set<uint32_t> removed_chars;
   flat_hash_map<uint32_t, uint32_t> char2id;
 
-  vector<flat_hash_map<VectorSegment, WordCount>> hash2wordcnt(n_threads);
+  std::vector<flat_hash_map<VectorSegment, WordCount>> hash2wordcnt(n_threads);
   int error_flag = 0;
 
-  flat_hash_map<uint32_t, vector<uint32_t>> recipe;
-  flat_hash_map<uint32_t, string> recipe_s;
-  vector<flat_hash_map<uint64_t, uint64_t>> pair2cnt_g(n_threads);
+  flat_hash_map<uint32_t, std::vector<uint32_t>> recipe;
+  flat_hash_map<uint32_t, std::string> recipe_s;
+  std::vector<flat_hash_map<uint64_t, uint64_t>> pair2cnt_g(n_threads);
   PriorityQueue merge_order(1);
-  vector<uint64_t> split_word_cnt;
-  vector<WordCount> word_cnt_global;
+  std::vector<uint64_t> split_word_cnt;
+  std::vector<WordCount> word_cnt_global;
 
   auto comb2int = [](uint64_t a, uint32_t &b, uint32_t &c) {
     b = static_cast<uint32_t>(a >> 32u);
     c = static_cast<uint32_t>(a & UINT32_MAX);
   };
 
-  vector<vector<flat_hash_map<uint32_t, uint64_t>>> left_tokens_submit(
-      2, vector<flat_hash_map<uint32_t, uint64_t>>(n_threads));
-  vector<vector<flat_hash_map<uint32_t, uint64_t>>> right_tokens_submit(
-      2, vector<flat_hash_map<uint32_t, uint64_t>>(n_threads));
-  vector<std::atomic<uint32_t>> results_ready(n_threads);
+  std::vector<std::vector<flat_hash_map<uint32_t, uint64_t>>> left_tokens_submit(
+      2, std::vector<flat_hash_map<uint32_t, uint64_t>>(n_threads));
+  std::vector<std::vector<flat_hash_map<uint32_t, uint64_t>>> right_tokens_submit(
+      2, std::vector<flat_hash_map<uint32_t, uint64_t>>(n_threads));
+  std::vector<std::atomic<uint32_t>> results_ready(n_threads);
   for (uint64_t i = 0; i < n_threads; i++) {
     results_ready[i] = 0;
   }
 
-  vector<char> thread_stopped(n_threads);
-  vector<char> thread_ready_to_run(n_threads);
-  vector<std::atomic_bool> thread_use_hs(n_threads);
-  vector<BPE_Rule> task_order(2);
+  std::vector<char> thread_stopped(n_threads);
+  std::vector<char> thread_ready_to_run(n_threads);
+  std::vector<std::atomic_bool> thread_use_hs(n_threads);
+  std::vector<BPE_Rule> task_order(2);
 
   std::atomic<uint32_t> real_n_tokens(n_tokens);
 
   std::mutex main_loop_mt;
   std::condition_variable main_loop_cv;
 
-  vector<std::thread> threads;
+  std::vector<std::thread> threads;
   for (uint64_t i = 0; i < n_threads; i++) {
     threads.emplace_back(
         [&](uint64_t thread_id) {
@@ -1058,9 +971,9 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
             return;
           }
 
-          flat_hash_map<uint64_t, vector<Position>> pair2pos;
-          vector<vector<NodeEncoder>> lists_of_tokens;
-          vector<uint64_t> word_freq;
+          flat_hash_map<uint64_t, std::vector<Position>> pair2pos;
+          std::vector<std::vector<NodeEncoder>> lists_of_tokens;
+          std::vector<uint64_t> word_freq;
           build_linked_list(
               {word_cnt_global.begin() + split_word_cnt[thread_id],
                word_cnt_global.begin() + split_word_cnt[thread_id + 1]},
@@ -1147,7 +1060,7 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
   uint64_t used_ids =
       char2id.size() + bpe_config.special_tokens.n_special_tokens();
   if (used_ids > (uint64_t) n_tokens) {
-    string error_message = "Incorrect arguments. Vocabulary size too small. Set vocab_size>=";
+    std::string error_message = "Incorrect arguments. Vocabulary size too small. Set vocab_size>=";
     error_message += std::to_string(used_ids) + ".  Current value for vocab_size=" + std::to_string(n_tokens);
     error_flag = 1;
     main_awake_threads();
@@ -1182,12 +1095,12 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
     comb2int(x.first, ka, kb);
     merge_order.push({x.second, ka, kb});
   }
-  vector<BPE_Rule> rules;
+  std::vector<BPE_Rule> rules;
 
   auto get_recipe = [&](uint32_t x, uint32_t y) {
     assert(recipe.count(x));
     assert(recipe.count(y));
-    vector<uint32_t> new_recipe = recipe[x];
+    std::vector<uint32_t> new_recipe = recipe[x];
     new_recipe.insert(new_recipe.end(), recipe[y].begin(), recipe[y].end());
     return new_recipe;
   };
@@ -1207,13 +1120,12 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
   uint64_t last_failed_try = 0;
 
   flat_hash_map<uint32_t, uint64_t> all_res;
-  vector<char> local_check_list(n_threads);
+  std::vector<char> local_check_list(n_threads);
   flat_hash_map<uint32_t, uint64_t> global_ht_update_left;
   flat_hash_map<uint32_t, uint64_t> global_ht_update_right;
 
   int inter_fail = 0;
   int equal_fail = 0;
-  vector<std::pair<int, double>> progress_debug;
   while (used_ids < (uint64_t) n_tokens) {
     uint32_t x, y, z;
     assert(finished_cur <= used_ids && used_ids <= finished_cur + 2);
@@ -1226,7 +1138,7 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
         thread_use_hs[i] = false;
       }
       {
-        vector<std::lock_guard<std::mutex>> lg(mt.begin(), mt.end());
+        std::vector<std::lock_guard<std::mutex>> lg(mt.begin(), mt.end());
 
         uint64_t real_cnt = 0;
         while (true) {
@@ -1247,7 +1159,7 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
           }
           BPE_Rule last_rule = (used_ids - finished_cur == 1)
                                ? rules.back()
-                               : BPE_Rule({0, 0, 0});
+                               : BPE_Rule{0, 0, 0};
 
           auto merge_event = merge_order.top(check_cnt, last_rule);
           if ((used_ids - finished_cur == 1) &&
@@ -1314,7 +1226,7 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
                       << recipe_s[x] + "+" + recipe_s[y] << std::endl;
           }
           used_ids++;
-          rules.emplace_back(x, y, z);
+          rules.push_back({x, y, z});
         }
 
         for (uint64_t i = 0; i < n_threads; i++) {
@@ -1388,51 +1300,8 @@ Status learn_bpe_from_string(string &text_utf8, int n_tokens,
   return Status();
 }
 
-void build_linked_list(
-    const vector<WordCount> &word_cnt, vector<vector<NodeEncoder>> &list,
-    flat_hash_map<uint64_t, PositionsCnt> &pair2poscnt) {
-  list.resize(word_cnt.size());
-  for (uint64_t i = 0; i < word_cnt.size(); i++) {
-    for (uint32_t ch : word_cnt[i].word) {
-      if (!list[i].empty() && list[i].back().val == ch) {
-        list[i].back().seg_len++;
-      } else {
-        int list_size = list[i].size();
-        list[i].emplace_back(ch, list_size - 1, list_size + 1, 1);
-      }
-    }
-
-    list[i].back().next = -1;
-    for (uint64_t j = 0; j < list[i].size(); j++) {
-      if (j + 1 < list[i].size()) {
-        uint64_t comb = int2comb(list[i][j].val, list[i][j + 1].val);
-        auto it = pair2poscnt.find(comb);
-        if (it == pair2poscnt.end()) {
-          pair2poscnt[comb] = {{{i, j}}, word_cnt[i].cnt};
-        } else {
-          it->second.positions.emplace_back(i, j);
-          it->second.cnt += word_cnt[i].cnt;
-        }
-      }
-      assert(list[i][j].seg_len >= 1);
-
-      if (list[i][j].seg_len > 1) {
-        uint64_t comb = int2comb(list[i][j].val, list[i][j].val);
-        auto it = pair2poscnt.find(comb);
-        uint64_t cc = word_cnt[i].cnt * pairsInSeg(list[i][j].seg_len);
-        if (it == pair2poscnt.end()) {
-          pair2poscnt[comb] = {{{i, j}}, cc};
-        } else {
-          it->second.positions.emplace_back(i, j);
-          it->second.cnt += cc;
-        }
-      }
-    }
-  }
-}
-
 flat_hash_map<uint32_t, uint32_t> compute_alphabet(
-    const vector<uint32_t> &data, flat_hash_set<uint32_t> &removed_chars,
+    const std::vector<uint32_t> &data, flat_hash_set<uint32_t> &removed_chars,
     const BpeConfig &bpe_config) {
   flat_hash_map<uint32_t, uint64_t> char_cnt;
   for (auto ch : data) {
@@ -1502,7 +1371,7 @@ Status check_config(BpeConfig &bpe_config, int vocab_size) {
   return Status();
 }
 
-void print_config(const string &input_path, const string &model_path,
+void print_config(const std::string &input_path, const std::string &model_path,
                   int vocab_size, BpeConfig bpe_config) {
   std::cerr << "Training parameters" << std::endl;
   std::cerr << "  input: " << input_path << std::endl;
@@ -1518,7 +1387,7 @@ void print_config(const string &input_path, const string &model_path,
   std::cerr << std::endl;
 }
 
-Status train_bpe(const string &input_path, const string &model_path,
+Status train_bpe(const std::string &input_path, const std::string &model_path,
                  int vocab_size, BpeConfig bpe_config) {
   Status status = check_config(bpe_config, vocab_size);
   if (!status.ok()) {
@@ -1526,7 +1395,7 @@ Status train_bpe(const string &input_path, const string &model_path,
   }
   print_config(input_path, model_path, vocab_size, bpe_config);
   std::cerr << "reading file..." << std::endl;
-  string data;
+  std::string data;
   status = fast_read_file_utf8(input_path, &data);
   if (!status.ok()) {
     return status;
@@ -1565,14 +1434,13 @@ class STLQueue : public BasePriorityQueue<T> {
   }
 };
 
-std::mt19937 rnd;
-
 template<typename T>
 class DropoutQueue : public BasePriorityQueue<T> {
   double skip_prob;
   std::uniform_real_distribution<> dist;
   std::priority_queue<T> q;
-  vector<T> skipped_elements;
+  std::vector<T> skipped_elements;
+  std::mt19937 rnd{};
  public:
   explicit DropoutQueue(double _skip_prob):skip_prob(_skip_prob), dist(std::uniform_real_distribution<>(0, 1))  {}
   void push(T x) override {
@@ -1631,8 +1499,8 @@ DecodeResult BaseEncoder::encode_sentence(const std::string &sentence_utf8,
     }
   };
 
-  vector<int> output_ids;
-  vector<string> output_pieces;
+  std::vector<int> output_ids;
+  std::vector<std::string> output_pieces;
 
   if (encoding_config.bos) {
     if (output_type == ID) {
@@ -1642,8 +1510,8 @@ DecodeResult BaseEncoder::encode_sentence(const std::string &sentence_utf8,
     }
   }
 
-  vector<NodeDecoder> list;
-  flat_hash_map<uint32_t, string> unrecognized_tokens;
+  std::vector<NodeDecoder> list;
+  flat_hash_map<uint32_t, std::string> unrecognized_tokens;
 
   auto text = decode_utf8(sentence_utf8.data(),
                           sentence_utf8.data() + sentence_utf8.size());
@@ -1793,7 +1661,7 @@ BaseEncoder::BaseEncoder(BPEState _bpe_state, int _n_threads)
   }
 }
 
-BaseEncoder::BaseEncoder(const string &model_path, int _n_threads, Status *ret_status)
+BaseEncoder::BaseEncoder(const std::string &model_path, int _n_threads, Status *ret_status)
     : n_threads(_n_threads) {
   Status status = bpe_state.load(model_path);
   if (!status.ok()) {
@@ -1809,8 +1677,8 @@ BaseEncoder::BaseEncoder(const string &model_path, int _n_threads, Status *ret_s
 }
 
 template<typename T>
-vector<T> concat_vectors(const vector<T> &a, const vector<T> &b) {
-  vector<T> c;
+std::vector<T> concat_vectors(const std::vector<T> &a, const std::vector<T> &b) {
+  std::vector<T> c;
   c.reserve(a.size() + b.size());
   c.insert(c.end(), a.begin(), a.end());
   c.insert(c.end(), b.begin(), b.end());
@@ -1868,7 +1736,7 @@ Status BaseEncoder::encode_parallel(
     }
     return Status();
   }
-  vector<std::thread> threads;
+  std::vector<std::thread> threads;
   for (int i = 0; i < n_threads; i++) {
     threads.emplace_back(
         [&](uint64_t this_thread) {
@@ -1890,7 +1758,7 @@ Status BaseEncoder::encode_parallel(
   return Status();
 }
 
-Status BaseEncoder::encode_as_ids(const vector<string> &sentences, vector<vector<int>> *ids,
+Status BaseEncoder::encode_as_ids(const std::vector<std::string> &sentences, std::vector<std::vector<int>> *ids,
                                   bool bos, bool eos,
                                   bool reverse, double dropout_prob) const {
   EncodingConfig encoding_config = {bos, eos, reverse, dropout_prob};
@@ -1900,7 +1768,7 @@ Status BaseEncoder::encode_as_ids(const vector<string> &sentences, vector<vector
   if (!status.ok()) {
     return status;
   }
-  ids->assign(decode_results.size(), vector<int>());
+  ids->assign(decode_results.size(), std::vector<int>());
   for (uint64_t i = 0; i < decode_results.size(); i++) {
     ids->at(i) = move(decode_results[i].ids);
   }
@@ -1908,24 +1776,23 @@ Status BaseEncoder::encode_as_ids(const vector<string> &sentences, vector<vector
 }
 
 Status BaseEncoder::encode_as_subwords(
-    const vector<string> &sentences,
-    vector<vector<string>> *subwords,
+    const std::vector<std::string> &sentences,
+    std::vector<std::vector<std::string>> *subwords,
     bool bos, bool eos, bool reverse, double dropout_prob) const {
-  time_check("");
   EncodingConfig encoding_config = {bos, eos, reverse, dropout_prob};
   std::vector<DecodeResult> decode_results;
   Status status = encode_parallel(sentences, encoding_config, SUBWORD, &decode_results);
   if (!status.ok()) {
     return status;
   }
-  subwords->assign(decode_results.size(), vector<string>());
+  subwords->assign(decode_results.size(), std::vector<std::string>());
   for (uint64_t i = 0; i < decode_results.size(); i++) {
     subwords->at(i) = move(decode_results[i].pieces);
   }
   return Status();
 }
 
-Status BaseEncoder::id_to_subword(int id, string *subword, bool replace_space) const {
+Status BaseEncoder::id_to_subword(int id, std::string *subword, bool replace_space) const {
   if (id < 0 || vocab_size() <= id) {
     return Status(1, "id must be in the range [0, vocab_size - 1]. Current value: vocab_size = " +
         std::to_string(vocab_size()) +
@@ -1960,7 +1827,7 @@ Status BaseEncoder::id_to_subword(int id, string *subword, bool replace_space) c
   return Status();
 }
 
-int BaseEncoder::subword_to_id(const string &token) const {
+int BaseEncoder::subword_to_id(const std::string &token) const {
   if (UNK_TOKEN == token) {
     return bpe_state.special_tokens.unk_id;
   }
@@ -1973,18 +1840,18 @@ int BaseEncoder::subword_to_id(const string &token) const {
   if (EOS_TOKEN == token) {
     return bpe_state.special_tokens.eos_id;
   }
-  if (reversed_recipe.count(token)) {
-    return reversed_recipe.at(token);
+  auto it = reversed_recipe.find(token);
+  if (it != reversed_recipe.end()) {
+      return it->second;
   }
   return bpe_state.special_tokens.unk_id;
 }
 
-Status BaseEncoder::decode(const vector<vector<int>> &ids,
-                           vector<string> *sentences,
-                           const unordered_set<int> *ignore_ids) const {
-  vector<string> ret;
+Status BaseEncoder::decode(const std::vector<std::vector<int>> &ids,
+                           std::vector<std::string> *sentences,
+                           const std::unordered_set<int> *ignore_ids) const {
   for (const auto &sentence : ids) {
-    string decode_output;
+    std::string decode_output;
     Status status = decode(sentence, &decode_output, ignore_ids);
     if (!status.ok()) {
       return status;
@@ -1994,10 +1861,10 @@ Status BaseEncoder::decode(const vector<vector<int>> &ids,
   return Status();
 }
 
-Status BaseEncoder::decode(const vector<int> &ids, string *sentence, const unordered_set<int> *ignore_ids) const {
+Status BaseEncoder::decode(const std::vector<int> &ids, std::string *sentence, const std::unordered_set<int> *ignore_ids) const {
   bool first_iter = true;
   for (auto id : ids) {
-    string subword;
+    std::string subword;
 
     if (!ignore_ids || ignore_ids->count(id) == 0) {
       Status status = id_to_subword(id, &subword, true);
@@ -2014,18 +1881,18 @@ Status BaseEncoder::decode(const vector<int> &ids, string *sentence, const unord
   return Status();
 }
 
-Status BaseEncoder::decode(const vector<string> &data,
-                           vector<string> *sentences,
+Status BaseEncoder::decode(const std::vector<std::string> &data,
+                           std::vector<std::string> *sentences,
                            const std::unordered_set<int> *ignore_ids) const {
   for (const auto &s : data) {
     std::stringstream stream;
     stream << s;
-    vector<int> ids;
+    std::vector<int> ids;
     int x;
     while (stream >> x) {
       ids.push_back(x);
     }
-    string sentence;
+    std::string sentence;
     Status status = decode(ids, &sentence, ignore_ids);
     if (!status.ok()) {
       return status;
@@ -2035,11 +1902,11 @@ Status BaseEncoder::decode(const vector<string> &data,
   return Status();
 }
 
-vector<string> BaseEncoder::vocabulary() const {
+std::vector<std::string> BaseEncoder::vocabulary() const {
   int n = vocab_size();
-  vector<string> vocab(n);
+  std::vector<std::string> vocab(n);
   for (int i = 0; i < n; i++) {
-    string subword;
+    std::string subword;
     Status status = id_to_subword(i, &subword);
     assert(status.ok());
     vocab[i] = subword;
@@ -2063,7 +1930,7 @@ void BaseEncoder::vocab_cli(bool verbose) const {
   }
 
   for (uint64_t i = 0; i < n_tokens; i++) {
-    string token_z;
+    std::string token_z;
     Status status = id_to_subword(i, &token_z);
     assert(status.ok());
     std::cout << i << "\t" << token_z;
@@ -2071,8 +1938,8 @@ void BaseEncoder::vocab_cli(bool verbose) const {
       if (reversed_rules.count(i)) {
         int used_symbols = 0;
         auto comb = reversed_rules[i];
-        string token_x;
-        string token_y;
+        std::string token_x;
+        std::string token_y;
         status = id_to_subword(comb.first, &token_x);
         assert(status.ok());
         status = id_to_subword(comb.second, &token_y);
@@ -2093,7 +1960,7 @@ void BaseEncoder::vocab_cli(bool verbose) const {
   }
 }
 
-Status BaseEncoder::encode_cli(const string &output_type_str, bool stream,
+Status BaseEncoder::encode_cli(const std::string &output_type_str, bool stream,
                                bool bos, bool eos, bool reverse, double dropout_prob) const {
   std::ios_base::sync_with_stdio(false);
   OutputType output_type;
@@ -2105,9 +1972,9 @@ Status BaseEncoder::encode_cli(const string &output_type_str, bool stream,
   }
   if (stream) {
     if (output_type == SUBWORD) {
-      string sentence;
+      std::string sentence;
       while (getline(std::cin, sentence)) {
-        vector<vector<string>> subwords;
+        std::vector<std::vector<std::string>> subwords;
         Status status = encode_as_subwords({sentence}, &subwords, bos, eos, reverse, dropout_prob);
         if (!status.ok()) {
           return status;
@@ -2116,9 +1983,9 @@ Status BaseEncoder::encode_cli(const string &output_type_str, bool stream,
       }
     } else {
       assert(output_type == ID);
-      string sentence;
+      std::string sentence;
       while (getline(std::cin, sentence)) {
-        vector<vector<int>> ids;
+        std::vector<std::vector<int>> ids;
         Status status = encode_as_ids({sentence}, &ids, bos, eos, reverse, dropout_prob);
         if (!status.ok()) {
           return status;
@@ -2127,7 +1994,6 @@ Status BaseEncoder::encode_cli(const string &output_type_str, bool stream,
       }
     }
   } else {
-    time_check("");
     const uint64_t batch_limit = 10 * 1024 * 1024;
     uint64_t total_progress = 0;
     uint64_t processed;
@@ -2137,7 +2003,7 @@ Status BaseEncoder::encode_cli(const string &output_type_str, bool stream,
       processed = 0;
       auto sentences = read_lines_from_stdin(batch_limit, &processed);
       if (output_type == SUBWORD) {
-        vector<vector<string>> subwords;
+        std::vector<std::vector<std::string>> subwords;
         Status status = encode_as_subwords(sentences, &subwords, bos, eos, reverse, dropout_prob);
         if (!status.ok()) {
           return status;
@@ -2145,7 +2011,7 @@ Status BaseEncoder::encode_cli(const string &output_type_str, bool stream,
         write_to_stdout(subwords, false);
       } else {
         assert(output_type == ID);
-        vector<vector<int>> ids;
+        std::vector<std::vector<int>> ids;
         Status status = encode_as_ids(sentences, &ids, bos, eos, reverse, dropout_prob);
         if (!status.ok()) {
           return status;
@@ -2158,7 +2024,7 @@ Status BaseEncoder::encode_cli(const string &output_type_str, bool stream,
         std::cerr << '\b';
       }
       chars_remove = 0;
-      string message = "bytes processed: ";
+      std::string message = "bytes processed: ";
       chars_remove += message.size();
       chars_remove += std::to_string(total_progress).length();
       std::cerr << message << total_progress;
@@ -2170,9 +2036,9 @@ Status BaseEncoder::encode_cli(const string &output_type_str, bool stream,
 
 Status BaseEncoder::decode_cli(const std::unordered_set<int> *ignore_ids) const {
   std::ios_base::sync_with_stdio(false);
-  string sentence;
+  std::string sentence;
   while (getline(std::cin, sentence)) {
-    vector<string> output;
+    std::vector<std::string> output;
     Status status = decode({sentence}, &output, ignore_ids);
     if (!status.ok()) {
       return status;

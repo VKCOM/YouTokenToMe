@@ -3,13 +3,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "utils.h"
 
 namespace vkcom {
-
-using std::string;
-using std::vector;
-
 
 bool check_byte(char x) { return (static_cast<uint8_t>(x) & 0xc0u) == 0x80u; }
 
@@ -73,7 +68,7 @@ uint32_t chars_to_utf8(const char* begin, uint64_t size, uint64_t* utf8_len) {
   return INVALID_UNICODE;
 }
 
-void utf8_to_chars(uint32_t x, std::back_insert_iterator<string> it) {
+void utf8_to_chars(uint32_t x, std::back_insert_iterator<std::string> it) {
   assert(check_codepoint(x));
 
   if (x <= 0x7f) {
@@ -100,16 +95,16 @@ void utf8_to_chars(uint32_t x, std::back_insert_iterator<string> it) {
   *(it++) = 0x80u | (x & 0x3fu);
 }
 
-string encode_utf8(const vector<uint32_t>& text) {
-  string utf8_text;
+std::string encode_utf8(const std::vector<uint32_t>& text) {
+  std::string utf8_text;
   for (const uint32_t c : text) {
     utf8_to_chars(c, std::back_inserter(utf8_text));
   }
   return utf8_text;
 }
 
-vector<uint32_t> decode_utf8(const char* begin, const char* end) {
-  vector<uint32_t> decoded_text;
+std::vector<uint32_t> decode_utf8(const char* begin, const char* end) {
+  std::vector<uint32_t> decoded_text;
   uint64_t utf8_len = 0;
   bool invalid_input = false;
   for (; begin < end; begin += utf8_len) {
@@ -127,7 +122,7 @@ vector<uint32_t> decode_utf8(const char* begin, const char* end) {
   return decoded_text;
 }
 
-vector<uint32_t> decode_utf8(const string& utf8_text) {
+std::vector<uint32_t> decode_utf8(const std::string& utf8_text) {
   return decode_utf8(utf8_text.data(), utf8_text.data() + utf8_text.size());
 }
 

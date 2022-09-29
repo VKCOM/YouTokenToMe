@@ -19,8 +19,6 @@ enum OutputType { ID, SUBWORD };
 Status train_bpe(const std::string &input_path, const std::string &model_path,
                  int vocab_size, BpeConfig config);
 
-void print_vocab(const std::string &model_path, bool verbose);
-
 class BaseEncoder {
  public:
   BPEState bpe_state;
@@ -33,8 +31,6 @@ class BaseEncoder {
   explicit BaseEncoder(BPEState bpe_state, int _n_threads);
 
   explicit BaseEncoder(const std::string &model_path, int n_threads, Status *ret_status);
-
-  void fill_from_state();
 
   Status encode_as_ids(
       const std::vector<std::string> &sentences, std::vector<std::vector<int>> *ids, bool bos = false,
@@ -72,6 +68,8 @@ class BaseEncoder {
   void vocab_cli(bool verbose) const;
 
  private:
+  void fill_from_state();
+
   DecodeResult encode_sentence(const std::string &sentence_utf8,
                                const EncodingConfig &encoding_config,
                                OutputType output_type) const;
