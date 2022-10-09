@@ -13,8 +13,6 @@ struct BPE_Rule {
   uint32_t x;
   uint32_t y;
   uint32_t z;
-
-  bool operator==(const BPE_Rule &other) const;
 };
 
 struct SpecialTokens {
@@ -66,6 +64,35 @@ struct BPEState {
   void dump(const std::string &file_name);
 
   Status load(const std::string &file_name);
+};
+
+struct MergeCandidate {
+  uint64_t count{0};
+  uint32_t left_token{0};
+  uint32_t right_token{0};
+
+  MergeCandidate() = default;
+
+  MergeCandidate(uint64_t count, uint32_t left_token, uint32_t right_token)
+   : count(count), left_token(left_token), right_token(right_token) {}
+
+  bool operator<(const MergeCandidate &other) const {
+    if (count != other.count) {
+      return count < other.count;
+    }
+    uint32_t this_min = std::min(left_token, right_token);
+    uint32_t this_max = std::max(left_token, right_token);
+
+    uint32_t other_min = std::min(other.left_token, other.right_token);
+    uint32_t other_max = std::max(other.left_token, other.right_token);
+    if (this_max != other_max) {
+      return this_max > other_max;
+    }
+    if (this_min != other_min) {
+      return this_min > other_min;
+    }
+    return left_token < other.left_token;
+  }
 };
 
 struct DecodeResult {

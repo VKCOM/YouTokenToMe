@@ -38,10 +38,6 @@ uint64_t SpecialTokens::n_special_tokens() const {
 SpecialTokens::SpecialTokens(int pad_id, int unk_id, int bos_id, int eos_id)
  : pad_id(pad_id), unk_id(unk_id), bos_id(bos_id), eos_id(eos_id) {}
 
-bool BPE_Rule::operator==(const BPE_Rule &other) const {
-  return x == other.x && y == other.y && z == other.z;
-}
-
 void BPEState::dump(const std::string &file_name) {
   std::ofstream fout(file_name, std::ios::out);
   if (fout.fail()) {
@@ -85,10 +81,10 @@ Status BPEState::load(const std::string &file_name) {
   return Status();
 }
 
-BpeConfig::BpeConfig(double _character_coverage,
-                     int _n_threads,
-                     const SpecialTokens &_special_tokens)
- : character_coverage(_character_coverage), n_threads(_n_threads), special_tokens(_special_tokens) {
+BpeConfig::BpeConfig(double character_coverage,
+                     int n_threads,
+                     const SpecialTokens &special_tokens)
+ : character_coverage(character_coverage), n_threads(n_threads), special_tokens(special_tokens) {
 }
 
 bool is_space(uint32_t ch) { return (ch < 256 && isspace(ch)) || (ch == SPACE_TOKEN); }

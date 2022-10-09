@@ -41,6 +41,7 @@ Checks: |-
   performance-trivially-destructible,
   performance-unnecessary-copy-initialization,
   performance-unnecessary-value-param,
+  readability-braces-around-statements,
   readability-const-return-type,
   readability-convert-member-functions-to-static,
   readability-duplicate-include,
@@ -49,12 +50,13 @@ Checks: |-
   readability-isolate-declaration,
   readability-make-member-function-const,
   readability-static-accessed-through-instance,
+  readability-static-definition-in-anonymous-namespace,
+  readability-qualified-auto,
 CheckOptions:
   # Classes, structs, ...
   - { key: readability-identifier-naming.NamespaceCase, value: lower_case }
   - { key: readability-identifier-naming.ClassCase, value: CamelCase }
   - { key: readability-identifier-naming.StructCase, value: CamelCase }
-  - { key: readability-identifier-naming.AbstractClassPrefix, value: I }
 
   # Variables, member variables, ...
   - { key: readability-identifier-naming.VariableCase, value: lower_case }
@@ -82,6 +84,7 @@ CheckOptions:
   - { key: readability-identifier-naming.EnumConstantCase, value: UPPER_CASE }
 
   # Other options
-  - { key: performance-inefficient-vector-operation.EnableProto, value: 1 }
+  - { key: performance-for-range-copy.WarnOnAllAutoCopies, value: true }
+  - { key: readability-qualified-auto.AddConstToQualified, value: true }
 FormatStyle: file
 HeaderFilterRegex: src/*

@@ -1,10 +1,9 @@
 #pragma once
 
-#include "third_party/flat_hash_map.h"
-#include <map>
 #include <string>
 #include <unordered_set>
 
+#include "third_party/flat_hash_map.h"
 #include "utils.h"
 
 namespace vkcom {
@@ -30,7 +29,7 @@ class BaseEncoder {
   flat_hash_map<uint64_t, int> rule2id;
   int n_threads;
 
-  explicit BaseEncoder(BPEState bpe_state, int _n_threads);
+  explicit BaseEncoder(BPEState bpe_state, int n_threads);
 
   explicit BaseEncoder(const std::string &model_path, int n_threads, Status *ret_status);
 

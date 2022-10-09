@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <iterator>
 #include <string>
 #include <vector>
 
@@ -9,6 +10,8 @@ namespace vkcom {
 constexpr static uint32_t INVALID_UNICODE = 0x0fffffff;
 
 uint32_t chars_to_utf8(const char *begin, uint64_t size, uint64_t *utf8_len);
+
+void utf8_to_chars(uint32_t x, std::back_insert_iterator<std::string> it);
 
 std::string encode_utf8(const std::vector<uint32_t> &utext);
 
@@ -37,7 +40,7 @@ struct UTF8Iterator {
 
   char *get_ptr() { return begin; }
 
-  uint64_t get_utf8_len() { return utf8_len; }
+  uint64_t get_utf8_len() const { return utf8_len; }
 
   bool empty() {
     assert(begin <= end);
