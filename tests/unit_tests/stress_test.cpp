@@ -63,7 +63,7 @@ void remove_rare_chars(std::vector<uint32_t> &data, const flat_hash_set<uint32_t
   data.erase(it_first_rare_char, data.end());
 }
 
-BPEState learn_bpe_slow(const string &text_utf8, int n_token, BpeConfig bpe_config) {
+BpeState learn_bpe_slow(const string &text_utf8, int n_token, BpeConfig bpe_config) {
   auto row_data = decode_utf8(text_utf8.data(), text_utf8.data() + text_utf8.size());
   vector<vector<uint32_t>> splited_text;
   for (auto &ch : row_data) {
@@ -146,7 +146,7 @@ BPEState learn_bpe_slow(const string &text_utf8, int n_token, BpeConfig bpe_conf
     }
   };
 
-  vector<BPE_Rule> rules;
+  vector<MergeRule> rules;
 
   for (; used_ids < n_token;) {
     map<pair<int, int>, int> local_cnt;
@@ -190,7 +190,7 @@ BPEState learn_bpe_slow(const string &text_utf8, int n_token, BpeConfig bpe_conf
     }
   }
 
-  BPEState state = {char2id, rules, bpe_config.special_tokens};
+  BpeState state = {char2id, rules, bpe_config.special_tokens};
   return state;
 }
 
@@ -323,7 +323,7 @@ void manual_test() {
   SpecialTokens special_tokens_config = {0, 1, 2, 3};
   BpeConfig bpe_config = {1.0, 1, special_tokens_config};
 
-  BPEState model_fast;
+  BpeState model_fast;
   status = learn_bpe_from_string(trn_data_copy, n_tokens, "remove_it.txt", bpe_config, &model_fast);
   assert(status.ok());
   auto model_slow = learn_bpe_slow(trn_data, n_tokens, bpe_config);
@@ -372,7 +372,7 @@ void parallel_test(int n_iter, int n_threads) {
 
     auto train_data_copy = train_data;
     BpeConfig bpe_config = {character_coverage, n_threads, {0, 1, 2, 3}};
-    BPEState learned_model;
+    BpeState learned_model;
     status = learn_bpe_from_string(train_data_copy,
                                    vocab_size,
                                    "remove_it.txt",
@@ -420,7 +420,7 @@ void base_stress(int n_iter) {
     }
     auto train_data_copy = train_data;
     BpeConfig bpe_config = {character_coverage, n_threads, {0, 1, 2, 3}};
-    BPEState fast_solution_model;
+    BpeState fast_solution_model;
     status = learn_bpe_from_string(train_data_copy,
                                    vocab_size,
                                    "remove_it.txt",

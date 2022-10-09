@@ -15,21 +15,41 @@ const std::string EOS_TOKEN = "<EOS>";
 
 enum OutputType { ID, SUBWORD };
 
+struct BpeConfig {
+  double character_coverage = 1;
+  int n_threads = 0;
+  SpecialTokens special_tokens;
+
+  BpeConfig() = default;
+
+  BpeConfig(double character_coverage, int n_threads, const SpecialTokens &special_tokens);
+};
+
 Status train_bpe(const std::string &input_path,
                  const std::string &model_path,
                  int vocab_size,
                  BpeConfig config);
 
+struct BpeState {
+  flat_hash_map<uint32_t, uint32_t> char2id;
+  std::vector<MergeRule> rules;
+  SpecialTokens special_tokens;
+
+  void dump(const std::string &file_name);
+
+  Status load(const std::string &file_name);
+};
+
 class BaseEncoder {
  public:
-  BPEState bpe_state;
+  BpeState bpe_state;
   flat_hash_map<uint32_t, uint32_t> id2char;
   flat_hash_map<uint32_t, std::vector<uint32_t>> recipe;
   flat_hash_map<std::string, uint32_t> reversed_recipe;
   flat_hash_map<uint64_t, int> rule2id;
   int n_threads;
 
-  explicit BaseEncoder(BPEState bpe_state, int n_threads);
+  explicit BaseEncoder(BpeState bpe_state, int n_threads);
 
   explicit BaseEncoder(const std::string &model_path, int n_threads, Status *ret_status);
 

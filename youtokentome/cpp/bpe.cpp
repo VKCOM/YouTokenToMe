@@ -6,6 +6,7 @@
 #include <condition_variable>
 #include <cstring>
 #include <functional>
+#include <fstream>
 #include <iostream>
 #include <mutex>
 #include <queue>
@@ -62,6 +63,55 @@ struct hash<vkcom::VectorSegment> {
 
 namespace vkcom {
 
+void BpeState::dump(const std::string &file_name) {
+  std::ofstream fout(file_name, std::ios::out);
+  if (fout.fail()) {
+    std::cerr << "Can't open file: " << file_name << std::endl;
+    assert(false);
+  }
+  fout << char2id.size() << " " << rules.size() << std::endl;
+  for (auto s : char2id) {
+    fout << s.first << " " << s.second << std::endl;
+  }
+
+  for (auto rule : rules) {
+    fout << rule.x << " " << rule.y << " " << rule.z << std::endl;
+  }
+  special_tokens.dump(fout);
+  fout.close();
+}
+
+Status BpeState::load(const std::string &file_name) {
+  char2id.clear();
+  rules.clear();
+  std::ifstream fin(file_name, std::ios::in);
+  if (fin.fail()) {
+    return Status(1, "Can not open file with model: " + file_name);
+  }
+  int n, m;
+  fin >> n >> m;
+  for (int i = 0; i < n; i++) {
+    uint32_t inner_id;
+    uint32_t utf32_id;
+    fin >> inner_id >> utf32_id;
+    char2id[inner_id] = utf32_id;
+  }
+  for (int i = 0; i < m; i++) {
+    uint32_t x, y, z;
+    fin >> x >> y >> z;
+    rules.push_back({x, y, z});
+  }
+  special_tokens.load(fin);
+  fin.close();
+  return Status();
+}
+
+BpeConfig::BpeConfig(double character_coverage,
+                     int n_threads,
+                     const SpecialTokens &special_tokens)
+ : character_coverage(character_coverage), n_threads(n_threads), special_tokens(special_tokens) {
+}
+
 Status fast_read_file_utf8(const std::string &file_name, std::string *file_content) {
   static const int buf_size = 1000000;
   *file_content = "";
@@ -108,7 +158,7 @@ int pairs_in_seg(int x) {
   return x / 2;
 }
 
-bool rule_intersection(BPE_Rule rule, uint32_t new_left, uint32_t new_right) {
+bool rule_intersection(MergeRule rule, uint32_t new_left, uint32_t new_right) {
   return rule.y == new_left || rule.x == new_right;
 }
 
@@ -187,7 +237,7 @@ struct BigObjectQueue {
   bool top(std::function<uint64_t(uint64_t)> &check_cnt,
            MergeCandidate &ret,
            SmallObjectQueue *small_object_queue,
-           BPE_Rule last_rule) {
+           MergeRule last_rule) {
     for (uint64_t i = 0; i < big_events.size();) {
       if (!rule_intersection(last_rule, big_events[i].left_token, big_events[i].right_token)) {
         uint64_t comb = int2comb(big_events[i].left_token, big_events[i].right_token);
@@ -250,7 +300,7 @@ struct PriorityQueue {
 
   bool empty() { return big_queue.empty() && small_queue.empty(); }
 
-  MergeCandidate top(std::function<uint64_t(uint64_t)> &check_cnt, BPE_Rule last_rule) {
+  MergeCandidate top(std::function<uint64_t(uint64_t)> &check_cnt, MergeRule last_rule) {
     MergeCandidate res;
     bool has_top = big_queue.top(check_cnt, res, &small_queue, last_rule);
     if (has_top) {
@@ -445,7 +495,7 @@ void worker_doing_merge(
         std::vector<uint64_t> &word_freq,
         std::vector<std::mutex> &mt,
         std::vector<std::condition_variable> &cv,
-        std::vector<BPE_Rule> &task_order,
+        std::vector<MergeRule> &task_order,
         std::vector<std::atomic_bool> &thread_use_hs,
         flat_hash_map<uint32_t, uint32_t> &char2id,
         std::vector<std::vector<flat_hash_map<uint32_t, uint64_t>>> &left_tokens_submit,
@@ -758,7 +808,7 @@ void worker_doing_merge(
 }
 
 void rename_tokens(flat_hash_map<uint32_t, uint32_t> &char2id,
-                   std::vector<BPE_Rule> &rules,
+                   std::vector<MergeRule> &rules,
                    const SpecialTokens &special_tokens,
                    uint32_t n_tokens) {
   flat_hash_map<uint32_t, uint32_t> renaming;
@@ -773,7 +823,7 @@ void rename_tokens(flat_hash_map<uint32_t, uint32_t> &char2id,
     node.second = renaming[node.second];
   }
 
-  for (BPE_Rule &rule : rules) {
+  for (MergeRule &rule : rules) {
     assert(renaming.count(rule.x));
     assert(renaming.count(rule.y));
     assert(renaming.count(rule.z));
@@ -806,7 +856,7 @@ Status learn_bpe_from_string(std::string &text_utf8,
                              int n_tokens,
                              const std::string &output_file,
                              BpeConfig bpe_config,
-                             BPEState *bpe_state) {
+                             BpeState *bpe_state) {
   assert(bpe_config.n_threads >= 1 || bpe_config.n_threads == -1);
   uint64_t n_threads = bpe_config.n_threads;
   std::vector<uint64_t> split_pos;
@@ -859,7 +909,7 @@ Status learn_bpe_from_string(std::string &text_utf8,
   std::vector<char> thread_stopped(n_threads);
   std::vector<char> thread_ready_to_run(n_threads);
   std::vector<std::atomic_bool> thread_use_hs(n_threads);
-  std::vector<BPE_Rule> task_order(2);
+  std::vector<MergeRule> task_order(2);
 
   std::atomic<uint32_t> real_n_tokens(n_tokens);
 
@@ -1049,7 +1099,7 @@ Status learn_bpe_from_string(std::string &text_utf8,
     comb2int(x.first, ka, kb);
     merge_order.push({x.second, ka, kb});
   }
-  std::vector<BPE_Rule> rules;
+  std::vector<MergeRule> rules;
 
   auto get_recipe = [&](uint32_t x, uint32_t y) {
     assert(recipe.count(x));
@@ -1110,7 +1160,7 @@ Status learn_bpe_from_string(std::string &text_utf8,
               break;
             }
           }
-          BPE_Rule last_rule = (used_ids - finished_cur == 1) ? rules.back() : BPE_Rule{0, 0, 0};
+          MergeRule last_rule = (used_ids - finished_cur == 1) ? rules.back() : MergeRule{0, 0, 0};
 
           MergeCandidate merge_event = merge_order.top(check_cnt, last_rule);
           if ((used_ids - finished_cur == 1)
@@ -1342,7 +1392,7 @@ Status train_bpe(const std::string &input_path,
     return status;
   }
   std::cerr << "learning bpe..." << std::endl;
-  BPEState bpe_state;
+  BpeState bpe_state;
   status = learn_bpe_from_string(data, vocab_size, model_path, bpe_config, &bpe_state);
   if (!status.ok()) {
     return status;
@@ -1582,7 +1632,7 @@ DecodeResult BaseEncoder::encode_sentence(const std::string &sentence_utf8,
   return {output_ids, output_pieces};
 }
 
-BaseEncoder::BaseEncoder(BPEState bpe_state, int n_threads)
+BaseEncoder::BaseEncoder(BpeState bpe_state, int n_threads)
  : bpe_state(std::move(bpe_state)), n_threads(n_threads) {
   fill_from_state();
   assert(n_threads >= 1 || n_threads == -1);
@@ -1628,7 +1678,7 @@ void BaseEncoder::fill_from_state() {
     recipe[x.first] = {x.first};
   }
 
-  for (BPE_Rule rule : bpe_state.rules) {
+  for (MergeRule rule : bpe_state.rules) {
     recipe[rule.z] = concat_vectors(recipe[rule.x], recipe[rule.y]);
   }
 
@@ -1858,7 +1908,7 @@ void BaseEncoder::vocab_cli(bool verbose) const {
 
   flat_hash_map<uint32_t, std::pair<uint32_t, uint32_t>> reversed_rules;
   if (verbose) {
-    for (BPE_Rule rule : bpe_state.rules) {
+    for (MergeRule rule : bpe_state.rules) {
       reversed_rules[rule.z] = {rule.x, rule.y};
     }
   }

@@ -18,7 +18,7 @@ def compile_test():
         "g++",
         *files,
         "-o",
-        "test",
+        "stress",
         "-std=c++11",
         "-pthread",
         "-Og",
@@ -35,16 +35,16 @@ def compile_test():
 
 def test_stress():
     compile_test()
-    run(["./test", "base", "1000"], check=True)
+    run(["./stress", "base", "1000"], check=True)
 
 
 def test_manual():
     compile_test()
-    run(["./test", "manual"], check=True)
+    run(["./stress", "manual"], check=True)
     os.remove("remove_it.txt")
 
 
 def test_parallel():
     compile_test()
-    run(["./test", "parallel", "50"], check=True)
+    run(["./stress", "parallel", "50"], check=True)
     os.remove("remove_it.txt")

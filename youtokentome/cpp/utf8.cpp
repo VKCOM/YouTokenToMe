@@ -23,8 +23,9 @@ uint64_t utf_length(char ch) {
   if ((static_cast<uint8_t>(ch) & 0xf8u) == 0xf0) {
     return 4;
   }
-  // Invalid utf-8
-  return 0;
+
+  std::cerr << "WARNING Input contains invalid unicode character." << std::endl;
+  return 0; // Invalid utf-8
 }
 
 uint32_t chars_to_utf8(const char *begin, uint64_t size, uint64_t *utf8_len) {

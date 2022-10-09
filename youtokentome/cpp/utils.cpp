@@ -1,7 +1,5 @@
 #include "utils.h"
-#include <cassert>
 #include <fstream>
-#include <iostream>
 #include <string>
 #include <vector>
 
@@ -38,53 +36,8 @@ uint64_t SpecialTokens::n_special_tokens() const {
 SpecialTokens::SpecialTokens(int pad_id, int unk_id, int bos_id, int eos_id)
  : pad_id(pad_id), unk_id(unk_id), bos_id(bos_id), eos_id(eos_id) {}
 
-void BPEState::dump(const std::string &file_name) {
-  std::ofstream fout(file_name, std::ios::out);
-  if (fout.fail()) {
-    std::cerr << "Can't open file: " << file_name << std::endl;
-    assert(false);
-  }
-  fout << char2id.size() << " " << rules.size() << std::endl;
-  for (auto s : char2id) {
-    fout << s.first << " " << s.second << std::endl;
-  }
-
-  for (auto rule : rules) {
-    fout << rule.x << " " << rule.y << " " << rule.z << std::endl;
-  }
-  special_tokens.dump(fout);
-  fout.close();
-}
-
-Status BPEState::load(const std::string &file_name) {
-  char2id.clear();
-  rules.clear();
-  std::ifstream fin(file_name, std::ios::in);
-  if (fin.fail()) {
-    return Status(1, "Can not open file with model: " + file_name);
-  }
-  int n, m;
-  fin >> n >> m;
-  for (int i = 0; i < n; i++) {
-    uint32_t inner_id;
-    uint32_t utf32_id;
-    fin >> inner_id >> utf32_id;
-    char2id[inner_id] = utf32_id;
-  }
-  for (int i = 0; i < m; i++) {
-    uint32_t x, y, z;
-    fin >> x >> y >> z;
-    rules.push_back({x, y, z});
-  }
-  special_tokens.load(fin);
-  fin.close();
-  return Status();
-}
-
-BpeConfig::BpeConfig(double character_coverage,
-                     int n_threads,
-                     const SpecialTokens &special_tokens)
- : character_coverage(character_coverage), n_threads(n_threads), special_tokens(special_tokens) {
+bool MergeRule::operator==(const MergeRule &other) const {
+  return x == other.x && y == other.y && z == other.z;
 }
 
 bool is_space(uint32_t ch) { return (ch < 256 && isspace(ch)) || (ch == SPACE_TOKEN); }
@@ -103,4 +56,5 @@ Status::Status(int code, std::string message) : code(code), message(std::move(me
 
 const std::string &Status::error_message() const { return message; }
 bool Status::ok() const { return code == 0; }
+
 } // namespace vkcom

@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "../../youtokentome/cpp/third_party/flat_hash_map.h"
-#include "../../youtokentome/cpp/utils.h"
+#include "../../youtokentome/cpp/bpe.h"
 
 namespace vkcom {
 
@@ -18,6 +18,6 @@ Status learn_bpe_from_string(std::string &text_utf8,
                              int n_tokens,
                              const std::string &output_file,
                              BpeConfig bpe_config,
-                             BPEState *bpe_state);
+                             BpeState *bpe_state);
 
 } // namespace vkcom

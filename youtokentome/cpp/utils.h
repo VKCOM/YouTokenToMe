@@ -6,14 +6,8 @@
 #include <vector>
 
 namespace vkcom {
-const uint32_t SPACE_TOKEN = 9601;
 
-struct BPE_Rule {
-  // x + y -> z
-  uint32_t x;
-  uint32_t y;
-  uint32_t z;
-};
+const uint32_t SPACE_TOKEN = 9601;
 
 struct SpecialTokens {
   int pad_id = -1;
@@ -36,16 +30,6 @@ struct SpecialTokens {
   uint64_t n_special_tokens() const;
 };
 
-struct BpeConfig {
-  double character_coverage = 1;
-  int n_threads = 0;
-  SpecialTokens special_tokens;
-
-  BpeConfig() = default;
-
-  BpeConfig(double character_coverage, int n_threads, const SpecialTokens &special_tokens);
-};
-
 struct Status {
   int code{0};
   std::string message;
@@ -56,14 +40,13 @@ struct Status {
   bool ok() const;
 };
 
-struct BPEState {
-  flat_hash_map<uint32_t, uint32_t> char2id;
-  std::vector<BPE_Rule> rules;
-  SpecialTokens special_tokens;
+struct MergeRule {
+  // x + y -> z
+  uint32_t x;
+  uint32_t y;
+  uint32_t z;
 
-  void dump(const std::string &file_name);
-
-  Status load(const std::string &file_name);
+  bool operator==(const MergeRule &other) const;
 };
 
 struct MergeCandidate {
