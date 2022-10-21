@@ -57,6 +57,7 @@ coverage.xml
 *.txt
 *.yttm
 artifacts/
+stress
 
 # Translations
 *.mo
