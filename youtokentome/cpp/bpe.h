@@ -19,8 +19,6 @@ enum OutputType { ID, SUBWORD };
 Status train_bpe(const std::string &input_path, const std::string &model_path,
                  int vocab_size, BpeConfig config);
 
-void print_vocab(const std::string &model_path, bool verbose);
-
 class BaseEncoder {
  public:
   BPEState bpe_state;
@@ -83,4 +81,4 @@ class BaseEncoder {
   ) const;
 };
 
-}  // namespace vkcom
+} // namespace vkcom
