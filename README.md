@@ -8,7 +8,7 @@
 
 YouTokenToMe is an unsupervised text tokenizer focused on computational efficiency. It currently implements fast Byte Pair Encoding (BPE) [[Sennrich et al.](https://www.aclweb.org/anthology/P16-1162)].
 Our implementation is much faster in training and tokenization than [Hugging Face](https://github.com/huggingface/tokenizers), [fastBPE](https://github.com/glample/fastBPE)
- and [SentencePiece](https://github.com/google/sentencepiece). In some test cases, it is 90 times faster.
+ and [SentencePiece](https://github.com/google/sentencepiece). In some test cases, it is 60 times faster.
   Check out our [benchmark](benchmark.md) results.
   
 Key advantages:

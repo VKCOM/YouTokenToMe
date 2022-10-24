@@ -29,4 +29,5 @@ WORKDIR /workspace
 COPY ./speed_test.py ./speed_test.py
 RUN cp /repos/fastBPE/fast /workspace/fastBPE
 
+# CMD ["python", "speed_test.py", "--langs", "en", "ru", "zh", "ja", "--corpus_size", "100", "--vocab_size", "30000"]
 CMD ["python", "speed_test.py", "--langs", "ru", "--corpus_size", "10", "--vocab_size", "30000"]
