@@ -11,6 +11,7 @@ def setup_version() -> str:
     return version_prefix + "." + version
 
 
+
 extensions = [
     Extension(
         "_youtokentome_cython",
@@ -40,7 +41,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/vkcom/youtokentome",
     python_requires=">=3.6.0",
-    install_requires=["Click>=7.0"],
+    install_requires=["Cython>=0.29.21", "setuptools>=50.3.2"],
     entry_points={"console_scripts": ["yttm = youtokentome.yttm_cli:main"]},
     author="Ivan Belonogov",
     license="MIT",

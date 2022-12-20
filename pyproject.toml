@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "youtokentome"
+version = "1.0.7"
+description = "FL version of YTTM"
+license = "MIT"
+authors = ["Ivan Belonogov"]
+maintainers = ["Yaroslav Sokolov <yaroslav.sokolov@jetbrains.com>"]
+readme = "README.md"
+repository = "https://github.com/JetBrains-Research/YouTokenToMe"
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Cython",
+    "Programming Language :: C++",
+]
+build = "build.py"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+setuptools = ">=32.0.0"
+click = ">=7.0"
+pytest = ">=4.3.1"
+tabulate = ">=0.8.5"
+cython = ">=0.29.14"
+
+
+[build-system]
+requires = ["poetry-core", "Cython>=0.29.21", "setuptools>=32.0.0"]
+build-backend = "poetry.core.masonry.api"

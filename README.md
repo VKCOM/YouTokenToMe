@@ -5,6 +5,7 @@ You can install this fork with the following command:
 pip uninstall youtokentome
 python setup.py install
 ```
+Or from our private PyPI on Space `https://packages.jetbrains.team/pypi/p/ccrm/full-line/simple`
 
 For the rest of the YouTokenToMe documentation please refer to the original repo: https://github.com/VKCOM/YouTokenToMe
 
