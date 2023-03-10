@@ -1,5 +1,3 @@
-
-
 ## Speed tests
 
 `YouTokenToMe` will be compared with [Hugging Face](https://github.com/huggingface/tokenizers), [SentencePiece](https://github.com/google/sentencepiece/)
@@ -16,83 +14,67 @@ In this benchmark, `YouTokenToMe` used 4 threads for training and tokenization. 
 Source code for benchmark can be found [here](tests/speed_test/speed_test.py).
 The results of the experiments are below. The time is measured in seconds.
 
-
+All experiments were run on the following machine:
+36-core Intel(R) Xeon(R) Platinum 8124M CPU @ 3.00GHz, disabled HyperThreading, 256GB RAM, Ubuntu 22.04.
 
 ### Training 100MB
-
- | |**Russian**|**English**|**Chinese**|**Japanese**
-:-----:|:-----:|:-----:|:-----:|:-----:
-SentencePiece|86.5 (x18.8)|82.1 (x17.4)|963.6 (x68.8)|1026.4 (x91.6)
-fastBPE|41.0 (x8.9)|36.1 (x7.6)|700.9 (x50.0)|485.1 (x43.3)
-Hugging Face|73.7 (x16.0)|60.9 (x12.9)|574.5 (x43.0)|466.2 (x41.6)
-YouTokenToMe|**4.6** (x1)|**4.7** (x1)|**14.0** (x1)|**11.2** (x1)
-
-
+|                  |    English     |    Russian     |     Chinese     |    Japanese     |
+|------------------|:--------------:|:--------------:|:---------------:|:---------------:|
+| YouTokenToMe     |    4.2 (x1)    |    4.5 (x1)    |    11.5 (x1)    |    11.1 (x1)    |
+| Hugging_Face_BPE |  10.3 (x2.4)   |  13.1 (x2.9)   |   47.3 (x4.1)   |   61.6 (x5.5)   |
+| SentencePiece    |  76.2 (x17.9)  |  85.3 (x19.1)  |  657.4 (x57.2)  |  587.9 (x52.9)  |
+| fastBPE          |  32.6 (x7.7)   |  35.0 (x7.9)   |   482.6 (x42)   |  384.2 (x34.5)  |
 
 ### Tokenization 100MB
- | |**Russian**|**English**|**Chinese**|**Japanese**
-:-----:|:-----:|:-----:|:-----:|:-----:
-SentencePiece|31.1 (x9.7)|51.5 (x10.3)|22.9 (x6.9)|23.2 (x8.0)
-fastBPE|10.1 (x3.1)|10.3 (x2.0)|56.3 (x17.0)|55.3 (x19.0)
-Hugging Face|11.4 (x3.5)|  11.1 (x2.2)| 12.2 (x3.7)|11.0(x3.8)
-YouTokenToMe|**3.2** (x1)|**5.0** (x1)|**3.3** (x1)|**2.9** (x1)
-
+|                  |    English    |    Russian    |    Chinese    |   Japanese    |
+|------------------|:-------------:|:-------------:|:-------------:|:-------------:|
+| YouTokenToMe     |   4.4 (x1)    |   3.1 (x1)    |   2.9 (x1)    |   2.8 (x1)    |
+| Hugging_Face_BPE |  12.0 (x2.7)  |  8.4 (x2.7)   |  10.4 (x3.6)  |  9.4 (x3.4)   |
+| SentencePiece    |  43.4 (x9.8)  |  26.6 (x8.6)  |  19.9 (x6.9)  |  20.1 (x7.2)  |
+| fastBPE          |  9.5 (x2.1)   |  9.4 (x3.1)   |  23.3 (x8.1)  |  24.8 (x8.9)  |
 
 ### Training 1GB
- | |**Russian**|**English**|**Chinese**|**Japanese**
-:-----:|:-----:|:-----:|:-----:|:-----:
-SentencePiece|455.9 (x14.9)|454.5 (x15.5)|3035.7 (x31.7)|5485.7 (x53.0)
-fastBPE|293.3 (x9.6)|253.4 (x8.6)|4388.2 (x45.8)|4554.8 (x44.0)
-Hugging Face|274.8 (x9.0) | 295.1(x10.0) | 2149.0(x22.4) | 1949.9 (x18.8)
-YouTokenToMe|**30.4** (x1)|**29.3** (x1)|**95.7** (x1)|**103.5** (x1)
-
+|                  |     English     |     Russian     |     Chinese      |     Japanese     |
+|------------------|:---------------:|:---------------:|:----------------:|:----------------:|
+| YouTokenToMe     |    25.4 (x1)    |    24.8 (x1)    |    75.4 (x1)     |    106.7 (x1)    |
+| Hugging_Face_BPE |   97.7 (x3.8)   |  103.3 (x4.2)   |   516.4 (x6.8)   |  1981.3 (x18.6)  |
+| SentencePiece    |  344.1 (x13.5)  |  355.8 (x14.3)  |  1446.5 (x19.2)  |  3908.7 (x36.6)  |
+| fastBPE          |  191.4 (x7.5)   |  201.3 (x8.1)   |   3392.0 (x45)   |  3239.5 (x30.4)  |
 
 ### Tokenization 1GB 
-
-  | |**Russian**|**English**|**Chinese**|**Japanese**
-:-----:|:-----:|:-----:|:-----:|:-----:
-SentencePiece|319.2 (x10.0)|543.1 (x10.9)|228.1 (x7.3)|220.5 (x7.1)
-fastBPE|92.5 (x2.9)|116 (x2.3)|444.3 (x14.3)|545.7 (x17.7)
-Hugging Face | 96.2(x3.0) | 117.8(x2.3)| 154.6(x5.0) | 130.7(x4.25)
-YouTokenToMe|**31.7** (x1)|**49.5** (x1)|**30.9** (x1)|**30.7** (x1)
-
+|                  |    English     |    Russian     |    Chinese     |    Japanese    |
+|------------------|:--------------:|:--------------:|:--------------:|:--------------:|
+| YouTokenToMe     |   47.6 (x1)    |   28.1 (x1)    |   34.3 (x1)    |   28.2 (x1)    |
+| Hugging_Face_BPE |  126.9 (x2.7)  |  96.8 (x3.4)   |   139.4 (x4)   |  117.9 (x4.2)  |
+| SentencePiece    |  438.4 (x9.2)  |  264.6 (x9.4)  |  213.5 (x6.2)  |  201.0 (x7.1)  |
+| fastBPE          |  88.0 (x1.8)   |   83.2 (x3)    |   240.1 (x7)   |  257.3 (x9.1)  |
 
 `YouTokenToMe` performed really well in this benchmark. This is especially noticeable for languages with large alphabets.
-
 
 ## Number of threads
 
 The table below shows the dependence of performance on the number of threads for `YouTokenToMe`.
 
 ### Training 1GB
- | YouTokenToMe |**Russian**|**English**|**Chinese**|**Japanese**
-:-----:|:-----:|:-----:|:-----:|:-----:
-1 thread |60.5|71.2|236.9|233.0
-2 threads|38.0|41.5|137.7|141.7
-4 threads|30.4|29.3|95.7|103.5
-8 threads|**23.4**|**25.2**|**74.1**|**77.5**
-16 threads|25.4|23.5|84.2|85.5
+|            | English | Russian | Chinese | Japanese |
+|------------|:-------:|:-------:|:-------:|:--------:|
+| 1 thread   |  62.1   |  58.1   |  140.3  |  187.5   |
+| 2 threads  |  36.6   |  35.2   |  83.7   |  110.2   |
+| 4 threads  |  25.2   |  25.9   |  58.5   |   75.3   |
+| 8 threads  |  20.6   |  20.5   |  48.5   |   57.7   |
+| 16 threads |  19.8   |  21.8   |  46.9   |   62.8   |
 
 ### Tokenization 1GB
-
- | YouTokenToMe |**Russian**|**English**|**Chinese**|**Japanese**
-:-----:|:-----:|:-----:|:-----:|:-----:
-1 thread|86.7|135.3|62.4|65.9
-2 threads|51.5|81.9|43.8|42.6
-4 threads|33.2|52.6|32.4|32.5
-8 threads|25.4|38.9|28.9|25.8
-16 threads|20.1|32.4|24.9|20.6
+|            | English | Russian | Chinese | Japanese |
+|------------|:-------:|:-------:|:-------:|:--------:|
+| 1 thread   |  116.1  |  74.4   |  49.3   |   57.0   |
+| 2 threads  |  68.7   |  46.2   |  38.2   |   39.0   |
+| 4 threads  |  43.5   |  32.1   |  32.1   |   30.7   |
+| 8 threads  |  30.1   |  23.5   |  33.0   |   21.2   |
+| 16 threads |  30.6   |  19.0   |  27.2   |   22.5   |
 
 
 Training performance stops increasing significantly after 8 threads. 
 So the number of threads for training is always `min(8, n_threads)`. 
 In almost any situation, `n_threads=-1` is a good value to use. 
 In this case, the number of threads will be determined automatically.
-
-
-All experiments were run on the following machine:
-24-core Intel(R) Xeon(R) CPU E5-2620 v3 @ 2.40GHz, 256GB memory, Debian 8.10
-
-
-
-

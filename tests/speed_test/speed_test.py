@@ -4,7 +4,10 @@ from pathlib import Path
 from time import time
 
 from tabulate import tabulate
-from tokenizers import BPETokenizer as HuggingFaceBPETokenizer
+from tokenizers import pre_tokenizers
+from tokenizers import Tokenizer as HuggingFaceBPETokenizer
+from tokenizers.models import BPE as HuggingFaceBPEModel
+from tokenizers.trainers import BpeTrainer as HuggingFaceBPETrainer
 
 MODEL_FILE_NAME = "bpe.model"
 MODEL_SUFFIX = ".model"
@@ -19,14 +22,15 @@ PATH_TO_FASTBPE = "./fastBPE"
 
 class HuggingfaceInterface:
     def train_from_file(self, train_file, vocab_size, model_file, _):
-        tokenizer = HuggingFaceBPETokenizer()
-        tokenizer.train(str(train_file), vocab_size=vocab_size)
-        tokenizer.save(".", model_file)
+        tokenizer = HuggingFaceBPETokenizer(HuggingFaceBPEModel(unk_token="[UNK]"))
+        trainer = HuggingFaceBPETrainer(special_tokens=["[UNK]", "[PAD]"], vocab_size=vocab_size)
+        tokenizer.pre_tokenizer = pre_tokenizers.Whitespace()
+
+        tokenizer.train([str(train_file)], trainer)
+        tokenizer.save(model_file)
 
     def encode_file(self, model_path, path_in, path_out, _):
-        f1 = str(model_path) + "-vocab.json"
-        f2 = str(model_path) + "-merges.txt"
-        tokenizer = HuggingFaceBPETokenizer(f1, f2)
+        tokenizer = HuggingFaceBPETokenizer.from_file(model_path)
         with open(path_in) as fin:
             full_text = fin.readlines()
         tokenizer.encode_batch(full_text)
@@ -91,10 +95,10 @@ def get_bpe(impl_name):
     assert False
 
 
-def check_train(algorithm, vocab_size, corpus_path, use_multithreading):
+def check_train(algorithm, vocab_size, corpus_path, n_threads):
     bpe = get_bpe(algorithm)
     start_time = time()
-    bpe.train_from_file(corpus_path, vocab_size, MODEL_FILE_NAME, use_multithreading)
+    bpe.train_from_file(corpus_path, vocab_size, MODEL_FILE_NAME, n_threads)
     return time() - start_time
 
 
@@ -168,13 +172,16 @@ def print_results(cfg, result_name, corpuses, algorithms):
         result_table[i][0] = algo_name
 
     for lang, res in cfg.items():
+        best = min(res.values())
         for algo in res:
             j = rev_lang[lang]
             i = rev_algo[algo]
-            result_table[i][j] = res[algo]
+            multiplier_str = f"{res[algo]/best:.1f}".rstrip('0').rstrip('.')
+            result_table[i][j] = f"{res[algo]:.1f} (x{multiplier_str})"
 
     table_header[0] = result_name
-    print(tabulate(result_table, table_header, tablefmt="grid"))
+    column_align = ["left"] + ["center" for _ in corpuses]
+    print(tabulate(result_table, table_header, tablefmt="github", colalign=column_align))
 
 
 def parse_args():
@@ -198,6 +205,7 @@ def parse_args():
 
 def main(args):
     langs = args.langs if isinstance(args.langs, list) else [args.langs]
+    # Hugging Face - limit number of processes
     os.environ["RAYON_RS_NUM_CPUS"] = str(args.n_threads)
 
     short_to_long_names = {
@@ -228,7 +236,7 @@ def main(args):
             os.system(f"wget -O {zip_file} {link}")
         corpuses[lang] = prepare_data(zip_file, args.corpus_size)
 
-    algorithms = [YOU_TOKEN_TO_ME, SENTENCE_PIECE, FAST_BPE, HUGGING_FACE_BPE]
+    algorithms = [YOU_TOKEN_TO_ME, HUGGING_FACE_BPE, SENTENCE_PIECE, FAST_BPE]
 
     global_train = {}
     global_tokenization = {}
@@ -240,8 +248,8 @@ def main(args):
         global_train[lang] = train_stat
         global_tokenization[lang] = tokenization_stat
 
-    print_results(global_train, "Train", corpuses, algorithms)
-    print_results(global_tokenization, "Tokenization", corpuses, algorithms)
+    print_results(global_train, f"Train {args.corpus_size}MB", corpuses, algorithms)
+    print_results(global_tokenization, f"Tokenization {args.corpus_size}MB", corpuses, algorithms)
 
 
 if __name__ == "__main__":
