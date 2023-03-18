@@ -27,6 +27,7 @@ class BaseEncoder {
   flat_hash_map<uint32_t, uint32_t> id2char;
   flat_hash_map<uint32_t, std::vector<uint32_t>> recipe;
   flat_hash_map<std::string, uint32_t> reversed_recipe;
+  flat_hash_map<std::string, uint32_t> custom_token2id;
   flat_hash_map<uint64_t, int> rule2id;
   int n_threads;
 

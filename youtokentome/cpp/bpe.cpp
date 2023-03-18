@@ -1515,6 +1515,12 @@ void print_config(const string &input_path, const string &model_path,
   std::cerr << "  unk: " << bpe_config.special_tokens.unk_id << std::endl;
   std::cerr << "  bos: " << bpe_config.special_tokens.bos_id << std::endl;
   std::cerr << "  eos: " << bpe_config.special_tokens.eos_id << std::endl;
+  if (bpe_config.special_tokens.custom_tokens.size()) {
+    std::cerr << "  custom_tokens: ";
+    for (auto token:bpe_config.special_tokens.custom_tokens)
+      std::cerr << token << " ";
+    std::cerr << std::endl;
+  }
   std::cerr << std::endl;
 }
 
@@ -1665,6 +1671,7 @@ DecodeResult BaseEncoder::encode_sentence(const std::string &sentence_utf8,
 
     uint32_t new_token_cur = new_tokens_start;
     list.emplace_back(bpe_state.char2id.at(SPACE_TOKEN), 0);
+    string utf8_text;
 
     for (auto it_char_in_word = begin_of_word; it_char_in_word < end_of_word;) {
       if (bpe_state.char2id.count(*it_char_in_word) == 0) {
@@ -1674,15 +1681,31 @@ DecodeResult BaseEncoder::encode_sentence(const std::string &sentence_utf8,
 
         unrecognized_tokens[new_token_cur] =
             encode_utf8({it_char_in_word, it_unrecognized_word});
+        if (custom_token2id.size()) 
+          utf8_text.append(unrecognized_tokens[new_token_cur]);
         it_char_in_word = it_unrecognized_word;
 
         list.emplace_back(new_token_cur, list.size());
         new_token_cur++;
       } else {
+        if (custom_token2id.size()) 
+          utf8_to_chars(*it_char_in_word, std::back_inserter(utf8_text));
         list.emplace_back(bpe_state.char2id.at(*it_char_in_word), list.size());
         ++it_char_in_word;
       }
     }
+
+    if (custom_token2id.size() && custom_token2id.count(utf8_text)) {
+      if (output_type == ID) {
+        output_ids.push_back(bpe_state.char2id.at(SPACE_TOKEN));
+        output_ids.push_back(custom_token2id.find(utf8_text) -> second);
+      } else {
+        output_pieces.push_back(encode_utf8({SPACE_TOKEN}));
+        output_pieces.push_back(utf8_text);
+      }
+      continue;
+    }
+    
     list.back().next = -1;
 
 
@@ -1840,6 +1863,11 @@ void BaseEncoder::fill_from_state() {
   }
   reversed_recipe[BOS_TOKEN] = bpe_state.special_tokens.bos_id;
   reversed_recipe[EOS_TOKEN] = bpe_state.special_tokens.eos_id;
+  uint32_t custom_id = bpe_state.special_tokens.max_predefined_id();
+  for (auto token : bpe_state.special_tokens.custom_tokens) {
+    ++custom_id;
+    custom_token2id[token] = custom_id;
+  }
 }
 
 int BaseEncoder::vocab_size() const {
@@ -1945,6 +1973,10 @@ Status BaseEncoder::id_to_subword(int id, string *subword, bool replace_space) c
   }
   if (bpe_state.special_tokens.eos_id == id) {
     *subword = EOS_TOKEN;
+    return Status();
+  }
+  if (id <= bpe_state.special_tokens.max_id() && id > bpe_state.special_tokens.max_predefined_id()) {
+    *subword = bpe_state.special_tokens.custom_tokens[id - bpe_state.special_tokens.max_predefined_id() - 1];
     return Status();
   }
 

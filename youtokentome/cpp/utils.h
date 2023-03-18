@@ -26,6 +26,7 @@ struct SpecialTokens {
   int unk_id = -1;
   int bos_id = -1;
   int eos_id = -1;
+  std::vector<std::string> custom_tokens;
 
   SpecialTokens() = default;
 
@@ -40,6 +41,7 @@ struct SpecialTokens {
   bool taken_id(int id) const;
 
   uint64_t n_special_tokens() const;
+  uint32_t max_predefined_id() const;
 };
 
 struct BpeConfig {

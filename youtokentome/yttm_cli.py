@@ -57,7 +57,14 @@ def main():
     default=3,
     show_default=True,
 )
-def bpe(data, model, vocab_size, coverage, n_threads, pad_id, unk_id, bos_id, eos_id):
+@click.option(
+    "--custom_tokens",
+    type=click.STRING,
+    help="Tokens which will not be split into subwords, muiltple tokens should be provided with comma seperated.",
+    default="",
+    show_default=True,
+)
+def bpe(data, model, vocab_size, coverage, n_threads, pad_id, unk_id, bos_id, eos_id, custom_tokens):
     """Train BPE model."""
     yttmc.BPE.train(
         data=data,
@@ -69,6 +76,7 @@ def bpe(data, model, vocab_size, coverage, n_threads, pad_id, unk_id, bos_id, eo
         unk_id=unk_id,
         bos_id=bos_id,
         eos_id=eos_id,
+        custom_tokens=map(lambda t: t.encode("utf8"), custom_tokens.split(','))
     )
 
 
