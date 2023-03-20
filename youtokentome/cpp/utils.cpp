@@ -6,8 +6,6 @@
 #include <vector>
 
 namespace vkcom {
-using std::string;
-using std::vector;
 
 void SpecialTokens::dump(std::ofstream &fout) {
   fout << unk_id << " " << pad_id << " " << bos_id << " " << eos_id
@@ -49,7 +47,7 @@ bool BPE_Rule::operator==(const BPE_Rule &other) const {
 
 BPE_Rule::BPE_Rule(uint32_t x, uint32_t y, uint32_t z) : x(x), y(y), z(z) {}
 
-void BPEState::dump(const string &file_name) {
+void BPEState::dump(const std::string &file_name) {
   std::ofstream fout(file_name, std::ios::out);
   if (fout.fail()) {
     std::cerr << "Can't open file: " << file_name << std::endl;
@@ -67,7 +65,7 @@ void BPEState::dump(const string &file_name) {
   fout.close();
 }
 
-Status BPEState::load(const string &file_name) {
+Status BPEState::load(const std::string &file_name) {
   char2id.clear();
   rules.clear();
   std::ifstream fin(file_name, std::ios::in);
@@ -98,14 +96,27 @@ BpeConfig::BpeConfig(double _character_coverage, int _n_threads,
       n_threads(_n_threads),
       special_tokens(_special_tokens) {}
 
-vector<string> read_lines_from_stdin(uint64_t batch_limit, uint64_t *processed) {
-  vector<string> sentences;
-  string s;
-  while (*processed < batch_limit && getline(std::cin, s)) {
+std::vector<std::string> read_lines_from_stdin(uint64_t batch_limit, uint64_t *processed) {
+  std::vector<std::string> sentences;
+  std::string s;
+  while (*processed < batch_limit && std::getline(std::cin, s)) {
     *processed += s.size();
     sentences.push_back(std::move(s));
   }
   return sentences;
+}
+
+std::string read_file(const std::string& path) {
+  std::ifstream t("file.txt");
+  std::string str;
+
+  t.seekg(0, std::ios::end);   
+  str.reserve(t.tellg());
+  t.seekg(0, std::ios::beg);
+
+  str.assign((std::istreambuf_iterator<char>(t)),
+             std::istreambuf_iterator<char>());
+  return str;
 }
 
 Status::Status(int code, std::string message) : code(code), message(std::move(message)) {}
@@ -116,4 +127,5 @@ const std::string &Status::error_message() const {
 bool Status::ok() const {
   return code == 0;
 }
+
 }  // namespace vkcom

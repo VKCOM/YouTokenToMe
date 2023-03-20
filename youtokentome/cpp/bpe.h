@@ -3,7 +3,7 @@
 #include <map>
 #include <string>
 #include <unordered_set>
-#include "third_party/flat_hash_map.h"
+#include "third_party/flat_hash_map/flat_hash_map/flat_hash_map.h"
 
 #include "utils.h"
 
@@ -18,8 +18,6 @@ enum OutputType { ID, SUBWORD };
 
 Status train_bpe(const std::string &input_path, const std::string &model_path,
                  int vocab_size, BpeConfig config);
-
-void print_vocab(const std::string &model_path, bool verbose);
 
 class BaseEncoder {
  public:
@@ -83,4 +81,4 @@ class BaseEncoder {
   ) const;
 };
 
-}  // namespace vkcom
+} // namespace vkcom

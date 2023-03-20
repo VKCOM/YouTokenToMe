@@ -15,12 +15,12 @@ MODEL_SUFFIX = ".model"
 YOU_TOKEN_TO_ME = "YouTokenToMe"
 SENTENCE_PIECE = "SentencePiece"
 FAST_BPE = "fastBPE"
-HUGGING_FACE_BPE = "Hugging_Face_BPE"
+HUGGING_FACE= "Hugging_Face"
 
 PATH_TO_FASTBPE = "./fastBPE"
 
 
-class HuggingfaceInterface:
+class HuggingFaceInterface:
     def train_from_file(self, train_file, vocab_size, model_file, _):
         tokenizer = HuggingFaceBPETokenizer(HuggingFaceBPEModel(unk_token="[UNK]"))
         trainer = HuggingFaceBPETrainer(special_tokens=["[UNK]", "[PAD]"], vocab_size=vocab_size)
@@ -90,8 +90,8 @@ def get_bpe(impl_name):
         return SentencePieceInterface()
     if impl_name == FAST_BPE:
         return FastBPEInterface()
-    if impl_name == HUGGING_FACE_BPE:
-        return HuggingfaceInterface()
+    if impl_name == HUGGING_FACE:
+        return HuggingFaceInterface()
     assert False
 
 

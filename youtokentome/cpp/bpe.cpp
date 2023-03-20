@@ -19,7 +19,7 @@
 #include <unordered_set>
 #include <cstring>
 
-#include "third_party/flat_hash_map.h"
+#include "third_party/flat_hash_map/flat_hash_map.h"
 #include "utf8.h"
 #include "utils.h"
 
@@ -28,42 +28,7 @@ using std::string;
 using std::vector;
 using std::unordered_set;
 
-struct VectorSegment {
-  constexpr static uint64_t MOD = 2032191299;
-  constexpr static uint64_t P = 726328703;
-
-  const char* begin;
-  const char* end;
-  uint64_t hash;
-
-  VectorSegment(const char* begin, const char* end): begin(begin), end(end) {
-    hash = 0;
-    for (auto it = begin; it != end; it++) {
-      hash = (hash * P + (unsigned char)(*it)) % MOD;
-    }
-  }
-
-  bool operator==(const VectorSegment &other) const {
-    if (other.hash != hash || end - begin != other.end - other.begin) {
-      return false;
-    }
-    for (auto it = begin, other_it = other.begin; it != end; it++, other_it++) {
-      if (*it != *other_it) {
-        return false;
-      }
-    }
-    return true;
-  }
-};
-
 }  // namespace vkcom
-
-namespace std {
-template<>
-struct hash<vkcom::VectorSegment> {
-  uint64_t operator()(const vkcom::VectorSegment &x) const { return x.hash; }
-};
-}  // namespace std
 
 namespace vkcom {
 
@@ -94,10 +59,6 @@ string token2word(const vector<uint32_t> &source,
     res.push_back(id2char.at(i));
   }
   return encode_utf8(res);
-}
-
-bool is_space(uint32_t ch) {
-  return (ch < 256 && isspace(ch)) || (ch == SPACE_TOKEN);
 }
 
 uint64_t int2comb(uint32_t a, uint32_t b) {
@@ -132,52 +93,6 @@ struct MergeCandidate {
     return left_token < other.left_token;
   }
 };
-
-struct UTF8Iterator {
-  UTF8Iterator(char* begin, char* end): begin(begin), end(end) {}
-
-  UTF8Iterator operator++() {
-	if (!state) {
-	  parse();
-	}
-	begin += utf8_len;
-	state = false;
-	return *this;
-  }
-
-  uint32_t operator*() {
-	if (!state) {
-	  parse();
-	}
-	return code_point;
-  }
-
-  char* get_ptr() {
-    return begin;
-  }
-  uint64_t get_utf8_len() {
-    return utf8_len;
-  }
-
-  bool empty() {
-    assert(begin <= end);
-    return begin == end;
-  }
- private:
-  char *begin, *end;
-  uint32_t code_point = 0;
-  uint64_t utf8_len = 0;
-  bool state = false;
-  void parse() {
-    if (state) {
-      return;
-    }
-    assert(!empty());
-    code_point = chars_to_utf8(begin, end - begin, &utf8_len);
-    state = true;
-  }
-};
-
 
 struct Position {
   uint64_t word_id, pos_id;
@@ -469,7 +384,8 @@ flat_hash_map<VectorSegment, WordCount> compute_word_count(
     char* begin_of_word = utf8_iter.get_ptr();
     for (; !utf8_iter.empty() && !is_space(*utf8_iter); ++utf8_iter);
     char* end_of_word = utf8_iter.get_ptr();
-    VectorSegment word_hash(begin_of_word, end_of_word);
+    VectorSegmentBuilder word_hash_builder(begin_of_word, end_of_word);
+    VectorSegment word_hash = word_hash_builder.finish();
     auto it = hash2wordcnt.find(word_hash);
     if (it == hash2wordcnt.end()) {
       word.clear();

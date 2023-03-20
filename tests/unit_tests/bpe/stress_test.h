@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../youtokentome/cpp/third_party/flat_hash_map.h"
+#include "../../youtokentome/cpp/third_party/flat_hash_map/flat_hash_map.h"
 #include "../../youtokentome/cpp/utils.h"
 
 namespace vkcom {

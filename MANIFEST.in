@@ -2,12 +2,9 @@ include youtokentome/cpp/utils.h
 include youtokentome/cpp/bpe.h
 include youtokentome/cpp/utf8.h
 include youtokentome/cpp/yttm.pyx
-include youtokentome/cpp/third_party/flat_hash_map.h
+include youtokentome/cpp/third_party/flat_hash_map/flat_hash_map.h
 include youtokentome/cpp/third_party/LICENSE
 include LICENSE
 include README.md
 include requirements.txt
 include yttm_cli.py
-
-
-

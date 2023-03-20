@@ -6,20 +6,21 @@
 
 # YouTokenToMe 
 
-YouTokenToMe is an unsupervised text tokenizer focused on computational efficiency. It currently implements fast Byte Pair Encoding (BPE) [[Sennrich et al.](https://www.aclweb.org/anthology/P16-1162)].
-Our implementation is much faster in training and tokenization than [Hugging Face](https://github.com/huggingface/tokenizers), [fastBPE](https://github.com/glample/fastBPE)
- and [SentencePiece](https://github.com/google/sentencepiece). In some test cases, it is 60 times faster.
-  Check out our [benchmark](benchmark.md) results.
+YouTokenToMe is an unsupervised text tokenizer focused on computational efficiency. It currently contains the fastest implementations of:
+- Byte Pair Encoding (BPE) [[Sennrich et al.](https://www.aclweb.org/anthology/P16-1162)], [benchmark results](benchmark.md);
+- WordPiece [[Song et al.](https://arxiv.org/abs/2012.15524)], [benchmark results](benchmark.md).
   
 Key advantages:
 
 * Multithreading for training and tokenization
-* The algorithm has  `O(N)` complexity, where `N` is the length of training data
 * Highly efficient implementation in C++
 * Python wrapper and command-line interface
 
-Extra features:
-* BPE-dropout (as described in [Provilkov et al, 2019](https://arxiv.org/abs/1910.13267))
+## BPE implementation
+
+Algorighm properties:
+* Time complexity is `O(N)`, where `N` is the length of training data
+* Supports BPE-dropout (as described in [Provilkov et al, 2019](https://arxiv.org/abs/1910.13267))
 
 As well as in the algorithm from the original paper, ours does not consider tokens 
 that cross word boundaries. Just like in [SentencePiece](https://github.com/google/sentencepiece), all space symbols were replaced by meta symbol "▁" (U+2581). It allows sequences of tokens to be converted back to text and for word boundaries to be restored.
@@ -28,15 +29,21 @@ For example, the phrase ```Blazingly fast tokenization!``` can be tokenized into
 
 `['▁Bl', 'az', 'ingly', '▁fast', '▁token', 'ization', '!']`
 
+## WordPiece implementation
+
+Algorighm properties:
+* Currently supports tokenizer only, but not training
+* Time complexity is `O(NM)`, where `N` is the length of tokenized data and `M` is the max length of word in vocabulary
+
 ## Installation
 
 ```bash
 pip install youtokentome
 ```
+
 ## Python interface 
 
-### Example
-Let's start with a self-contained example. 
+### BPE Example
 
 ```python
 import random
@@ -68,10 +75,31 @@ print(bpe.encode([test_text], output_type=yttm.OutputType.ID))
 print(bpe.encode([test_text], output_type=yttm.OutputType.SUBWORD))
 ```
 
-&nbsp;
-### Training model
+### WordPiece Example
+
+TODO
+  
+### BPE Methods
+Class `youtokentome.BPE` has the following methods:
+
+#### constructor
+
 ```python
-youtokentome.BPE.train(data, model, vocab_size, coverage, n_threads=-1, pad_id=0, unk_id=1, bos_id=2, eos_id=3)
+youtokentome.BPE(model, n_threads=-1)
+```
+
+Class constructor. Loads the trained model.
+
+* `model`: string, path to the trained model
+* `n_threads`: int, number of parallel threads used to run. 
+    If equal to -1, then the maximum number of threads available will be used.
+ 
+&nbsp;
+
+#### train
+
+```python
+train(data, model, vocab_size, coverage, n_threads=-1, pad_id=0, unk_id=1, bos_id=2, eos_id=3)
 ```
 Trains BPE model and saves to file.
 
@@ -92,22 +120,6 @@ Trains BPE model and saves to file.
 
 &nbsp;
 
-### Model loading
-
-```python
-youtokentome.BPE(model, n_threads=-1)
-```
-
-Class constructor. Loads the trained model.
-
-* `model`: string, path to the trained model
-* `n_threads`: int, number of parallel threads used to run. 
-    If equal to -1, then the maximum number of threads available will be used.
- 
-&nbsp;
-  
-### Methods
-Class `youtokentome.BPE` has the following methods:
 #### encode 
 ```python
 encode(self, sentences, output_type=yttm.OutputType.ID, bos=False, eos=False, reverse=False, dropout_prob=0)
@@ -185,16 +197,12 @@ Convert each id to subword and concatenate with space symbol.
 
   
 **Returns:** List of strings.  
- 
+
+### WordPiece methods
+
+TODO
+
 ## Command line interface
-
-### Example 
-
-```bash
-$ yttm bpe --data TRAINING_DATA_FILE --model OUTPUT_MODEL_FILE --vocab_size 2000
-$ yttm encode --model OUTPUT_MODEL_FILE --output_type subword < TEST_DATA_FILE > ENCODED_DATA 
-```
-
 
 ### Supported commands
 
@@ -241,7 +249,7 @@ Options:
 Apply BPE encoding for a corpus of sentences. Use `stdin` for input and `stdout` for output.
 
 By default, encoding works in parallel using `n_threads` threads. Number of threads is limited by
-8 (see [benchmark](benchmark.md#number-of-threads)).
+8 (see [benchmark](benchmark_bpe.md#number-of-threads)).
 
 With the `--stream` option, `--n_threads` will be ignored and all sentences will be processed one by one.
  Each sentence will be tokenized and written to the `stdout` before the next sentence is read.
@@ -296,9 +304,11 @@ Options:
   --help        Show this message and exit.
 ```
 
+### Examples
 
+TODO: wordpiece
 
-
-
-
-
+```bash
+$ yttm bpe --data TRAINING_DATA_FILE --model OUTPUT_MODEL_FILE --vocab_size 2000
+$ yttm encode --model OUTPUT_MODEL_FILE --output_type subword < TEST_DATA_FILE > ENCODED_DATA 
+```

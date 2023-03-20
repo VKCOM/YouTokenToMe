@@ -8,8 +8,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	cmake \
 	make \
 	g++ \
-	wget && \
-    pip3 install tabulate youtokentome tokenizers
+	wget \
+	bzip2 \
+	perl && \
+	pip3 install -r requirements.txt && \
+    pip3 install youtokentome
 
 WORKDIR /repos
 
@@ -26,8 +29,13 @@ RUN g++ -std=c++11 -pthread -O3 fastBPE/main.cc -IfastBPE -o fast
 
 WORKDIR /workspace
 
-COPY ./speed_test.py ./speed_test.py
 RUN cp /repos/fastBPE/fast /workspace/fastBPE
+RUN wget -O bert-base-cased.txt https://huggingface.co/bert-base-cased/resolve/main/vocab.txt
 
-# CMD ["python", "speed_test.py", "--langs", "en", "ru", "zh", "ja", "--corpus_size", "100", "--vocab_size", "30000"]
-CMD ["python", "speed_test.py", "--langs", "ru", "--corpus_size", "10", "--vocab_size", "30000"]
+COPY ./bpe.py ./bpe.py
+COPY ./wordpiece.py ./wordpiece.py
+
+# use comma to separate langs, e.g.: "--langs", "en", "ru", "zh", "ja"
+CMD ["python", "bpe.py", "--langs", "ru", "--corpus_size", "10", "--vocab_size", "30000"]
+
+CMD ["python", "bpe.py", "--langs", "ru", "--corpus_size", "10", "--vocab", "bert-base-cased.txt"]
