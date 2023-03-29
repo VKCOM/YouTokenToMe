@@ -11,15 +11,9 @@
 #include "../../youtokentome/cpp/bpe.h"
 #include "../../youtokentome/cpp/utf8.h"
 
-#include <chrono>
-#include <thread>
-
 namespace vkcom {
+
 using namespace std;
-
-extern int alive_tokens;
-
-using char32=uint32_t;
 
 // random number from the range [l, r)
 long long uniform_dist_int(mt19937& rnd, long long l, long long r) {
@@ -44,6 +38,32 @@ double uniform_dist_double(mt19937& rnd, double l, double r) {
     const uint64_t generator_range = rnd.max() - rnd.min();
     return static_cast<double>(rnd() - rnd.min()) / generator_range * (r - l) + l;
 };
+
+flat_hash_map<uint32_t, uint32_t> compute_alphabet(
+    const std::vector<uint32_t> &data,
+    flat_hash_set<uint32_t> &removed_chars,
+    const BpeConfig &bpe_config) {
+  flat_hash_map<uint32_t, uint64_t> char_cnt;
+  for (auto ch : data) {
+    if (!is_space(ch)) {
+      char_cnt[ch]++;
+    }
+  }
+  assert(!char_cnt.empty());
+  return compute_alphabet_helper(char_cnt, data.size(), removed_chars,
+                                 bpe_config);
+}
+
+void remove_rare_chars(std::vector<uint32_t> &data,
+                       const flat_hash_set<uint32_t> &removed_chars) {
+  if (removed_chars.empty()) {
+    return;
+  }
+  auto it_first_rare_char =
+      std::remove_if(data.begin(), data.end(),
+                     [&](uint32_t c) { return removed_chars.count(c) != 0; });
+  data.erase(it_first_rare_char, data.end());
+}
 
 BPEState learn_bpe_slow(const string &text_utf8, int n_token, string, BpeConfig bpe_config) {
   auto row_data = decode_utf8(text_utf8.data(), text_utf8.data() + text_utf8.size());
