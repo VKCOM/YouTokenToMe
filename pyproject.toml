@@ -1,0 +1,3 @@
+[build-system]
+# Minimum requirements for the build system to execute.
+requires = ["Cython==0.29.14", "setuptools>=32.0.0"]
