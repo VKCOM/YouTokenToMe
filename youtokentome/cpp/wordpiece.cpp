@@ -210,7 +210,7 @@ encodeWordPiece(const char *text, size_t size, const WordPieceVocabulary &vocab)
 
 } // namespace
 
-namespace vkcom {
+namespace vkcom::wordpiece {
 
 /*std::vector<int> encode_wordpiece(const std::string& input_path, const std::string& vocab_path) {
   const WordPieceVocabulary vocab_utf8 = readVocabFromFile(vocab_file);
@@ -231,4 +231,4 @@ Status encode_wordpiece_cli(const std::string& input_path, const std::string& vo
   }
 }*/
 
-} // namespace vkcom
+} // namespace vkcom::wordpiece

@@ -3,21 +3,31 @@
 #include <iostream>
 #include <string>
 #include <vector>
+
 #include "third_party/flat_hash_map/flat_hash_map.h"
 
 namespace vkcom {
 
-struct BPE_Rule {
-  // x + y -> z
-  uint32_t x{0};
-  uint32_t y{0};
-  uint32_t z{0};
+const std::string UNK_TOKEN = "<UNK>";
+const std::string PAD_TOKEN = "<PAD>";
+const std::string BOS_TOKEN = "<BOS>";
+const std::string EOS_TOKEN = "<EOS>";
 
-  BPE_Rule() = default;
+enum OutputType { ID, SUBWORD };
 
-  BPE_Rule(uint32_t x, uint32_t y, uint32_t z);
+struct DecodeResult {
+  std::vector<int> ids;
+  std::vector<std::string> pieces;
+};
 
-  bool operator==(const BPE_Rule &other) const;
+struct Status {
+  int code{0};
+  std::string message;
+  Status() = default;
+  Status(int code, std::string message);
+
+  const std::string &error_message() const;
+  bool ok() const;
 };
 
 struct SpecialTokens {
@@ -41,6 +51,19 @@ struct SpecialTokens {
   uint64_t n_special_tokens() const;
 };
 
+struct BPE_Rule {
+  // x + y -> z
+  uint32_t x{0};
+  uint32_t y{0};
+  uint32_t z{0};
+
+  BPE_Rule() = default;
+
+  BPE_Rule(uint32_t x, uint32_t y, uint32_t z);
+
+  bool operator==(const BPE_Rule &other) const;
+};
+
 struct BpeConfig {
   double character_coverage = 1;
   int n_threads = 0;
@@ -52,16 +75,6 @@ struct BpeConfig {
             const SpecialTokens &special_tokens);
 };
 
-struct Status {
-  int code{0};
-  std::string message;
-  Status() = default;
-  Status(int code, std::string message);
-
-  const std::string &error_message() const;
-  bool ok() const;
-};
-
 struct BPEState {
   flat_hash_map<uint32_t, uint32_t> char2id;
   std::vector<BPE_Rule> rules;
@@ -70,11 +83,6 @@ struct BPEState {
   void dump(const std::string &file_name);
 
   Status load(const std::string &file_name);
-};
-
-struct DecodeResult {
-  std::vector<int> ids;
-  std::vector<std::string> pieces;
 };
 
 struct EncodingConfig {

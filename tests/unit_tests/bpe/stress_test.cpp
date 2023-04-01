@@ -5,7 +5,6 @@
 #include <cassert>
 #include <algorithm>
 #include <random>
-#include "stress_test.h"
 
 #include "../../youtokentome/cpp/utils.h"
 #include "../../youtokentome/cpp/bpe.h"

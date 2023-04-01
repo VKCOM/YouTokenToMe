@@ -25,10 +25,6 @@
 
 namespace vkcom {
 
-}  // namespace vkcom
-
-namespace vkcom {
-
 Status fast_read_file_utf8(const std::string &file_name, std::string *file_content) {
   static const int buf_size = 1000000;
   *file_content = "";

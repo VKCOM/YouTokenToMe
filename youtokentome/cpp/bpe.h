@@ -9,15 +9,20 @@
 
 namespace vkcom {
 
-const std::string UNK_TOKEN = "<UNK>";
-const std::string PAD_TOKEN = "<PAD>";
-const std::string BOS_TOKEN = "<BOS>";
-const std::string EOS_TOKEN = "<EOS>";
-
-enum OutputType { ID, SUBWORD };
-
 Status train_bpe(const std::string &input_path, const std::string &model_path,
                  int vocab_size, BpeConfig config);
+
+Status learn_bpe_from_string(std::string &text_utf8,
+                             int n_tokens,
+                             const std::string &output_file,
+                             BpeConfig bpe_config,
+                             BPEState *bpe_state);
+
+flat_hash_map<uint32_t, uint32_t>
+compute_alphabet_helper(const flat_hash_map<uint32_t, uint64_t> &char_cnt,
+                        uint64_t data_len,
+                        flat_hash_set<uint32_t> &removed_chars,
+                        const BpeConfig &bpe_config);
 
 class BaseEncoder {
  public:

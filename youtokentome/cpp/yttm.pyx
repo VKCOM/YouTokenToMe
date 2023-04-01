@@ -7,8 +7,7 @@ from pathlib import Path
 from typing import Collection
 
 
-cdef extern from "bpe.h" namespace "vkcom":
-
+cdef extern from "utils.h" namespace "vkcom":
     cdef cppclass SpecialTokens:
         int pad_id
         int unk_id

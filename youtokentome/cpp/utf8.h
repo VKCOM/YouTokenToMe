@@ -1,14 +1,8 @@
 #pragma once
 
-<<<<<<< HEAD
 #include <cassert>
 #include <string>
 #include <vector>
-=======
-#include <vector>
-#include <string>
-#include <cassert>
->>>>>>> master
 
 namespace vkcom {
 
@@ -34,14 +28,11 @@ uint64_t utf_length(char ch);
 
 uint32_t chars_to_utf8(const char* begin, uint64_t size, uint64_t* utf8_len);
 
-<<<<<<< HEAD
 bool starts_with_space(const char *begin, int64_t size);
 
-=======
->>>>>>> master
 void utf8_to_chars(uint32_t x, std::back_insert_iterator<std::string> it);
 
-std::string encode_utf8(const std::vector<uint32_t> &utext);
+std::string encode_utf8(const std::vector<uint32_t> &text);
 
 std::vector<uint32_t> decode_utf8(const char *begin, const char *end);
 
@@ -49,7 +40,6 @@ std::vector<uint32_t> decode_utf8(const std::string &utf8_text);
 
 struct UTF8Iterator {
   UTF8Iterator(char* begin, char* end): begin(begin), end(end) {}
-<<<<<<< HEAD
 
   UTF8Iterator operator++() {
     if (!state) {
@@ -70,6 +60,7 @@ struct UTF8Iterator {
   char* get_ptr() {
     return begin;
   }
+
   uint64_t get_utf8_len() {
     return utf8_len;
   }
@@ -85,41 +76,6 @@ private:
   uint64_t utf8_len = 0;
   bool state = false;
 
-=======
-
-  UTF8Iterator operator++() {
-    if (!state) {
-      parse();
-    }
-    begin += utf8_len;
-    state = false;
-    return *this;
-  }
-
-  uint32_t operator*() {
-    if (!state) {
-      parse();
-    }
-    return code_point;
-  }
-
-  char* get_ptr() {
-    return begin;
-  }
-  uint64_t get_utf8_len() {
-    return utf8_len;
-  }
-
-  bool empty() {
-    assert(begin <= end);
-    return begin == end;
-  }
-private:
-  char *begin, *end;
-  uint32_t code_point = 0;
-  uint64_t utf8_len = 0;
-  bool state = false;
->>>>>>> master
   void parse() {
     if (state) {
       return;
@@ -130,8 +86,4 @@ private:
   }
 };
 
-<<<<<<< HEAD
 } // namespace vkcom
-=======
-} // namespace vkcom
->>>>>>> master
