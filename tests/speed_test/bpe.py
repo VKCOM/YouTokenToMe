@@ -15,7 +15,7 @@ MODEL_SUFFIX = ".model"
 YOU_TOKEN_TO_ME = "YouTokenToMe"
 SENTENCE_PIECE = "SentencePiece"
 FAST_BPE = "fastBPE"
-HUGGING_FACE= "Hugging_Face"
+HUGGING_FACE= "Hugging Face"
 
 PATH_TO_FASTBPE = "./fastBPE"
 

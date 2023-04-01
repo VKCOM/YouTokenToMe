@@ -4,8 +4,6 @@
 #include <string>
 #include <vector>
 
-#include "third_party/flat_hash_map/flat_hash_map.h"
-
 namespace vkcom {
 
 const std::string UNK_TOKEN = "<UNK>";
@@ -51,50 +49,9 @@ struct SpecialTokens {
   uint64_t n_special_tokens() const;
 };
 
-struct BPE_Rule {
-  // x + y -> z
-  uint32_t x{0};
-  uint32_t y{0};
-  uint32_t z{0};
-
-  BPE_Rule() = default;
-
-  BPE_Rule(uint32_t x, uint32_t y, uint32_t z);
-
-  bool operator==(const BPE_Rule &other) const;
-};
-
-struct BpeConfig {
-  double character_coverage = 1;
-  int n_threads = 0;
-  SpecialTokens special_tokens;
-
-  BpeConfig() = default;
-
-  BpeConfig(double character_coverage, int n_threads,
-            const SpecialTokens &special_tokens);
-};
-
-struct BPEState {
-  flat_hash_map<uint32_t, uint32_t> char2id;
-  std::vector<BPE_Rule> rules;
-  SpecialTokens special_tokens;
-
-  void dump(const std::string &file_name);
-
-  Status load(const std::string &file_name);
-};
-
-struct EncodingConfig {
-  bool bos;
-  bool eos;
-  bool reverse;
-  double dropout_prob;
-};
-
 std::vector<std::string> read_lines_from_stdin(uint64_t batch_limit, uint64_t *processed);
 
-std::string read_file(const std::string& path);
+Status fast_read_file_utf8(const std::string &file_name, std::string *file_content);
 
 template<typename T>
 void write_to_stdout(const std::vector<T> &items, bool flush) {

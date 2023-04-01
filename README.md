@@ -7,8 +7,8 @@
 # YouTokenToMe 
 
 YouTokenToMe is an unsupervised text tokenizer focused on computational efficiency. It currently contains the fastest implementations of:
-- Byte Pair Encoding (BPE) [[Sennrich et al.](https://www.aclweb.org/anthology/P16-1162)], [benchmark results](benchmark.md);
-- WordPiece [[Song et al.](https://arxiv.org/abs/2012.15524)], [benchmark results](benchmark.md).
+- Byte Pair Encoding (BPE) [[Sennrich et al.](https://www.aclweb.org/anthology/P16-1162)], [benchmark results](benchmark_bpe.md);
+- WordPiece [[Song et al.](https://arxiv.org/abs/2012.15524)], [benchmark results](benchmark_wordpiece.md).
   
 Key advantages:
 
@@ -33,7 +33,7 @@ For example, the phrase ```Blazingly fast tokenization!``` can be tokenized into
 
 Algorighm properties:
 * Currently supports tokenizer only, but not training
-* Time complexity is `O(NM)`, where `N` is the length of tokenized data and `M` is the max length of word in vocabulary
+* Time complexity is `O(NM^2)`, where `N` is the length of tokenized data and `M` is the max length of word in vocabulary
 
 ## Installation
 
@@ -41,9 +41,9 @@ Algorighm properties:
 pip install youtokentome
 ```
 
-## Python interface 
+## Python BPE interface
 
-### BPE Example
+### Example
 
 ```python
 import random
@@ -74,12 +74,8 @@ bpe = yttm.BPE(model=model_path)
 print(bpe.encode([test_text], output_type=yttm.OutputType.ID))
 print(bpe.encode([test_text], output_type=yttm.OutputType.SUBWORD))
 ```
-
-### WordPiece Example
-
-TODO
   
-### BPE Methods
+### Methods
 Class `youtokentome.BPE` has the following methods:
 
 #### constructor
@@ -198,7 +194,13 @@ Convert each id to subword and concatenate with space symbol.
   
 **Returns:** List of strings.  
 
-### WordPiece methods
+## Python WordPiece interface
+
+### Example
+
+TODO
+
+### Methods
 
 TODO
 

@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+// TODO: introduce vkcom::utf8 namespace
 namespace vkcom {
 
 const uint32_t SPACE_TOKEN = 9601;

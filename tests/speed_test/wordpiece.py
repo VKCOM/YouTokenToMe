@@ -12,9 +12,9 @@ from torchtext.transforms import BERTTokenizer as TorchBertTokenizer
 
 
 YOU_TOKEN_TO_ME = "YouTokenToMe"
-HUGGING_FACE = 'Hugging_Face'
+HUGGING_FACE = 'Hugging Face'
 KERAS = 'Keras'
-TENSORFLOW = 'Tensorflow'
+TENSORFLOW = 'TensorFlow'
 TORCH = 'Torch'
 
 ALGORITHMS = [YOU_TOKEN_TO_ME, HUGGING_FACE, KERAS, TENSORFLOW, TORCH]

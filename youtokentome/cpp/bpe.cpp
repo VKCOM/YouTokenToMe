@@ -1,5 +1,3 @@
-#include <utility>
-
 #include "bpe.h"
 
 #include <algorithm>
@@ -7,6 +5,7 @@
 #include <cassert>
 #include <condition_variable>
 #include <cstring>
+#include <fstream>
 #include <functional>
 #include <iostream>
 #include <mutex>
@@ -25,24 +24,60 @@
 
 namespace vkcom {
 
-Status fast_read_file_utf8(const std::string &file_name, std::string *file_content) {
-  static const int buf_size = 1000000;
-  *file_content = "";
-  auto fin = fopen(file_name.data(), "rb");
-  if (fin == nullptr) {
-    return Status(1, "Failed to open file: " + file_name);
-  }
-  while (true) {
-    uint64_t cur_size = file_content->size();
-    file_content->resize(cur_size + buf_size);
-    int buf_len = fread((void *) (file_content->data() + cur_size), 1, buf_size, fin);
-    if (buf_len < buf_size) {
-      file_content->resize(file_content->size() - (buf_size - buf_len));
-      fclose(fin);
-      return Status();
-    }
-  }
+bool BPE_Rule::operator==(const BPE_Rule &other) const {
+  return x == other.x && y == other.y && z == other.z;
 }
+
+BPE_Rule::BPE_Rule(uint32_t x, uint32_t y, uint32_t z) : x(x), y(y), z(z) {}
+
+void BPEState::dump(const std::string &file_name) {
+  std::ofstream fout(file_name, std::ios::out);
+  if (fout.fail()) {
+    std::cerr << "Can't open file: " << file_name << std::endl;
+    assert(false);
+  }
+  fout << char2id.size() << " " << rules.size() << std::endl;
+  for (auto s : char2id) {
+    fout << s.first << " " << s.second << std::endl;
+  }
+
+  for (auto rule : rules) {
+    fout << rule.x << " " << rule.y << " " << rule.z << std::endl;
+  }
+  special_tokens.dump(fout);
+  fout.close();
+}
+
+Status BPEState::load(const std::string &file_name) {
+  char2id.clear();
+  rules.clear();
+  std::ifstream fin(file_name, std::ios::in);
+  if (fin.fail()) {
+    return Status(1, "Can not open file with model: " + file_name);
+  }
+  int n, m;
+  fin >> n >> m;
+  for (int i = 0; i < n; i++) {
+    uint32_t inner_id;
+    uint32_t utf32_id;
+    fin >> inner_id >> utf32_id;
+    char2id[inner_id] = utf32_id;
+  }
+  for (int i = 0; i < m; i++) {
+    uint32_t x, y, z;
+    fin >> x >> y >> z;
+    rules.emplace_back(x, y, z);
+  }
+  special_tokens.load(fin);
+  fin.close();
+  return Status();
+}
+
+BpeConfig::BpeConfig(double _character_coverage, int _n_threads,
+                     const SpecialTokens &_special_tokens)
+    : character_coverage(_character_coverage),
+      n_threads(_n_threads),
+      special_tokens(_special_tokens) {}
 
 std::string token2word(const std::vector<uint32_t> &source,
                        const flat_hash_map<uint32_t, uint32_t> &id2char) {
