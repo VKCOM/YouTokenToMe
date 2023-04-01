@@ -57,7 +57,7 @@ def main():
     default=3,
     show_default=True,
 )
-def bpe(data, model, vocab_size, coverage, n_threads, pad_id, unk_id, bos_id, eos_id):
+def bpe_train(data, model, vocab_size, coverage, n_threads, pad_id, unk_id, bos_id, eos_id):
     """Train BPE model."""
     yttmc.BPE.train(
         data=data,
@@ -105,7 +105,7 @@ def bpe(data, model, vocab_size, coverage, n_threads, pad_id, unk_id, bos_id, eo
     show_default=True,
     help="BPE-dropout probability (the probability of a merge being dropped)",
 )
-def encode(model, output_type, n_threads, bos, eos, reverse, stream, dropout_prob):
+def bpe_encode(model, output_type, n_threads, bos, eos, reverse, stream, dropout_prob):
     """Encode text to ids or subwords."""
     if n_threads < -1 or n_threads == 0:
         raise ValueError(
@@ -143,7 +143,7 @@ def validate_ignore_ids(ctx, param, value):
     required=False,
     help="List of indices to ignore for decoding. Example: --ignore_ids=1,2,3",
 )
-def decode(model, ignore_ids):
+def bpe_decode(model, ignore_ids):
     """Decode ids to text."""
     bpe = yttmc.BPE(model)
     bpe.decode_cli(ignore_ids)
@@ -157,13 +157,13 @@ def decode(model, ignore_ids):
     help="Path to file with learned model.",
 )
 @click.option("--verbose", is_flag=True, help="Add merging rules.")
-def vocab(model, verbose):
+def bpe_vocab(model, verbose):
     """Print list of learned subwords."""
     bpe = yttmc.BPE(model)
     bpe.vocab_cli(verbose)
 
 
-main.add_command(bpe)
-main.add_command(encode)
-main.add_command(decode)
-main.add_command(vocab)
+main.add_command(bpe_train)
+main.add_command(bpe_encode)
+main.add_command(bpe_decode)
+main.add_command(bpe_vocab)

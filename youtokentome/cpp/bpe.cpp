@@ -22,6 +22,15 @@
 #include "utf8.h"
 #include "utils.h"
 
+namespace {
+
+const std::string UNK_TOKEN = "<UNK>";
+const std::string PAD_TOKEN = "<PAD>";
+const std::string BOS_TOKEN = "<BOS>";
+const std::string EOS_TOKEN = "<EOS>";
+
+} // namespace
+
 namespace vkcom {
 
 bool BPE_Rule::operator==(const BPE_Rule &other) const {
@@ -853,7 +862,7 @@ uint64_t compute_char_count(flat_hash_map<uint32_t, uint64_t>& char_cnt, char* b
   return char_count;
 }
 
-Status learn_bpe_from_string(std::string &text_utf8, int n_tokens,
+Status bpe_learn_from_string(std::string &text_utf8, int n_tokens,
                              const std::string &output_file,
                              BpeConfig bpe_config, BPEState *bpe_state) {
   assert(bpe_config.n_threads >= 1 || bpe_config.n_threads == -1);
@@ -1362,7 +1371,7 @@ void print_config(const std::string &input_path, const std::string &model_path,
   std::cerr << std::endl;
 }
 
-Status train_bpe(const std::string &input_path, const std::string &model_path,
+Status bpe_train(const std::string &input_path, const std::string &model_path,
                  int vocab_size, BpeConfig bpe_config) {
   Status status = check_config(bpe_config, vocab_size);
   if (!status.ok()) {
@@ -1377,7 +1386,7 @@ Status train_bpe(const std::string &input_path, const std::string &model_path,
   }
   std::cerr << "learning bpe..." << std::endl;
   BPEState bpe_state;
-  status = learn_bpe_from_string(data, vocab_size, model_path, bpe_config, &bpe_state);
+  status = bpe_learn_from_string(data, vocab_size, model_path, bpe_config, &bpe_state);
   if (!status.ok()) {
     return status;
   }

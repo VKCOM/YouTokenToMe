@@ -6,11 +6,6 @@
 
 namespace vkcom {
 
-const std::string UNK_TOKEN = "<UNK>";
-const std::string PAD_TOKEN = "<PAD>";
-const std::string BOS_TOKEN = "<BOS>";
-const std::string EOS_TOKEN = "<EOS>";
-
 enum OutputType { ID, SUBWORD };
 
 struct DecodeResult {

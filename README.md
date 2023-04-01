@@ -219,16 +219,16 @@ Options:
   --help  Show this message and exit.
 
 Commands:
-  bpe     Train BPE model.
-  decode  Decode ids to text.
-  encode  Encode text to ids or subwords.
-  vocab   Print list of learned subwords.
+  bpe-train     Train BPE model.
+  bpe-decode  Decode ids to text.
+  bpe-encode  Encode text to ids or subwords.
+  bpe-vocab   Print list of learned subwords.
 ```
 
 Command `bpe` allows you to train Byte Pair Encoding model based on a text file.
 
 ```
-$ yttm bpe --help
+$ yttm bpe-train --help
 
 Usage: yttm bpe [OPTIONS]
 
@@ -247,6 +247,20 @@ Options:
   --help                Show this message and exit.
 ```
 
+Convert ids back to text. Use `stdin` for input and `stdout` for output.
+
+```
+$ yttm bpe-decode --help
+
+Usage: yttm decode [OPTIONS]
+
+  Decode ids to text.
+
+Options:
+  --model PATH  Path to file with learned model.  [required]
+  --ignore_ids  List of indices to ignore for decoding. Example: --ignore_ids=1,2,3
+  --help        Show this message and exit.
+```
 
 Apply BPE encoding for a corpus of sentences. Use `stdin` for input and `stdout` for output.
 
@@ -256,9 +270,8 @@ By default, encoding works in parallel using `n_threads` threads. Number of thre
 With the `--stream` option, `--n_threads` will be ignored and all sentences will be processed one by one.
  Each sentence will be tokenized and written to the `stdout` before the next sentence is read.
 
-
 ```
-$ yttm encode --help
+$ yttm bpe-encode --help
 
 Usage: yttm encode [OPTIONS]
 
@@ -279,7 +292,7 @@ Options:
 Print vocabulary. This can be useful for understanding the model.
 
 ```
-$ yttm vocab --help
+$ yttm bpe-vocab --help
 
 Usage: yttm vocab [OPTIONS]
 
@@ -291,26 +304,11 @@ Options:
   --help        Show this message and exit.
 ```
 
-Convert ids back to text. Use `stdin` for input and `stdout` for output.
-
-```
-$ yttm decode --help
-
-Usage: yttm decode [OPTIONS]
-
-  Decode ids to text.
-
-Options:
-  --model PATH  Path to file with learned model.  [required]
-  --ignore_ids  List of indices to ignore for decoding. Example: --ignore_ids=1,2,3
-  --help        Show this message and exit.
-```
-
 ### Examples
 
 TODO: wordpiece
 
 ```bash
-$ yttm bpe --data TRAINING_DATA_FILE --model OUTPUT_MODEL_FILE --vocab_size 2000
-$ yttm encode --model OUTPUT_MODEL_FILE --output_type subword < TEST_DATA_FILE > ENCODED_DATA 
+$ yttm bpe-train --data TRAINING_DATA_FILE --model OUTPUT_MODEL_FILE --vocab_size 2000
+$ yttm bpe-encode --model OUTPUT_MODEL_FILE --output_type subword < TEST_DATA_FILE > ENCODED_DATA
 ```

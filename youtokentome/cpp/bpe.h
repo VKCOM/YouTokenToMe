@@ -51,12 +51,12 @@ struct EncodingConfig {
   double dropout_prob;
 };
 
-Status train_bpe(const std::string &input_path,
+Status bpe_train(const std::string &input_path,
                  const std::string &model_path,
                  int vocab_size,
                  BpeConfig config);
 
-Status learn_bpe_from_string(std::string &text_utf8,
+Status bpe_learn_from_string(std::string &text_utf8,
                              int n_tokens,
                              const std::string &output_file,
                              BpeConfig bpe_config,
