@@ -96,10 +96,21 @@ BpeConfig::BpeConfig(double _character_coverage, int _n_threads,
       n_threads(_n_threads),
       special_tokens(_special_tokens) {}
 
+<<<<<<< HEAD
 std::vector<std::string> read_lines_from_stdin(uint64_t batch_limit, uint64_t *processed) {
   std::vector<std::string> sentences;
   std::string s;
   while (*processed < batch_limit && std::getline(std::cin, s)) {
+=======
+bool is_space(uint32_t ch) {
+  return (ch < 256 && isspace(ch)) || (ch == SPACE_TOKEN);
+}
+
+std::vector<std::string> read_lines_from_stdin(uint64_t batch_limit, uint64_t *processed) {
+  std::vector<std::string> sentences;
+  std::string s;
+  while (*processed < batch_limit && getline(std::cin, s)) {
+>>>>>>> master
     *processed += s.size();
     sentences.push_back(std::move(s));
   }
