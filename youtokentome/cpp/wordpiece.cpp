@@ -15,31 +15,32 @@ namespace {
 
 struct WordPieceToken {
   explicit WordPieceToken(const std::string &encoded_word)
-    : is_prefix(true), is_special(false), is_malformed(false), word(vkcom::decode_utf8(encoded_word)) {
-  if (isSuffixVocab(word)) {
-    is_prefix = false;
-    word.erase(word.begin(), word.begin() + 2);
-  } else if (isSpecialToken(word)) {
-    is_special = true;
-  }
+   : is_prefix(true), is_special(false), is_malformed(false),
+     word(vkcom::decode_utf8(encoded_word)) {
+    if (isSuffixVocab(word)) {
+      is_prefix = false;
+      word.erase(word.begin(), word.begin() + 2);
+    } else if (isSpecialToken(word)) {
+      is_special = true;
+    }
 
-  bool all_punctuation = true;
-  for (uint32_t code_point : word) {
-    if (code_point == vkcom::INVALID_UNICODE) {
+    bool all_punctuation = true;
+    for (uint32_t code_point : word) {
+      if (code_point == vkcom::INVALID_UNICODE) {
+        is_malformed = true;
+      }
+      if (!vkcom::is_punctuation(code_point) && !vkcom::is_space(code_point)) {
+        all_punctuation = false;
+      }
+    }
+    if (word.empty()) {
+      throw std::runtime_error("Vocab word is empty");
+    }
+    if (is_malformed || (all_punctuation && word.size() > 1)) {
       is_malformed = true;
-    }
-    if (!vkcom::is_punctuation(code_point) && !vkcom::is_space(code_point)) {
-      all_punctuation = false;
+      std::cerr << "Vocab word is malformed: " << encoded_word << std::endl;
     }
   }
-  if (word.empty()) {
-    throw std::runtime_error("Vocab word is empty");
-  }
-  if (is_malformed || (all_punctuation && word.size() > 1)) {
-    is_malformed = true;
-    std::cerr << "Vocab word is malformed: " << encoded_word << std::endl;
-  }
-}
 
   bool is_prefix;
   bool is_special;
@@ -162,8 +163,7 @@ std::vector<int> encodeWordPieceImpl(const std::vector<uint32_t> &text,
   if (text.size() < 2 * kWorkBatch) {
     token_ids = worker(0, text.size());
   } else {
-    const size_t thread_count
-     = std::min(globalThreadPool().maxThreads(), text.size() / kWorkBatch);
+    const size_t thread_count = std::min(globalThreadPool().maxThreads(), text.size() / kWorkBatch);
     const size_t work_batch = text.size() / thread_count + 1;
     std::vector<std::vector<int>> per_thread_token_ids(thread_count);
     size_t work_begin = 0;
@@ -172,10 +172,9 @@ std::vector<int> encodeWordPieceImpl(const std::vector<uint32_t> &text,
       while (work_end < text.size() && !vkcom::is_space(text[work_end])) {
         ++work_end;
       }
-      globalThreadPool().submit(
-       [thread_id, work_begin, work_end, &per_thread_token_ids, &worker] {
-         per_thread_token_ids[thread_id] = worker(work_begin, work_end);
-       });
+      globalThreadPool().submit([thread_id, work_begin, work_end, &per_thread_token_ids, &worker] {
+        per_thread_token_ids[thread_id] = worker(work_begin, work_end);
+      });
       work_begin = work_end;
     }
 
@@ -199,8 +198,7 @@ std::vector<int> encodeWordPieceImpl(const std::vector<uint32_t> &text,
   return token_ids;
 }
 
-std::vector<int>
-encodeWordPiece(const char *text, size_t size, const WordPieceVocabulary &vocab) {
+std::vector<int> encodeWordPiece(const char *text, size_t size, const WordPieceVocabulary &vocab) {
   if (size == 0) {
     return {};
   }

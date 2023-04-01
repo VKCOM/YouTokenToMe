@@ -8,21 +8,15 @@ namespace vkcom {
 
 Status::Status(int code, std::string message) : code(code), message(std::move(message)) {}
 
-const std::string &Status::error_message() const {
-  return message;
-}
-bool Status::ok() const {
-  return code == 0;
-}
+const std::string &Status::error_message() const { return message; }
+
+bool Status::ok() const { return code == 0; }
 
 void SpecialTokens::dump(std::ofstream &fout) {
-  fout << unk_id << " " << pad_id << " " << bos_id << " " << eos_id
-       << std::endl;
+  fout << unk_id << " " << pad_id << " " << bos_id << " " << eos_id << std::endl;
 }
 
-void SpecialTokens::load(std::ifstream &fin) {
-  fin >> unk_id >> pad_id >> bos_id >> eos_id;
-}
+void SpecialTokens::load(std::ifstream &fin) { fin >> unk_id >> pad_id >> bos_id >> eos_id; }
 
 uint32_t SpecialTokens::max_id() const {
   int ret = 0;
@@ -47,7 +41,7 @@ uint64_t SpecialTokens::n_special_tokens() const {
 }
 
 SpecialTokens::SpecialTokens(int pad_id, int unk_id, int bos_id, int eos_id)
-    : pad_id(pad_id), unk_id(unk_id), bos_id(bos_id), eos_id(eos_id) {}
+ : pad_id(pad_id), unk_id(unk_id), bos_id(bos_id), eos_id(eos_id) {}
 
 std::vector<std::string> read_lines_from_stdin(uint64_t batch_limit, uint64_t *processed) {
   std::vector<std::string> sentences;
@@ -70,7 +64,7 @@ Status fast_read_file_utf8(const std::string &file_name, std::string *file_conte
   while (true) {
     uint64_t cur_size = file_content->size();
     file_content->resize(cur_size + buf_size);
-    int buf_len = fread((void *) (file_content->data() + cur_size), 1, buf_size, fin);
+    int buf_len = fread((void *)(file_content->data() + cur_size), 1, buf_size, fin);
     if (buf_len < buf_size) {
       file_content->resize(file_content->size() - (buf_size - buf_len));
       fclose(fin);
@@ -79,4 +73,4 @@ Status fast_read_file_utf8(const std::string &file_name, std::string *file_conte
   }
 }
 
-}  // namespace vkcom
+} // namespace vkcom
