@@ -390,10 +390,10 @@ struct WordCount {
 };
 
 
-flat_hash_map<VectorSegment, WordCount> compute_word_count(
+flat_hash_map<BpeVectorSegment, WordCount> compute_word_count(
   char* sbegin, char* send,
   const flat_hash_map<uint32_t, uint32_t> &char2id) {
-  flat_hash_map<VectorSegment, WordCount> hash2wordcnt;
+  flat_hash_map<BpeVectorSegment, WordCount> hash2wordcnt;
   std::vector<uint32_t> word;
   UTF8Iterator utf8_iter(sbegin, send);
 
@@ -405,8 +405,8 @@ flat_hash_map<VectorSegment, WordCount> compute_word_count(
     char* begin_of_word = utf8_iter.get_ptr();
     for (; !utf8_iter.empty() && !is_space(*utf8_iter); ++utf8_iter);
     char* end_of_word = utf8_iter.get_ptr();
-    VectorSegmentBuilder word_hash_builder(begin_of_word, end_of_word);
-    VectorSegment word_hash = word_hash_builder.finish();
+    VectorSegmentBuilder<char> word_hash_builder(begin_of_word, end_of_word);
+    BpeVectorSegment word_hash = word_hash_builder.finish();
     auto it = hash2wordcnt.find(word_hash);
     if (it == hash2wordcnt.end()) {
       word.clear();
@@ -889,7 +889,7 @@ Status bpe_learn_from_string(std::string &text_utf8, int n_tokens,
   flat_hash_set<uint32_t> removed_chars;
   flat_hash_map<uint32_t, uint32_t> char2id;
 
-  std::vector<flat_hash_map<VectorSegment, WordCount>> hash2wordcnt(n_threads);
+  std::vector<flat_hash_map<BpeVectorSegment, WordCount>> hash2wordcnt(n_threads);
   int error_flag = 0;
 
   flat_hash_map<uint32_t, std::vector<uint32_t>> recipe;
@@ -1047,7 +1047,7 @@ Status bpe_learn_from_string(std::string &text_utf8, int n_tokens,
   word_cnt_global.resize(hash2wordcnt[0].size());
   std::transform(
       hash2wordcnt[0].begin(), hash2wordcnt[0].end(), word_cnt_global.begin(),
-      [](const std::pair<VectorSegment, WordCount> &x) { return x.second; });
+      [](const std::pair<BpeVectorSegment, WordCount> &x) { return x.second; });
 
   hash2wordcnt.shrink_to_fit();
   text_utf8.shrink_to_fit();
@@ -1986,7 +1986,7 @@ Status BaseEncoder::encode_cli(const std::string &output_type_str, bool stream,
     int chars_remove = 0;
     do {
       processed = 0;
-      auto sentences = read_lines_from_stdin(batch_limit, &processed);
+      auto sentences = read_lines(std::cin, batch_limit, &processed);
       if (output_type == SUBWORD) {
         std::vector<std::vector<std::string>> subwords;
         Status status = encode_as_subwords(sentences, &subwords, bos, eos, reverse, dropout_prob);

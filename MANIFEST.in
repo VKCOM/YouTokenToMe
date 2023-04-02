@@ -4,8 +4,9 @@ include youtokentome/cpp/utf8.h
 include youtokentome/cpp/wordpiece.h
 include youtokentome/cpp/yttm.pyx
 include youtokentome/cpp/third_party/flat_hash_map/flat_hash_map.h
+include youtokentome/cpp/third_party/flat_hash_map/LICENSE
 include youtokentome/cpp/third_party/thread_pool/thread_pool.h
-include youtokentome/cpp/third_party/LICENSE
+include youtokentome/cpp/third_party/thread_pool/LICENSE
 include LICENSE
 include README.md
 include requirements.txt

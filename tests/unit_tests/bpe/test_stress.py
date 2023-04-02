@@ -9,7 +9,7 @@ def compile_test():
     if tests_compiled:
         return
     build_files = ["bpe.cpp", "utils.cpp", "utf8.cpp"]
-    files = ["../../youtokentome/cpp/" + file_name for file_name in build_files]
+    files = ["../../../youtokentome/cpp/" + file_name for file_name in build_files]
     files.append("stress_test.cpp")
 
     print("compiling stress test ...")

@@ -37,7 +37,7 @@ def generate_artifacts():
 
     cmd_args = [
         "yttm",
-        "bpe",
+        "bpe-train",
         f"--data={TRAIN_FILE}",
         f"--model={BASE_MODEL_FILE}",
         "--vocab_size=16000",
@@ -49,7 +49,7 @@ def generate_artifacts():
     run(cmd_args, check=True)
     cmd_args = [
         "yttm",
-        "bpe",
+        "bpe-train",
         f"--data={TRAIN_FILE}",
         f"--model={RENAME_ID_MODEL_FILE}",
         "--vocab_size=16000",

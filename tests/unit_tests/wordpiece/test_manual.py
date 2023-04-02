@@ -3,8 +3,17 @@ import youtokentome as yttm
 
 
 def check(text, vocab, output_type=yttm.OutputType.ID):
-    encoder = yttm.WordPiece(vocab)
-    return encoder.encode(text, output_type=output_type)
+    TEXT_FILE = "text_file.txt"
+    VOCAB_FILE = "vocab_file.txt"
+    with open(TEXT_FILE, 'w') as f:
+        f.write(text)
+    with open(VOCAB_FILE, 'w') as f:
+        for word in vocab:
+            f.write(word)
+            f.write('\n')
+
+    encoder = yttm.WordPiece(VOCAB_FILE)
+    return encoder.encode(TEXT_FILE, output_type=output_type)
 
 
 def test_russian():

@@ -6,9 +6,9 @@
 #include <algorithm>
 #include <random>
 
-#include "../../youtokentome/cpp/utils.h"
-#include "../../youtokentome/cpp/bpe.h"
-#include "../../youtokentome/cpp/utf8.h"
+#include "../../../youtokentome/cpp/utils.h"
+#include "../../../youtokentome/cpp/bpe.h"
+#include "../../../youtokentome/cpp/utf8.h"
 
 namespace vkcom {
 

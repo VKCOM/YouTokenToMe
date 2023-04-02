@@ -4,7 +4,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "third_party/flat_hash_map/flat_hash_map/flat_hash_map.h"
+#include "third_party/flat_hash_map/flat_hash_map.h"
 
 #include "utils.h"
 

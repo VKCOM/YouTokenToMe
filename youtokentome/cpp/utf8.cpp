@@ -26,6 +26,8 @@ bool is_spacing_char(uint32_t ch) { return is_space(ch) || is_punctuation(ch) ||
 
 bool check_byte(char x) { return (static_cast<uint8_t>(x) & 0xc0u) == 0x80u; }
 
+bool check_symbol_start(char x) { return !check_byte(x); };
+
 bool check_codepoint(uint32_t x) { return (x < 0xd800) || (0xdfff < x && x < 0x110000); }
 
 uint64_t utf_length(char ch) {

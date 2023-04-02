@@ -3,12 +3,13 @@
 #include <algorithm>
 #include <cstring>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 #include "third_party/flat_hash_map/flat_hash_map.h"
-#include "third_party/thread_pool/thread_pool.hpp"
+#include "third_party/thread_pool/thread_pool.h"
 #include "utf8.h"
 
 namespace {
@@ -17,6 +18,16 @@ const std::string UNK_TOKEN = "[UNK]";
 const std::string PAD_TOKEN = "[PAD]";
 const std::string BOS_TOKEN = "[BOS]";
 const std::string EOS_TOKEN = "[EOS]";
+
+bool isSuffixVocab(const std::vector<uint32_t> &word) {
+  static const uint32_t kSharp = static_cast<uint32_t>('#');
+  return word.size() >= 2 && word[0] == kSharp && word[1] == kSharp;
+}
+
+bool isSpecialToken(const std::vector<uint32_t> &word) {
+  return word.size() > 2 && word[0] == static_cast<uint32_t>('[')
+      && word.back() == static_cast<uint32_t>(']');
+}
 
 struct WordPieceToken {
   explicit WordPieceToken(const std::string &encoded_word)
@@ -66,7 +77,6 @@ struct WordPieceVocabulary {
   }
 
   explicit WordPieceVocabulary(const std::string &file) {
-    WordPieceVocabulary vocab_utf8;
     std::ifstream fin(file);
     std::string word;
     int token_id = 0;
@@ -79,7 +89,7 @@ struct WordPieceVocabulary {
   }
 
   std::vector<WordPieceToken> tokens;
-  SpecialTokens special_tokens;
+  vkcom::SpecialTokens special_tokens;
 
 private:
   void update_special_tokens(const std::string& word, int token_id) {
@@ -95,10 +105,54 @@ private:
   }
 };
 
+std::vector<uint32_t> parseText(const char *text, size_t size, vkcom::ThreadPool &thread_pool) {
+  static const size_t kWorkBatch = 5000000;
+
+  if (size < 2 * kWorkBatch) {
+    return vkcom::decode_utf8(text, text + size);
+  } else {
+    const size_t thread_count = std::min(thread_pool.maxThreads(), size / kWorkBatch);
+    const size_t work_batch = size / thread_count + 1;
+    std::vector<std::vector<uint32_t>> per_thread_text_utf8(thread_count);
+    size_t work_start = 0;
+    for (size_t thread_id = 0; thread_id < thread_count && work_start < size; thread_id++) {
+      size_t work_end = std::min(size, work_start + work_batch);
+      while (work_end < size && !vkcom::check_symbol_start(text[work_end])) {
+        ++work_end;
+      }
+      thread_pool.submit([thread_id, work_start, work_end, text, &per_thread_text_utf8] {
+        const char *begin = text + work_start;
+        const size_t len = work_end - work_start;
+        per_thread_text_utf8[thread_id] = vkcom::decode_utf8(begin, begin + len);
+      });
+      work_start = work_end;
+    }
+
+    thread_pool.waitCompletion();
+    size_t text_utf8_size = 0;
+    for (size_t thread_id = 0; thread_id < thread_count; thread_id++) {
+      text_utf8_size += per_thread_text_utf8[thread_id].size();
+    }
+    std::vector<uint32_t> text_utf8(text_utf8_size);
+    text_utf8.resize(text_utf8_size);
+    work_start = 0;
+    for (size_t thread_id = 0; thread_id < thread_count; thread_id++) {
+      std::vector<uint32_t> &segment = per_thread_text_utf8[thread_id];
+      if (!segment.empty()) {
+        std::memcpy(text_utf8.data() + work_start,
+                    segment.data(),
+                    segment.size() * sizeof(uint32_t));
+        work_start += segment.size();
+      }
+    }
+    return text_utf8;
+  }
+}
+
 std::vector<int> encode_word_piece_impl(const std::vector<uint32_t> &text,
                                         const WordPieceVocabulary &vocab,
                                         vkcom::ThreadPool& thread_pool) {
-  using WordMap = std::unordered_map<vkcom::VectorSegment, int>;
+  using WordMap = std::unordered_map<vkcom::WordPieceVectorSegment, int>;
   WordMap prefix_to_id; // no ## in word prefix
   WordMap suffix_to_id; // ## in word prefix
 
@@ -109,7 +163,7 @@ std::vector<int> encode_word_piece_impl(const std::vector<uint32_t> &text,
       continue;
     }
     max_len = std::max(max_len, token.word.size());
-    vkcom::VectorSegmentBuilder segment(token.word);
+    vkcom::VectorSegmentBuilder<uint32_t> segment(token.word);
     WordMap *word_to_id = token.is_prefix ? &prefix_to_id : &suffix_to_id;
     (*word_to_id)[segment.finish()] = static_cast<int>(i);
   }
@@ -119,8 +173,9 @@ std::vector<int> encode_word_piece_impl(const std::vector<uint32_t> &text,
     return index == 0 || vkcom::is_spacing_char(text[index])
         || vkcom::is_spacing_char(text[index - 1]);
   };
+  const int unk_token_id = vocab.special_tokens.unk_id;
 
-  const auto worker = [&, unk_token_id = vocab.special_tokens.unk_id](size_t begin, size_t end) {
+  const auto worker = [&, unk_token_id](size_t begin, size_t end) {
     std::vector<int> token_ids;
     token_ids.reserve((end - begin) / max_len + 1);
 
@@ -143,7 +198,7 @@ std::vector<int> encode_word_piece_impl(const std::vector<uint32_t> &text,
       const uint32_t *segment_end = segment_begin + static_cast<int64_t>(word_len);
       const WordMap *word_to_id = is_word_prefix(begin) ? &prefix_to_id : &suffix_to_id;
 
-      vkcom::VectorSegmentBuilder segment(segment_begin, segment_end);
+      vkcom::VectorSegmentBuilder<uint32_t> segment(segment_begin, segment_end);
       while (!segment.empty()) {
         auto it = word_to_id->find(segment.finish());
         if (it != word_to_id->end()) {
@@ -178,8 +233,9 @@ std::vector<int> encode_word_piece_impl(const std::vector<uint32_t> &text,
     return token_ids;
   };
 
-  static constexpr size_t kWorkBatch = 1'000'000;
+  static const size_t kWorkBatch = 1000000;
   std::vector<int> token_ids;
+
   if (text.size() < 2 * kWorkBatch) {
     token_ids = worker(0, text.size());
   } else {
@@ -223,7 +279,7 @@ std::vector<int> encode_word_piece(const char *text, size_t size, const WordPiec
     return {};
   }
   vkcom::ThreadPool thread_pool(0);
-  const std::vector<uint32_t> text_utf8 = utils::parseText(text, size, thread_pool);
+  const std::vector<uint32_t> text_utf8 = parseText(text, size, thread_pool);
   return encode_word_piece_impl(text_utf8, vocab, thread_pool);
 }
 
@@ -233,26 +289,20 @@ namespace vkcom::wordpiece {
 
 Status encode_as_ids(const std::string &text_path,
                      const std::string& vocab_path, std::vector<int> *ids) {
-  const uint64_t batch_limit = 10 * 1024 * 1024;
+  const uint64_t kBatchLimit = 10 * 1024 * 1024;
+
   try {
     std::string text;
     Status status = fast_read_file_utf8(text_path, &text);
     if (!status.ok()) {
       return status;
     }
-    uint64_t processed = 0;
-    std::vector<std::string> vocab = read_lines_from_stdin(batch_limit, &processed);
-    return encode_as_ids(text, vocab, ids);
-  } catch (const std::exception& ex) {
-    return Status(1, ex.what());
-  } catch (...) {
-    return Status(1, "Unknown error");
-  }
-}
-
-Status encode_as_ids(const std::string &text,
-                     const std::vector<std::string>& vocab, std::vector<int> *ids) {
-  try {
+    std::vector<std::string> vocab;
+    {
+      std::ifstream fin(vocab_path);
+      uint64_t processed = 0;
+      vocab = read_lines(fin, kBatchLimit, &processed);
+    }
     WordPieceVocabulary word_piece_vocab(vocab);
     *ids = encode_word_piece(text.data(), text.size(), word_piece_vocab);
     return Status();
@@ -266,26 +316,20 @@ Status encode_as_ids(const std::string &text,
 Status encode_as_subwords(const std::string &text_path,
                           const std::string& vocab_path,
                           std::vector<std::string> *subwords) {
+  const uint64_t kBatchLimit = 10 * 1024 * 1024;
+
   try {
     std::string text;
     Status status = fast_read_file_utf8(text_path, &text);
     if (!status.ok()) {
       return status;
     }
-    uint64_t processed = 0;
-    std::vector<std::string> vocab = read_lines_from_stdin(batch_limit, &processed);
-    return encode_as_subwords(text, vocab, subwords);
-  } catch (const std::exception& ex) {
-    return Status(1, ex.what());
-  } catch (...) {
-    return Status(1, "Unknown error");
-  }
-}
-
-Status encode_as_subwords(const std::string &text,
-                          const std::vector<std::string>& vocab,
-                          std::vector<std::string> *subwords) {
-  try {
+    std::vector<std::string> vocab;
+    {
+      std::ifstream fin(vocab_path);
+      uint64_t processed = 0;
+      vocab = read_lines(fin, kBatchLimit, &processed);
+    }
     WordPieceVocabulary word_piece_vocab(vocab);
     std::vector<int> ids = encode_word_piece(text.data(), text.size(), word_piece_vocab);
     for (int id : ids) {
@@ -300,13 +344,21 @@ Status encode_as_subwords(const std::string &text,
 }
 
 Status decode(const std::vector<int>& ids,
-              const std::vector<std::string>& vocab,
+              const std::string& vocab_path,
               std::vector<std::string> *subwords,
               const std::unordered_set<int> *ignore_ids) {
+  const uint64_t kBatchLimit = 10 * 1024 * 1024;
+
   try {
+    std::vector<std::string> vocab;
+    {
+      std::ifstream fin(vocab_path);
+      uint64_t processed = 0;
+      vocab = read_lines(fin, kBatchLimit, &processed);
+    }
     for (int id : ids) {
       if (!ignore_ids || ignore_ids->count(id) == 0) {
-        subwords->push_back(vocab[id]);
+        subwords->push_back(vocab.at(id));
       }
     }
     return Status();
