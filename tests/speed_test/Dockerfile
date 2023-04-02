@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	bzip2 \
 	perl && \
 	pip3 install -r requirements.txt && \
-    pip3 install youtokentome
+	pip3 install youtokentome
 
 WORKDIR /repos
 
@@ -38,4 +38,4 @@ COPY ./wordpiece.py ./wordpiece.py
 # use comma to separate langs, e.g.: "--langs", "en", "ru", "zh", "ja"
 CMD ["python", "bpe.py", "--langs", "ru", "--corpus_size", "10", "--vocab_size", "30000"]
 
-CMD ["python", "bpe.py", "--langs", "ru", "--corpus_size", "10", "--vocab", "bert-base-cased.txt"]
+CMD ["python", "wordpiece.py", "--langs", "ru", "--corpus_size", "10", "--vocab", "bert-base-cased.txt"]

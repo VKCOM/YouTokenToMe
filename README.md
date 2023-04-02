@@ -33,7 +33,7 @@ For example, the phrase ```Blazingly fast tokenization!``` can be tokenized into
 
 Algorighm properties:
 * Currently supports tokenizer only, but not training
-* Time complexity is `O(NM^2)`, where `N` is the length of tokenized data and `M` is the max length of word in vocabulary
+* Time complexity is `O(Nm^2)`, where `N` is the length of tokenized data and `m` is the max length of word in vocabulary
 
 ## Installation
 
@@ -201,8 +201,13 @@ Convert each id to subword and concatenate with space symbol.
 TODO
 
 ### Methods
+Class `youtokentome.WordPiece` has the following methods:
 
-TODO
+#### constructor
+
+#### encode
+
+#### decode
 
 ## Command line interface
 
