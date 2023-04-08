@@ -36,34 +36,32 @@ std::vector<uint32_t> parse_text(const char *text, size_t size, vkcom::ThreadPoo
   std::vector<std::vector<uint32_t>> per_thread_text_utf8(thread_count);
   size_t work_start = 0;
   for (size_t thread_id = 0; thread_id < thread_count && work_start < size; thread_id++) {
-      size_t work_end = std::min(size, work_start + work_batch);
-      while (work_end < size && !vkcom::check_symbol_start(text[work_end])) {
-        ++work_end;
-      }
-      thread_pool.submit([thread_id, work_start, work_end, text, &per_thread_text_utf8] {
-        const char *begin = text + work_start;
-        const size_t len = work_end - work_start;
-        per_thread_text_utf8[thread_id] = vkcom::decode_utf8(begin, begin + len);
-      });
-      work_start = work_end;
+    size_t work_end = std::min(size, work_start + work_batch);
+    while (work_end < size && !vkcom::check_symbol_start(text[work_end])) {
+      ++work_end;
     }
+    thread_pool.submit([thread_id, work_start, work_end, text, &per_thread_text_utf8] {
+      const char *begin = text + work_start;
+      const size_t len = work_end - work_start;
+      per_thread_text_utf8[thread_id] = vkcom::decode_utf8(begin, begin + len);
+    });
+    work_start = work_end;
+  }
 
-    thread_pool.waitCompletion();
-    size_t text_utf8_size = 0;
-    for (size_t thread_id = 0; thread_id < thread_count; thread_id++) {
-      text_utf8_size += per_thread_text_utf8[thread_id].size();
+  thread_pool.waitCompletion();
+  size_t text_utf8_size = 0;
+  for (size_t thread_id = 0; thread_id < thread_count; thread_id++) {
+    text_utf8_size += per_thread_text_utf8[thread_id].size();
+  }
+  std::vector<uint32_t> text_utf8(text_utf8_size);
+  text_utf8.resize(text_utf8_size);
+  work_start = 0;
+  for (size_t thread_id = 0; thread_id < thread_count; thread_id++) {
+    std::vector<uint32_t> &segment = per_thread_text_utf8[thread_id];
+    if (!segment.empty()) {
+      std::memcpy(text_utf8.data() + work_start, segment.data(), segment.size() * sizeof(uint32_t));
+      work_start += segment.size();
     }
-    std::vector<uint32_t> text_utf8(text_utf8_size);
-    text_utf8.resize(text_utf8_size);
-    work_start = 0;
-    for (size_t thread_id = 0; thread_id < thread_count; thread_id++) {
-      std::vector<uint32_t> &segment = per_thread_text_utf8[thread_id];
-      if (!segment.empty()) {
-        std::memcpy(text_utf8.data() + work_start,
-                    segment.data(),
-                    segment.size() * sizeof(uint32_t));
-        work_start += segment.size();
-      }
   }
 
   return text_utf8;
@@ -74,61 +72,62 @@ std::vector<uint32_t> parse_text(const char *text, size_t size, vkcom::ThreadPoo
 namespace vkcom::wordpiece {
 
 WordPieceToken::WordPieceToken(const std::string &encoded_word)
-   : is_prefix(true), is_special(false), is_malformed(false),
-     word(vkcom::decode_utf8(encoded_word)) {
+ : is_prefix(true), is_special(false), is_malformed(false), word(vkcom::decode_utf8(encoded_word)) {
   if (is_suffix_vocab(word)) {
-      is_prefix = false;
-      word.erase(word.begin(), word.begin() + 2);
-    } else if (is_special_token(word)) {
-      is_special = true;
-    }
+    is_prefix = false;
+    word.erase(word.begin(), word.begin() + 2);
+  } else if (is_special_token(word)) {
+    is_special = true;
+  }
 
-    bool all_punctuation = true;
-    for (uint32_t code_point : word) {
-      if (code_point == vkcom::INVALID_UNICODE) {
-        is_malformed = true;
-      }
-      if (!vkcom::is_punctuation(code_point) && !vkcom::is_space(code_point)) {
-        all_punctuation = false;
-      }
-    }
-    if (word.empty()) {
-      throw std::runtime_error("Vocab word is empty");
-    }
-    if (is_malformed || (all_punctuation && word.size() > 1)) {
+  bool all_punctuation = true;
+  for (uint32_t code_point : word) {
+    if (code_point == vkcom::INVALID_UNICODE) {
       is_malformed = true;
-      std::cerr << "Vocab word is malformed: " << encoded_word << std::endl;
     }
+    if (!vkcom::is_punctuation(code_point) && !vkcom::is_space(code_point)) {
+      all_punctuation = false;
+    }
+  }
+  if (word.empty()) {
+    throw std::runtime_error("Vocab word is empty");
+  }
+  if (is_malformed || (all_punctuation && word.size() > 1)) {
+    is_malformed = true;
+    std::cerr << "Vocab word is malformed: " << encoded_word << std::endl;
+  }
 }
 
-WordPieceVocabulary::WordPieceVocabulary(const std::vector<std::string>& words) {
-    tokens.reserve(words.size());
-    int token_id = 0;
-    max_token_len = 0;
-    for (const std::string& word : words) {
-      update_special_tokens(word, token_id);
-      WordPieceToken token(word);
-      max_token_len = std::max(max_token_len, token.word.size());
-      tokens.push_back(std::move(token));
-      ++token_id;
-    }
+WordPieceVocabulary::WordPieceVocabulary(const std::vector<std::string> &words) {
+  tokens.reserve(words.size());
+  int token_id = 0;
+  max_token_len = 0;
+  for (const std::string &word : words) {
+    update_special_tokens(word, token_id);
+    WordPieceToken token(word);
+    max_token_len = std::max(max_token_len, token.word.size());
+    tokens.push_back(std::move(token));
+    ++token_id;
+  }
 }
 
-void WordPieceVocabulary::update_special_tokens(const std::string& word, int token_id) {
-    if (word == UNK_TOKEN) {
-      special_tokens.unk_id = token_id;
-    } else if (word == PAD_TOKEN) {
-      special_tokens.pad_id = token_id;
-    } else if (word == BOS_TOKEN) {
-      special_tokens.bos_id = token_id;
-    } else if (word == EOS_TOKEN) {
-      special_tokens.eos_id = token_id;
-    }
+void WordPieceVocabulary::update_special_tokens(const std::string &word, int token_id) {
+  if (word == UNK_TOKEN) {
+    special_tokens.unk_id = token_id;
+  } else if (word == PAD_TOKEN) {
+    special_tokens.pad_id = token_id;
+  } else if (word == BOS_TOKEN) {
+    special_tokens.bos_id = token_id;
+  } else if (word == EOS_TOKEN) {
+    special_tokens.eos_id = token_id;
+  }
 }
 
-Encoder::Encoder(const std::string &vocab_path, int n_threads) : Encoder(read_lines(std::ifstream(vocab_path)), n_threads) {}
+Encoder::Encoder(const std::string &vocab_path, int n_threads)
+ : Encoder(read_lines(std::ifstream(vocab_path)), n_threads) {}
 
-Encoder::Encoder(std::vector<std::string> vocab, int n_threads) : vocab_(std::move(vocab)), word_piece_vocab_(vocab_), thread_pool_(n_threads) {
+Encoder::Encoder(std::vector<std::string> vocab, int n_threads)
+ : vocab_(std::move(vocab)), word_piece_vocab_(vocab_), thread_pool_(n_threads) {
   build_word_maps();
 }
 
@@ -189,7 +188,7 @@ Status Encoder::decode(const std::vector<int> &ids,
 
 bool Encoder::is_word_prefix(const std::vector<uint32_t> &text, size_t index) {
   return index == 0 || vkcom::is_spacing_char(text[index])
-        || vkcom::is_spacing_char(text[index - 1]);
+      || vkcom::is_spacing_char(text[index - 1]);
 }
 
 void Encoder::build_word_maps() {
@@ -245,7 +244,8 @@ std::vector<int> Encoder::encode_parallel(const std::vector<uint32_t> &text) con
   return token_ids;
 }
 
-std::vector<int> Encoder::encode_impl(const std::vector<uint32_t> &text, size_t begin, size_t end) const {
+std::vector<int>
+Encoder::encode_impl(const std::vector<uint32_t> &text, size_t begin, size_t end) const {
   size_t max_len = std::min(word_piece_vocab_.max_token_len, end - begin);
   const int unk_token_id = vocab.special_tokens.unk_id;
 
@@ -260,47 +260,47 @@ std::vector<int> Encoder::encode_impl(const std::vector<uint32_t> &text, size_t 
 
   while (begin != end) {
     size_t word_len = 1;
-      if (!vkcom::is_punctuation(text[begin])) {
-        while (word_len < std::min(max_len, end - begin)
-               && !vkcom::is_spacing_char(text[begin + word_len])) {
-          ++word_len;
-        }
+    if (!vkcom::is_punctuation(text[begin])) {
+      while (word_len < std::min(max_len, end - begin)
+             && !vkcom::is_spacing_char(text[begin + word_len])) {
+        ++word_len;
       }
+    }
 
-      const uint32_t *segment_begin = text.data() + static_cast<int64_t>(begin);
-      const uint32_t *segment_end = segment_begin + static_cast<int64_t>(word_len);
-      const WordMap *word_to_id = is_word_prefix(begin) ? &prefix_to_id_ : &suffix_to_id_;
+    const uint32_t *segment_begin = text.data() + static_cast<int64_t>(begin);
+    const uint32_t *segment_end = segment_begin + static_cast<int64_t>(word_len);
+    const WordMap *word_to_id = is_word_prefix(begin) ? &prefix_to_id_ : &suffix_to_id_;
 
-      vkcom::VectorSegmentBuilder<uint32_t> segment(segment_begin, segment_end);
-      while (!segment.empty()) {
-        auto it = word_to_id->find(segment.finish());
-        if (it != word_to_id->end()) {
-          ++tokens_since_prefix;
-          token_ids.push_back(it->second);
-          begin += segment.size();
-          break;
-        } else {
-          segment.pop_back();
-        }
+    vkcom::VectorSegmentBuilder<uint32_t> segment(segment_begin, segment_end);
+    while (!segment.empty()) {
+      auto it = word_to_id->find(segment.finish());
+      if (it != word_to_id->end()) {
+        ++tokens_since_prefix;
+        token_ids.push_back(it->second);
+        begin += segment.size();
+        break;
+      } else {
+        segment.pop_back();
       }
+    }
 
-      if (segment.empty()) {
-        while (tokens_since_prefix > 0) {
-          token_ids.pop_back();
-          --tokens_since_prefix;
-        }
-        token_ids.push_back(unk_token_id);
-        begin += word_len;
-        while (begin != end && !is_word_prefix(begin)) {
-          ++begin;
-        }
-      } else if (begin != end && is_word_prefix(begin)) {
-        tokens_since_prefix = 0;
+    if (segment.empty()) {
+      while (tokens_since_prefix > 0) {
+        token_ids.pop_back();
+        --tokens_since_prefix;
       }
-
-      while (begin != end && vkcom::is_space(text[begin])) {
+      token_ids.push_back(unk_token_id);
+      begin += word_len;
+      while (begin != end && !is_word_prefix(begin)) {
         ++begin;
       }
+    } else if (begin != end && is_word_prefix(begin)) {
+      tokens_since_prefix = 0;
+    }
+
+    while (begin != end && vkcom::is_space(text[begin])) {
+      ++begin;
+    }
   }
 
   return token_ids;

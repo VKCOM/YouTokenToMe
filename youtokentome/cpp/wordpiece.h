@@ -1,8 +1,8 @@
 #pragma once
 
 #include <string>
-#include <vector>
 #include <unordered_set>
+#include <vector>
 
 #include "third_party/thread_pool/thread_pool.h"
 #include "utils.h"
@@ -19,26 +19,25 @@ struct WordPieceToken {
 };
 
 struct WordPieceVocabulary {
-  explicit WordPieceVocabulary(const std::vector<std::string>& words);
+  explicit WordPieceVocabulary(const std::vector<std::string> &words);
 
   std::vector<WordPieceToken> tokens;
   vkcom::SpecialTokens special_tokens;
   size_t max_token_len = 0;
 
-private:
-  void update_special_tokens(const std::string& word, int token_id);
+ private:
+  void update_special_tokens(const std::string &word, int token_id);
 };
 
 class Encoder {
-public:
+ public:
   explicit Encoder(const std::string &vocab_path, int n_threads);
 
   explicit Encoder(std::vector<std::string> vocab, int n_threads);
 
   Status encode_as_ids(const std::string &text_path, std::vector<int> *ids) const;
 
-  Status encode_as_subwords(const std::string &text_path,
-                            std::vector<std::string> *subwords) const;
+  Status encode_as_subwords(const std::string &text_path, std::vector<std::string> *subwords) const;
 
   Status decode(const std::vector<int> &ids,
                 std::vector<std::string> *subwords,
@@ -48,7 +47,7 @@ public:
 
   int subword_to_id(const std::string &token) const;
 
-private:
+ private:
   static const uint64_t kReadBatchLimit = 10 * 1024 * 1024;
 
   static bool is_word_prefix(const std::vector<uint32_t> &text, size_t index);
