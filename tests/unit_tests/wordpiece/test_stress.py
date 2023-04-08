@@ -8,23 +8,22 @@ def compile_test():
     global tests_compiled
     if tests_compiled:
         return
-    build_files = ["bpe.cpp", "utils.cpp", "utf8.cpp"]
-    files = ["../../../youtokentome/cpp/" + file_name for file_name in build_files]
+    build_files = ["wordpiece.cpp", "utils.cpp", "utf8.cpp"]
+    files = ["../../youtokentome/cpp/" + file_name for file_name in build_files]
     files.append("stress_test.cpp")
 
-    print("compiling bpe stress test ...")
+    print("compiling wordpiece stress test ...")
 
     command = [
         "g++",
         *files,
         "-o",
-        "bpe_stress",
+        "wordpiece_stress",
         "-std=c++11",
         "-pthread",
         "-Og",
         "-D_GLIBCXX_DEBUG",
         "-fno-omit-frame-pointer -fsanitize=address -fsanitize=leak -fsanitize=undefined",
-        "-DDETERMINISTIC_QUEUE",
     ]
 
     command = " ".join(command)
@@ -33,18 +32,16 @@ def compile_test():
     tests_compiled = True
 
 
-def test_stress():
+def test_small():
     compile_test()
-    run(["./bpe_stress", "base", "1000"], check=True)
+    run(["./wordpiece_stress", "small"], check=True)
 
 
 def test_manual():
     compile_test()
-    run(["./bpe_stress", "manual"], check=True)
-    os.remove("remove_it.txt")
+    run(["./wordpiece_stress", "large"], check=True)
 
 
 def test_parallel():
     compile_test()
-    run(["./bpe_stress", "parallel", "50"], check=True)
-    os.remove("remove_it.txt")
+    run(["./wordpiece_stress", "parallel"], check=True)

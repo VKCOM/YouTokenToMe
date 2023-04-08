@@ -176,34 +176,38 @@ cdef class BPE:
         self.encoder.vocab_cli(verbose)
 
 cdef extern from "wordpiece.h" namespace "vkcom::wordpiece":
-    Status encode_as_ids(const string &text_path, const string &vocab_path, vector[int] *ids)
+    cdef cppclass Encoder:
+        Encoder(const string &vocab_path, int n_threads)
 
-    Status encode_as_subwords(const string &text_path, const string &vocab_path, vector[string] *subwords)
+        Status encode_as_ids(const string &text_path, vector[int] *ids) const
 
-    Status decode(const vector[int] &ids, const string &vocab_path, vector[string] *subwords, const unordered_set[int] *ignore_ids)
+        Status encode_as_subwords(const string &text_path, vector[string] *subwords) const
+
+        Status decode(const vector[int] &ids, const string &vocab_path, vector[string] *subwords, const unordered_set[int] *ignore_ids) const
+
+        Status id_to_subword(int id, string *subword) const
+        int subword_to_id(const string &subword) const
 
 cdef class WordPiece:
-    cdef string vocab_path
-    cdef int n_threads
+   cdef Encoder *encoder
 
     def __dealloc__(self):
-        pass
+        del self.encoder
 
     def __init__(self, vocab_path, n_threads=0):
-        self.vocab_path = vocab_path.encode()
-        self.n_threads = n_threads
+        self.encoder = new Encoder(vocab_path.encode(), n_threads)
 
     def encode(self, text_path, output_type):
         cdef Status status
         cdef vector[int] ids
         cdef vector[string] subwords
         if output_type == 'id':
-            status = encode_as_ids(text_path.encode(), self.vocab_path, &ids)
+            status = self.encoder.encode_as_ids(text_path.encode(), &ids)
             if status.code != 0:
                 raise ValueError(status.message.decode())
             return ids
         elif output_type == 'subword':
-            status = encode_as_subwords(text_path.encode(), self.vocab_path, &subwords)
+            status = self.encoder.encode_as_subwords(text_path.encode(), &subwords)
             if status.code != 0:
                 raise ValueError(status.message.decode())
             return subwords
@@ -215,7 +219,7 @@ cdef class WordPiece:
             ignore_ids = set()
         cdef unordered_set[int] c_ignore_ids = unordered_set[int](ignore_ids)
         cdef vector[string] subwords
-        cdef Status status = decode(ids, self.vocab_path, &subwords, &c_ignore_ids)
+        cdef Status status = self.encoder.decode(ids, &subwords, &c_ignore_ids)
         if status.code != 0:
             raise ValueError(status.message.decode())
         return subwords

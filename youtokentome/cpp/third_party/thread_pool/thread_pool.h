@@ -18,14 +18,14 @@ class ThreadPool {
     using Task = std::function<void()>;
 
   public:
-    ThreadPool(size_t thread_count) {
-        if (thread_count == 0) {
-            thread_count = static_cast<size_t>(std::thread::hardware_concurrency());
+    ThreadPool(int thread_count) {
+        if (thread_count <= 0) {
+            thread_count = static_cast<int>(std::thread::hardware_concurrency());
         }
         if (thread_count == 0) {
             thread_count = 8;
         }
-        for (size_t thread = 0; thread < thread_count; ++thread) {
+        for (int thread = 0; thread < thread_count; ++thread) {
             threads_.emplace_back([this] {
                 while (!stop_.load(std::memory_order_relaxed)) {
                     std::unique_lock<std::mutex> lock(mutex_);
