@@ -183,13 +183,13 @@ cdef extern from "wordpiece.h" namespace "vkcom::wordpiece":
 
         Status encode_as_subwords(const string &text_path, vector[string] *subwords) const
 
-        Status decode(const vector[int] &ids, const string &vocab_path, vector[string] *subwords, const unordered_set[int] *ignore_ids) const
+        Status decode(const vector[int] &ids, vector[string] *subwords, const unordered_set[int] *ignore_ids) const
 
         Status id_to_subword(int id, string *subword) const
         int subword_to_id(const string &subword) const
 
 cdef class WordPiece:
-   cdef Encoder *encoder
+    cdef Encoder *encoder
 
     def __dealloc__(self):
         del self.encoder

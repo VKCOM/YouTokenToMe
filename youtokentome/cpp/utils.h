@@ -45,6 +45,8 @@ struct SpecialTokens {
   uint64_t n_special_tokens() const;
 };
 
+std::vector<std::string> read_all_lines(std::istream& stream);
+
 std::vector<std::string> read_lines(std::istream& stream, uint64_t batch_limit, uint64_t *processed);
 
 Status fast_read_file_utf8(const std::string &file_name, std::string *file_content);

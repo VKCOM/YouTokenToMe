@@ -43,6 +43,15 @@ uint64_t SpecialTokens::n_special_tokens() const {
 SpecialTokens::SpecialTokens(int pad_id, int unk_id, int bos_id, int eos_id)
  : pad_id(pad_id), unk_id(unk_id), bos_id(bos_id), eos_id(eos_id) {}
 
+std::vector<std::string> read_all_lines(std::istream& stream) {
+  std::vector<std::string> sentences;
+  std::string s;
+  while (std::getline(stream, s)) {
+    sentences.push_back(std::move(s));
+  }
+  return sentences;
+}
+
 std::vector<std::string> read_lines(std::istream& stream, uint64_t batch_limit, uint64_t *processed) {
   std::vector<std::string> sentences;
   std::string s;

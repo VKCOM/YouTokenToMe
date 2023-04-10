@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -48,13 +49,11 @@ class Encoder {
   int subword_to_id(const std::string &token) const;
 
  private:
-  static const uint64_t kReadBatchLimit = 10 * 1024 * 1024;
-
   static bool is_word_prefix(const std::vector<uint32_t> &text, size_t index);
 
   void build_word_maps();
 
-  std::vector<int> encode_parallel(const std::vector<uint32_t> &text);
+  std::vector<int> encode_parallel(const std::vector<uint32_t> &text) const;
   std::vector<int> encode_impl(const std::vector<uint32_t> &text, size_t begin, size_t end) const;
 
   std::vector<std::string> vocab_;

@@ -7,6 +7,8 @@
 
 #include "utf8.h"
 
+namespace vkcom::wordpiece {
+
 namespace {
 
 const std::string UNK_TOKEN = "[UNK]";
@@ -67,9 +69,12 @@ std::vector<uint32_t> parse_text(const char *text, size_t size, vkcom::ThreadPoo
   return text_utf8;
 }
 
-} // namespace
+std::vector<std::string> read_lines_helper(const std::string &filename) {
+  std::ifstream fin(filename);
+  return read_all_lines(fin);
+}
 
-namespace vkcom::wordpiece {
+} // namespace
 
 WordPieceToken::WordPieceToken(const std::string &encoded_word)
  : is_prefix(true), is_special(false), is_malformed(false), word(vkcom::decode_utf8(encoded_word)) {
@@ -124,7 +129,7 @@ void WordPieceVocabulary::update_special_tokens(const std::string &word, int tok
 }
 
 Encoder::Encoder(const std::string &vocab_path, int n_threads)
- : Encoder(read_lines(std::ifstream(vocab_path)), n_threads) {}
+ : Encoder(read_lines_helper(vocab_path), n_threads) {}
 
 Encoder::Encoder(std::vector<std::string> vocab, int n_threads)
  : vocab_(std::move(vocab)), word_piece_vocab_(vocab_), thread_pool_(n_threads) {
@@ -138,7 +143,7 @@ Status Encoder::encode_as_ids(const std::string &text_path, std::vector<int> *id
     if (!status.ok()) {
       return status;
     }
-    const std::vector<uint32_t> text = parse_text(text_str, text_str.size(), thread_pool_);
+    const std::vector<uint32_t> text = parse_text(text_str.data(), text_str.size(), thread_pool_);
     *ids = encode_parallel(text);
     return Status();
   } catch (const std::exception &ex) {
@@ -156,10 +161,10 @@ Status Encoder::encode_as_subwords(const std::string &text_path,
     if (!status.ok()) {
       return status;
     }
-    const std::vector<uint32_t> text = parse_text(text_str, text_str.size(), thread_pool_);
+    const std::vector<uint32_t> text = parse_text(text_str.data(), text_str.size(), thread_pool_);
     std::vector<int> ids = encode_parallel(text);
     for (int id : ids) {
-      subwords->push_back(vocab[id]);
+      subwords->push_back(vocab_[id]);
     }
     return Status();
   } catch (const std::exception &ex) {
@@ -192,8 +197,8 @@ bool Encoder::is_word_prefix(const std::vector<uint32_t> &text, size_t index) {
 }
 
 void Encoder::build_word_maps() {
-  for (size_t i = 0; i < vocab.tokens.size(); i++) {
-    const auto &token = vocab.tokens[i];
+  for (size_t i = 0; i < word_piece_vocab_.tokens.size(); i++) {
+    const auto &token = word_piece_vocab_.tokens[i];
     if (token.is_special || token.is_malformed) {
       continue;
     }
@@ -219,7 +224,7 @@ std::vector<int> Encoder::encode_parallel(const std::vector<uint32_t> &text) con
     while (work_end < text.size() && !vkcom::is_space(text[work_end])) {
       ++work_end;
     }
-    thread_pool_.submit([thread_id, work_begin, work_end, &per_thread_token_ids, &worker, &text] {
+    thread_pool_.submit([this, thread_id, work_begin, work_end, &per_thread_token_ids, &text] {
       per_thread_token_ids[thread_id] = encode_impl(text, work_begin, work_end);
     });
     work_begin = work_end;
@@ -247,7 +252,16 @@ std::vector<int> Encoder::encode_parallel(const std::vector<uint32_t> &text) con
 std::vector<int>
 Encoder::encode_impl(const std::vector<uint32_t> &text, size_t begin, size_t end) const {
   size_t max_len = std::min(word_piece_vocab_.max_token_len, end - begin);
-  const int unk_token_id = vocab.special_tokens.unk_id;
+  if (begin == end) {
+    return {};
+  }
+  if (word_piece_vocab_.tokens.empty()) {
+    throw std::runtime_error("abc");
+  }
+  if (max_len == 0) {
+    throw std::runtime_error("her");
+  }
+  const int unk_token_id = word_piece_vocab_.special_tokens.unk_id;
 
   std::vector<int> token_ids;
   token_ids.reserve((end - begin) / max_len + 1);
@@ -269,7 +283,7 @@ Encoder::encode_impl(const std::vector<uint32_t> &text, size_t begin, size_t end
 
     const uint32_t *segment_begin = text.data() + static_cast<int64_t>(begin);
     const uint32_t *segment_end = segment_begin + static_cast<int64_t>(word_len);
-    const WordMap *word_to_id = is_word_prefix(begin) ? &prefix_to_id_ : &suffix_to_id_;
+    const WordMap *word_to_id = is_word_prefix(text, begin) ? &prefix_to_id_ : &suffix_to_id_;
 
     vkcom::VectorSegmentBuilder<uint32_t> segment(segment_begin, segment_end);
     while (!segment.empty()) {
@@ -291,10 +305,10 @@ Encoder::encode_impl(const std::vector<uint32_t> &text, size_t begin, size_t end
       }
       token_ids.push_back(unk_token_id);
       begin += word_len;
-      while (begin != end && !is_word_prefix(begin)) {
+      while (begin != end && !is_word_prefix(text, begin)) {
         ++begin;
       }
-    } else if (begin != end && is_word_prefix(begin)) {
+    } else if (begin != end && is_word_prefix(text, begin)) {
       tokens_since_prefix = 0;
     }
 
