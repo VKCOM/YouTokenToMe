@@ -12,6 +12,7 @@ extensions = [
             "youtokentome/cpp/bpe.cpp",
             "youtokentome/cpp/utils.cpp",
             "youtokentome/cpp/utf8.cpp",
+            "youtokentome/cpp/wordpiece.cpp"
         ],
         extra_compile_args=["-std=c++11", "-pthread", "-O3"],
         language="c++",
@@ -35,7 +36,7 @@ setup(
     python_requires=">=3.5.0",
     install_requires=["Click>=7.0"],
     entry_points={"console_scripts": ["yttm = youtokentome.yttm_cli:main"]},
-    author="Ivan Belonogov",
+    author="VKCOM",
     license="MIT",
     classifiers=[
         "License :: OSI Approved :: MIT License",

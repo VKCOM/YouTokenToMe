@@ -2,6 +2,7 @@ import os
 import random
 
 import youtokentome as yttm
+
 from utils_for_testing import (
     BASE_MODEL_FILE,
     RENAME_ID_MODEL_FILE,

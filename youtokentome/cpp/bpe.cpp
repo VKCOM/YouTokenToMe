@@ -1,5 +1,3 @@
-#include <utility>
-
 #include "bpe.h"
 
 #include <algorithm>
@@ -7,6 +5,7 @@
 #include <cassert>
 #include <condition_variable>
 #include <cstring>
+#include <fstream>
 #include <functional>
 #include <iostream>
 #include <mutex>
@@ -19,69 +18,75 @@
 #include <utility>
 #include <vector>
 
-#include "third_party/flat_hash_map.h"
+#include "third_party/flat_hash_map/flat_hash_map.h"
 #include "utf8.h"
 #include "utils.h"
 
-namespace vkcom {
+namespace {
 
-struct VectorSegment {
-  constexpr static uint64_t MOD = 2032191299;
-  constexpr static uint64_t P = 726328703;
+const std::string UNK_TOKEN = "<UNK>";
+const std::string PAD_TOKEN = "<PAD>";
+const std::string BOS_TOKEN = "<BOS>";
+const std::string EOS_TOKEN = "<EOS>";
 
-  const char* begin;
-  const char* end;
-  uint64_t hash;
-
-  VectorSegment(const char* begin, const char* end): begin(begin), end(end) {
-    hash = 0;
-    for (auto it = begin; it != end; it++) {
-      hash = (hash * P + (unsigned char)(*it)) % MOD;
-    }
-  }
-
-  bool operator==(const VectorSegment &other) const {
-    if (other.hash != hash || end - begin != other.end - other.begin) {
-      return false;
-    }
-    for (auto it = begin, other_it = other.begin; it != end; it++, other_it++) {
-      if (*it != *other_it) {
-        return false;
-      }
-    }
-    return true;
-  }
-};
-
-}  // namespace vkcom
-
-namespace std {
-template<>
-struct hash<vkcom::VectorSegment> {
-  uint64_t operator()(const vkcom::VectorSegment &x) const { return x.hash; }
-};
-}  // namespace std
+} // namespace
 
 namespace vkcom {
 
-Status fast_read_file_utf8(const std::string &file_name, std::string *file_content) {
-  static const int buf_size = 1000000;
-  *file_content = "";
-  auto fin = fopen(file_name.data(), "rb");
-  if (fin == nullptr) {
-    return Status(1, "Failed to open file: " + file_name);
-  }
-  while (true) {
-    uint64_t cur_size = file_content->size();
-    file_content->resize(cur_size + buf_size);
-    int buf_len = fread((void *) (file_content->data() + cur_size), 1, buf_size, fin);
-    if (buf_len < buf_size) {
-      file_content->resize(file_content->size() - (buf_size - buf_len));
-      fclose(fin);
-      return Status();
-    }
-  }
+bool BPE_Rule::operator==(const BPE_Rule &other) const {
+  return x == other.x && y == other.y && z == other.z;
 }
+
+BPE_Rule::BPE_Rule(uint32_t x, uint32_t y, uint32_t z) : x(x), y(y), z(z) {}
+
+void BPEState::dump(const std::string &file_name) {
+  std::ofstream fout(file_name, std::ios::out);
+  if (fout.fail()) {
+    std::cerr << "Can't open file: " << file_name << std::endl;
+    assert(false);
+  }
+  fout << char2id.size() << " " << rules.size() << std::endl;
+  for (auto s : char2id) {
+    fout << s.first << " " << s.second << std::endl;
+  }
+
+  for (auto rule : rules) {
+    fout << rule.x << " " << rule.y << " " << rule.z << std::endl;
+  }
+  special_tokens.dump(fout);
+  fout.close();
+}
+
+Status BPEState::load(const std::string &file_name) {
+  char2id.clear();
+  rules.clear();
+  std::ifstream fin(file_name, std::ios::in);
+  if (fin.fail()) {
+    return Status(1, "Can not open file with model: " + file_name);
+  }
+  int n, m;
+  fin >> n >> m;
+  for (int i = 0; i < n; i++) {
+    uint32_t inner_id;
+    uint32_t utf32_id;
+    fin >> inner_id >> utf32_id;
+    char2id[inner_id] = utf32_id;
+  }
+  for (int i = 0; i < m; i++) {
+    uint32_t x, y, z;
+    fin >> x >> y >> z;
+    rules.emplace_back(x, y, z);
+  }
+  special_tokens.load(fin);
+  fin.close();
+  return Status();
+}
+
+BpeConfig::BpeConfig(double _character_coverage, int _n_threads,
+                     const SpecialTokens &_special_tokens)
+    : character_coverage(_character_coverage),
+      n_threads(_n_threads),
+      special_tokens(_special_tokens) {}
 
 std::string token2word(const std::vector<uint32_t> &source,
                        const flat_hash_map<uint32_t, uint32_t> &id2char) {
@@ -385,10 +390,10 @@ struct WordCount {
 };
 
 
-flat_hash_map<VectorSegment, WordCount> compute_word_count(
+flat_hash_map<BpeVectorSegment, WordCount> compute_word_count(
   char* sbegin, char* send,
   const flat_hash_map<uint32_t, uint32_t> &char2id) {
-  flat_hash_map<VectorSegment, WordCount> hash2wordcnt;
+  flat_hash_map<BpeVectorSegment, WordCount> hash2wordcnt;
   std::vector<uint32_t> word;
   UTF8Iterator utf8_iter(sbegin, send);
 
@@ -400,7 +405,8 @@ flat_hash_map<VectorSegment, WordCount> compute_word_count(
     char* begin_of_word = utf8_iter.get_ptr();
     for (; !utf8_iter.empty() && !is_space(*utf8_iter); ++utf8_iter);
     char* end_of_word = utf8_iter.get_ptr();
-    VectorSegment word_hash(begin_of_word, end_of_word);
+    VectorSegmentBuilder<char> word_hash_builder(begin_of_word, end_of_word);
+    BpeVectorSegment word_hash = word_hash_builder.finish();
     auto it = hash2wordcnt.find(word_hash);
     if (it == hash2wordcnt.end()) {
       word.clear();
@@ -856,7 +862,7 @@ uint64_t compute_char_count(flat_hash_map<uint32_t, uint64_t>& char_cnt, char* b
   return char_count;
 }
 
-Status learn_bpe_from_string(std::string &text_utf8, int n_tokens,
+Status bpe_learn_from_string(std::string &text_utf8, int n_tokens,
                              const std::string &output_file,
                              BpeConfig bpe_config, BPEState *bpe_state) {
   assert(bpe_config.n_threads >= 1 || bpe_config.n_threads == -1);
@@ -883,7 +889,7 @@ Status learn_bpe_from_string(std::string &text_utf8, int n_tokens,
   flat_hash_set<uint32_t> removed_chars;
   flat_hash_map<uint32_t, uint32_t> char2id;
 
-  std::vector<flat_hash_map<VectorSegment, WordCount>> hash2wordcnt(n_threads);
+  std::vector<flat_hash_map<BpeVectorSegment, WordCount>> hash2wordcnt(n_threads);
   int error_flag = 0;
 
   flat_hash_map<uint32_t, std::vector<uint32_t>> recipe;
@@ -1041,7 +1047,7 @@ Status learn_bpe_from_string(std::string &text_utf8, int n_tokens,
   word_cnt_global.resize(hash2wordcnt[0].size());
   std::transform(
       hash2wordcnt[0].begin(), hash2wordcnt[0].end(), word_cnt_global.begin(),
-      [](const std::pair<VectorSegment, WordCount> &x) { return x.second; });
+      [](const std::pair<BpeVectorSegment, WordCount> &x) { return x.second; });
 
   hash2wordcnt.shrink_to_fit();
   text_utf8.shrink_to_fit();
@@ -1365,7 +1371,7 @@ void print_config(const std::string &input_path, const std::string &model_path,
   std::cerr << std::endl;
 }
 
-Status train_bpe(const std::string &input_path, const std::string &model_path,
+Status bpe_train(const std::string &input_path, const std::string &model_path,
                  int vocab_size, BpeConfig bpe_config) {
   Status status = check_config(bpe_config, vocab_size);
   if (!status.ok()) {
@@ -1380,7 +1386,7 @@ Status train_bpe(const std::string &input_path, const std::string &model_path,
   }
   std::cerr << "learning bpe..." << std::endl;
   BPEState bpe_state;
-  status = learn_bpe_from_string(data, vocab_size, model_path, bpe_config, &bpe_state);
+  status = bpe_learn_from_string(data, vocab_size, model_path, bpe_config, &bpe_state);
   if (!status.ok()) {
     return status;
   }
@@ -1980,7 +1986,7 @@ Status BaseEncoder::encode_cli(const std::string &output_type_str, bool stream,
     int chars_remove = 0;
     do {
       processed = 0;
-      auto sentences = read_lines_from_stdin(batch_limit, &processed);
+      auto sentences = read_lines(std::cin, batch_limit, &processed);
       if (output_type == SUBWORD) {
         std::vector<std::vector<std::string>> subwords;
         Status status = encode_as_subwords(sentences, &subwords, bos, eos, reverse, dropout_prob);

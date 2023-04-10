@@ -2,13 +2,11 @@ from libcpp.vector cimport vector
 from libcpp.unordered_set cimport unordered_set
 from libcpp.string cimport string
 from libcpp cimport bool
-import os
 from pathlib import Path
 from typing import Collection
 
 
-cdef extern from "bpe.h" namespace "vkcom":
-
+cdef extern from "utils.h" namespace "vkcom":
     cdef cppclass SpecialTokens:
         int pad_id
         int unk_id
@@ -26,31 +24,29 @@ cdef extern from "bpe.h" namespace "vkcom":
 
 
 cdef extern from "bpe.h" namespace "vkcom":
-    Status train_bpe(const string &source_path, const string& model_path, int vocab_size, const BpeConfig& bpe_config)
+    Status bpe_train(const string &source_path, const string &model_path, int vocab_size, const BpeConfig &bpe_config)
 
 cdef extern from "bpe.h" namespace "vkcom":
     cdef cppclass BaseEncoder:
-        BaseEncoder(const string& model_path, int n_threads, Status* status)
+        BaseEncoder(const string &model_path, int n_threads, Status *status)
 
-        Status encode_as_ids(const vector[string] &sentences, vector[vector[int]]* ids, bool bos, bool eos, bool reverse, double dropout_prob) const
-        Status encode_as_subwords(const vector[string]& sentences, vector[vector[string]]* subwords, bool bos, bool eos, bool reverse, double dropout_prob) const
-
+        Status encode_as_ids(const vector[string] &sentences, vector[vector[int]] *ids, bool bos, bool eos, bool reverse, double dropout_prob) const
+        Status encode_as_subwords(const vector[string] &sentences, vector[vector[string]] *subwords, bool bos, bool eos, bool reverse, double dropout_prob) const
         Status encode_cli(string output_type, bool stream, bool bos, bool eos, bool reverse, double dropout_prob) const
 
-        Status decode_cli(const unordered_set[int]* ignore_ids) const
+        Status decode(const vector[vector[int]] &ids, vector[string] *output, const unordered_set[int] *ignore_ids) const
+        Status decode_cli(const unordered_set[int] *ignore_ids) const
 
-        void vocab_cli(bool verbose) const
-
-        Status id_to_subword(int id, string* subword) const
-
+        Status id_to_subword(int id, string *subword) const
         int subword_to_id(const string &subword) const
-        Status decode(const vector[vector[int]]& ids, vector[string]* output, const unordered_set[int]* ignore_ids) const
+
         int vocab_size() const
         vector[string] vocabulary() const
+        void vocab_cli(bool verbose) const
 
 
 cdef class BPE:
-    cdef BaseEncoder* encoder
+    cdef BaseEncoder *encoder
 
     def __dealloc__(self):
         del self.encoder
@@ -80,7 +76,7 @@ cdef class BPE:
         bpe_config.special_tokens.bos_id = bos_id
         bpe_config.special_tokens.eos_id = eos_id
 
-        cdef Status status = train_bpe(data.encode(), model.encode(), vocab_size, bpe_config)
+        cdef Status status = bpe_train(data.encode(), model.encode(), vocab_size, bpe_config)
         if status.code != 0:
             raise ValueError(status.message.decode())
 
@@ -134,7 +130,6 @@ cdef class BPE:
         return subword.decode()
 
     def decode(self, ids, ignore_ids):
-
         if not isinstance(ids, list):
             raise TypeError(
                 "{} is not a list instance".format(type(ids))
@@ -180,3 +175,51 @@ cdef class BPE:
     def vocab_cli(self, verbose):
         self.encoder.vocab_cli(verbose)
 
+cdef extern from "wordpiece.h" namespace "vkcom::wordpiece":
+    cdef cppclass Encoder:
+        Encoder(const string &vocab_path, int n_threads)
+
+        Status encode_as_ids(const string &text_path, vector[int] *ids) const
+
+        Status encode_as_subwords(const string &text_path, vector[string] *subwords) const
+
+        Status decode(const vector[int] &ids, vector[string] *subwords, const unordered_set[int] *ignore_ids) const
+
+        Status id_to_subword(int id, string *subword) const
+        int subword_to_id(const string &subword) const
+
+cdef class WordPiece:
+    cdef Encoder *encoder
+
+    def __dealloc__(self):
+        del self.encoder
+
+    def __init__(self, vocab_path, n_threads=0):
+        self.encoder = new Encoder(vocab_path.encode(), n_threads)
+
+    def encode(self, text_path, output_type):
+        cdef Status status
+        cdef vector[int] ids
+        cdef vector[string] subwords
+        if output_type == 'id':
+            status = self.encoder.encode_as_ids(text_path.encode(), &ids)
+            if status.code != 0:
+                raise ValueError(status.message.decode())
+            return ids
+        elif output_type == 'subword':
+            status = self.encoder.encode_as_subwords(text_path.encode(), &subwords)
+            if status.code != 0:
+                raise ValueError(status.message.decode())
+            return subwords
+        else:
+            raise ValueError('output_type must be equal to "id" or "subword"')
+
+    def decode(self, ids, ignore_ids):
+        if ignore_ids is None:
+            ignore_ids = set()
+        cdef unordered_set[int] c_ignore_ids = unordered_set[int](ignore_ids)
+        cdef vector[string] subwords
+        cdef Status status = self.encoder.decode(ids, &subwords, &c_ignore_ids)
+        if status.code != 0:
+            raise ValueError(status.message.decode())
+        return subwords

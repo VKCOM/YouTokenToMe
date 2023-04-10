@@ -1,7 +1,11 @@
-## Speed tests
+## BPE Speed tests
 
-`YouTokenToMe` will be compared with [Hugging Face](https://github.com/huggingface/tokenizers), [SentencePiece](https://github.com/google/sentencepiece/)
- and [fastBPE](https://github.com/glample/fastBPE). These three algorithms are considered to be fast.
+`YouTokenToMe` will be compared with:
+* [Hugging Face](https://github.com/huggingface/tokenizers)
+* [SentencePiece](https://github.com/google/sentencepiece/)
+* [fastBPE](https://github.com/glample/fastBPE)
+
+These algorithms are considered to be fast.
  
 Data from [Wikipedia](https://linguatools.org/tools/corpora/wikipedia-monolingual-corpora/) was used to evaluate algorithm speed. In a similar way to `enwik8` and `enwik9`, the experiments were run on first `10^8` and `10^9` bytes of datasets for English, Russian, Chinese and Japanese.
 
@@ -11,7 +15,7 @@ In this benchmark, `YouTokenToMe` used 4 threads for training and tokenization. 
  doesn't support multithreading for **BPE** at all. `fastBPE` doesn't support multithreading for training. 
  For tokenization, it also used 4 threads. 
  
-Source code for benchmark can be found [here](tests/speed_test/speed_test.py).
+Source code for benchmark can be found [here](tests/speed_test/bpe.py).
 The results of the experiments are below. The time is measured in seconds.
 
 All experiments were run on the following machine:

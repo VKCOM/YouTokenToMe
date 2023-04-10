@@ -4,6 +4,3 @@ pip install pytest
 pytest
 ```
 Testing may take several minutes.
-
-
-

@@ -97,3 +97,40 @@ class BPE:
         self.bpe_cython = _youtokentome_cython.BPE(
             model_path=self.model, n_threads=self.n_threads
         )
+
+
+class WordPiece:
+    def __init__(self, vocab_path: str, n_threads: int = 0):
+        self.vocab_path = vocab_path
+        self.n_threads = n_threads
+
+        self.word_piece_cython = _youtokentome_cython.WordPiece(
+            vocab_path=vocab_path, n_threads=n_threads
+        )
+
+    def encode(
+        self,
+        text_path: str,
+        output_type: OutputType = OutputType.ID
+    ) -> Union[List[List[int]], List[List[str]]]:
+        output_type_str = "id" if output_type == OutputType.ID else "subword"
+        return self.word_piece_cython.encode(text_path, output_type_str)
+
+    def decode(
+        self,
+        ids: List[int],
+        ignore_ids: Optional[Collection[int]] = None
+    ) -> List[str]:
+        return self.word_piece_cython.decode(ids, ignore_ids)
+
+    def __getstate__(self):
+        return {"vocab_path": self.vocab_path, "n_threads": self.n_threads}
+
+    def __setstate__(self, dict):
+        self.vocab_path = dict["vocab_path"]
+        self.n_threads = dict["n_threads"]
+
+        self.word_piece_cython = _youtokentome_cython.WordPiece(
+            vocab_path=vocab_path, n_threads=self.n_threads
+        )
+

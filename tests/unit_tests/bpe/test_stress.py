@@ -9,16 +9,16 @@ def compile_test():
     if tests_compiled:
         return
     build_files = ["bpe.cpp", "utils.cpp", "utf8.cpp"]
-    files = ["../../youtokentome/cpp/" + file_name for file_name in build_files]
+    files = ["../../../youtokentome/cpp/" + file_name for file_name in build_files]
     files.append("stress_test.cpp")
 
-    print("compiling stress test ...")
+    print("compiling bpe stress test ...")
 
     command = [
         "g++",
         *files,
         "-o",
-        "stress",
+        "bpe_stress",
         "-std=c++11",
         "-pthread",
         "-Og",
@@ -35,16 +35,16 @@ def compile_test():
 
 def test_stress():
     compile_test()
-    run(["./stress", "base", "1000"], check=True)
+    run(["./bpe_stress", "base", "1000"], check=True)
 
 
 def test_manual():
     compile_test()
-    run(["./stress", "manual"], check=True)
+    run(["./bpe_stress", "manual"], check=True)
     os.remove("remove_it.txt")
 
 
 def test_parallel():
     compile_test()
-    run(["./stress", "parallel", "50"], check=True)
+    run(["./bpe_stress", "parallel", "50"], check=True)
     os.remove("remove_it.txt")

@@ -18,7 +18,7 @@ def test_bos_eos_reverse():
     generate_artifacts()
     cmd_args = [
         "yttm",
-        "encode",
+        "bpe-encode",
         f"--model={BASE_MODEL_FILE}",
         "--output_type=subword",
         "--n_threads=1",
@@ -29,7 +29,7 @@ def test_bos_eos_reverse():
 
     cmd_args = [
         "yttm",
-        "encode",
+        "bpe-encode",
         f"--model={BASE_MODEL_FILE}",
         "--output_type=subword",
         "--n_threads=1",
@@ -41,7 +41,7 @@ def test_bos_eos_reverse():
 
     cmd_args = [
         "yttm",
-        "encode",
+        "bpe-encode",
         f"--model={BASE_MODEL_FILE}",
         "--output_type=id",
         "--n_threads=1",
@@ -52,7 +52,7 @@ def test_bos_eos_reverse():
 
     cmd_args = [
         "yttm",
-        "encode",
+        "bpe-encode",
         f"--model={BASE_MODEL_FILE}",
         "--output_type=id",
         "--n_threads=1",
@@ -67,11 +67,11 @@ def test_bos_eos_reverse():
 def test_interactive_mode():
     generate_artifacts()
     print("interactive helper running id ...")
-    cmd = f"python interactor.py | yttm encode --stream --model={BASE_MODEL_FILE} --output_type=id > log.txt"
+    cmd = f"python interactor.py | yttm bpe-encode --stream --model={BASE_MODEL_FILE} --output_type=id > log.txt"
     assert os.system(cmd) == 0
 
     print("interactive helper running subword ...")
-    cmd = f"python interactor.py | yttm encode --stream --model={BASE_MODEL_FILE} --output_type=subword > log.txt"
+    cmd = f"python interactor.py | yttm bpe-encode --stream --model={BASE_MODEL_FILE} --output_type=subword > log.txt"
     assert os.system(cmd) == 0
     os.remove("log.txt")
 
@@ -80,7 +80,7 @@ def test_multithreading():
     generate_artifacts()
     cmd_args = [
         "yttm",
-        "encode",
+        "bpe-encode",
         f"--model={BASE_MODEL_FILE}",
         "--output_type=subword",
         "--n_threads=10",
@@ -92,7 +92,7 @@ def test_renaming():
     generate_artifacts()
     cmd_args = [
         "yttm",
-        "encode",
+        "bpe-encode",
         f"--model={RENAME_ID_MODEL_FILE}",
         "--output_type=id",
         "--bos",
@@ -103,7 +103,7 @@ def test_renaming():
 
     cmd_args = [
         "yttm",
-        "encode",
+        "bpe-encode",
         f"--model={RENAME_ID_MODEL_FILE}",
         "--output_type=id",
         "--eos",
@@ -122,7 +122,7 @@ def test_renaming_unknown():
 
     cmd_args = [
         "yttm",
-        "encode",
+        "bpe-encode",
         f"--model={RENAME_ID_MODEL_FILE}",
         "--output_type=id",
         "--reverse",
@@ -143,8 +143,8 @@ def test_renaming_unknown():
 
 def test_vocab():
     generate_artifacts()
-    run(["yttm", "vocab", f"--model={BASE_MODEL_FILE}"], check=True)
-    run(["yttm", "vocab", f"--model={BASE_MODEL_FILE}", "--verbose"], check=True)
+    run(["yttm", "bpe-vocab", f"--model={BASE_MODEL_FILE}"], check=True)
+    run(["yttm", "bpe-vocab", f"--model={BASE_MODEL_FILE}", "--verbose"], check=True)
 
 
 def test_decode():
@@ -153,7 +153,7 @@ def test_decode():
 
     with open("decode_text_in.txt", "w") as fout:
         fout.write(text_in)
-    cmd_args = ["yttm", "encode", f"--model={BASE_MODEL_FILE}", "--output_type=id"]
+    cmd_args = ["yttm", "bpe-encode", f"--model={BASE_MODEL_FILE}", "--output_type=id"]
     run(
         cmd_args,
         stdin=open("decode_text_in.txt", "r"),
@@ -161,7 +161,7 @@ def test_decode():
         check=True,
     )
 
-    cmd_args = ["yttm", "decode", f"--model={BASE_MODEL_FILE}"]
+    cmd_args = ["yttm", "bpe-decode", f"--model={BASE_MODEL_FILE}"]
     run(
         cmd_args,
         stdin=open("decode_id.txt", "r"),
@@ -176,7 +176,7 @@ def test_decode():
 
     cmd_args = [
         "yttm",
-        "encode",
+        "bpe-encode",
         f"--model={BASE_MODEL_FILE}",
         "--output_type=id",
         "--bos",
@@ -191,7 +191,7 @@ def test_decode():
 
     cmd_args = [
         "yttm",
-        "decode",
+        "bpe-decode",
         f"--model={BASE_MODEL_FILE}",
         f"--ignore_ids={BOS_ID},{EOS_ID}",
     ]
