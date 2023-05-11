@@ -2,4 +2,4 @@ setuptools>=32.0.0
 Click>=7.0
 pytest==4.3.1
 tabulate==0.8.5
-Cython==0.29.14
+Cython>=0.29.34
